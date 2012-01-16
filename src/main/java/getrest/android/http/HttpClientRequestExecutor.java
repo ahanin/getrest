@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.ahanin.getrest.http;
+package getrest.android.http;
 
-import com.github.ahanin.getrest.Method;
-import com.github.ahanin.getrest.Request;
-import com.github.ahanin.getrest.Response;
-import com.github.ahanin.getrest.service.RequestExecutor;
+import getrest.android.Method;
+import getrest.android.Request;
+import getrest.android.Response;
+import getrest.android.service.RequestExecutor;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;

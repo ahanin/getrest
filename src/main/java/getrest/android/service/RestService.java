@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.ahanin.getrest.service;
+package getrest.android.service;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import com.github.ahanin.getrest.Request;
+import getrest.android.Request;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.PriorityBlockingQueue;

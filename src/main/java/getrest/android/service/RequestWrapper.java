@@ -13,35 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.ahanin.getrest;
+package getrest.android.service;
+
+import android.content.Intent;
+import getrest.android.Request;
 
 /**
  * @author aha
  * @since 2012-01-13
  */
-public class Response {
+public class RequestWrapper {
 
-    private Representation entity;
+    private Intent intent;
 
-    private boolean isFailed;
+    private static final String EXTRA_REQUEST = "getrest.android.service.RequestWrapper.REQUEST";
 
-    /**
-     * Tells if communication error occurred during the request execution.
-     *
-     * @return
-     */
-    public boolean isFailed() {
-        return isFailed;
+    public RequestWrapper(final Intent intent) {
+        this.intent = intent;
     }
 
-    /**
-     * Set communication failure flag.
-     *
-     * @param isFailed {@code true} in case communication error occurred during the request execution,
-     *                 otherwise {@code false}
-     */
-    public void setFailed(final boolean isFailed) {
-        this.isFailed = isFailed;
+    public Request getRequest() {
+        return intent.getParcelableExtra(EXTRA_REQUEST);
     }
 
 }

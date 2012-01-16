@@ -13,33 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.ahanin.getrest.service;
+package getrest.android.service;
 
-import com.github.ahanin.getrest.Request;
-import com.github.ahanin.getrest.Response;
+import getrest.android.Request;
+import getrest.android.Response;
 
 /**
  * @author aha
  * @since 2012-01-13
  */
-public class RequestJob implements Runnable {
-
-    private RequestExecutor requestExecutor;
-
-    private Request request;
-
-    public void setRequestExecutor(final RequestExecutor requestExecutor) {
-        this.requestExecutor = requestExecutor;
-    }
-
-    public RequestJob(final Request request) {
-        this.request = request;
-    }
-
-    @Override
-    public void run() {
-        final Response response = new Response();
-        requestExecutor.execute(request, response);
-    }
-
+public interface RequestExecutor {
+    void execute(Request request, Response response);
 }
