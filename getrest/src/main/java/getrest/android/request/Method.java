@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android;
+package getrest.android.request;
 
 /**
  * @author aha
@@ -21,19 +21,25 @@ package getrest.android;
  */
 public final class Method {
 
-    public static final Method GET = new Method((byte) 1);
-    public static final Method POST = new Method((byte) 2);
-    public static final Method PUT = new Method((byte) 3);
-    public static final Method DELETE = new Method((byte) 4);
+    public static final Method GET = new Method((byte) 1, "GET");
+    public static final Method POST = new Method((byte) 2, "POST");
+    public static final Method PUT = new Method((byte) 3, "PUT");
+    public static final Method DELETE = new Method((byte) 4, "DELETE");
 
     private byte id;
+    private String name;
 
-    private Method(byte id) {
+    private Method(byte id, final String name) {
         this.id = id;
+        this.name = name;
     }
 
     public byte getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public static Method byId(final byte id) {

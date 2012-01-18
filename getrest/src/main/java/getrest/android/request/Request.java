@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android;
+package getrest.android.request;
 
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.Date;
+import getrest.android.entity.Pack;
 
 /**
  * @author aha
@@ -28,10 +27,10 @@ import java.util.Date;
 public class Request implements Parcelable {
 
     private String requestId;
-    private Uri url;
+    private Uri uri;
     private Method method;
-    private Representation representation;
-    private Date date;
+    private Pack entity;
+    private long timestamp;
 
     public String getRequestId() {
         return requestId;
@@ -41,12 +40,12 @@ public class Request implements Parcelable {
         this.requestId = requestId;
     }
 
-    public Uri getUrl() {
-        return url;
+    public Uri getUri() {
+        return uri;
     }
 
-    public void setUrl(final Uri url) {
-        this.url = url;
+    public void setUri(final Uri uri) {
+        this.uri = uri;
     }
 
     public Method getMethod() {
@@ -57,48 +56,45 @@ public class Request implements Parcelable {
         this.method = method;
     }
 
-    public Representation getRepresentation() {
-        return representation;
+    public Pack getEntity() {
+        return entity;
     }
 
-    public void setRepresentation(final Representation representation) {
-        this.representation = representation;
+    public void setEntity(final Pack entity) {
+        this.entity = entity;
     }
 
-    public Date getDate() {
-        return date;
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public void setDate(final Date date) {
-        this.date = date;
+    public void setTimestamp(final long timestamp) {
+        this.timestamp = timestamp;
     }
 
-    @Override
     public int describeContents() {
         return 0;
     }
 
-    @Override
     public void writeToParcel(final Parcel parcel, final int i) {
         parcel.writeString(requestId);
-        parcel.writeParcelable(url, 0);
+        parcel.writeParcelable(uri, 0);
         parcel.writeInt(method.getId());
-        parcel.writeParcelable(representation, 0);
+        parcel.writeParcelable(entity, 0);
+        parcel.writeLong(timestamp);
     }
 
     public static final Creator<Request> CREATOR = new Creator<Request>() {
-        @Override
         public Request createFromParcel(final Parcel parcel) {
             final Request request = new Request();
             request.requestId = parcel.readString();
-            request.url = parcel.readParcelable(Uri.class.getClassLoader());
+            request.uri = parcel.readParcelable(Uri.class.getClassLoader());
             request.method = Method.byId(parcel.readByte());
-            request.representation = parcel.readParcelable(Representation.class.getClassLoader());
-            request.date = new Date(parcel.readLong());
+            request.entity = parcel.readParcelable(Pack.class.getClassLoader());
+            request.timestamp = parcel.readLong();
             return request;
         }
 
-        @Override
         public Request[] newArray(final int i) {
             return new Request[0];
         }

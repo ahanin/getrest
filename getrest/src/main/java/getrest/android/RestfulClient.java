@@ -15,13 +15,39 @@
  */
 package getrest.android;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import getrest.android.entity.Pack;
+import getrest.android.request.Method;
+import getrest.android.request.Request;
+import getrest.android.service.RequestWrapper;
+import getrest.android.service.RestService;
+import getrest.android.service.ServiceContext;
+import getrest.android.util.Logger;
+import getrest.android.util.LoggerFactory;
+
+import java.util.UUID;
 
 /**
  * @author aha
  * @since 2012-01-13
  */
 public abstract class RestfulClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("GetRest:RestfulClient");
+
+    private Context androidContext;
+
+    private ServiceContext serviceContext;
+
+    public void setContext(Context context) {
+        this.androidContext = context;
+    }
+
+    public void setServiceContext(final ServiceContext serviceContext) {
+        this.serviceContext = serviceContext;
+    }
 
     /**
      * Pushes a POST request for processing.
@@ -32,11 +58,35 @@ public abstract class RestfulClient {
      * @return unique request id
      */
     public <T> String post(Uri url, T entity) {
-        throw new UnsupportedOperationException();
+        final String requestId = nextRequestId();
+
+        LOGGER.debug("POST: requestId={}, url={}, entity={}", requestId, url, entity);
+
+        final Pack<T> pack = serviceContext.pack(url, Method.POST, entity);
+
+        final Request request = new Request();
+        request.setUri(url);
+        request.setMethod(Method.POST);
+        request.setEntity(pack);
+        request.setRequestId(requestId);
+        request.setTimestamp(System.currentTimeMillis());
+
+        final RequestWrapper wrapper = new RequestWrapper(new Intent(androidContext, RestService.class));
+        wrapper.setRequest(request);
+
+        LOGGER.trace("Starting service");
+
+        androidContext.startService(wrapper.asIntent());
+
+        return requestId;
+    }
+
+    private String nextRequestId() {
+        return UUID.randomUUID().toString();
     }
 
     /**
-     * Pushes a POST request for processing.
+     * Pushes a GET request for processing.
      *
      * @param url resource url
      * @return unique request id

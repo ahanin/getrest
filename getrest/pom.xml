@@ -27,28 +27,22 @@
     <packaging>jar</packaging>
 
     <properties>
-        <android.version>2.1_r3</android.version>
         <android-compatibility-v4.version>r4</android-compatibility-v4.version>
         <jsr311-api.version>1.1.1</jsr311-api.version>
         <restlet.version>2.0.10</restlet.version>
         <jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
-        <junit.version>4.8.2</junit.version>
         <robolectric.version>1.0</robolectric.version>
         <mockito.version>1.8.5</mockito.version>
     </properties>
 
+    <parent>
+        <groupId>getrest</groupId>
+        <artifactId>getrest-parent</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                    <artifactId>android-maven-plugin</artifactId>
-                    <version>3.0.0</version>
-                    <extensions>true</extensions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -65,7 +59,7 @@
                 <configuration>
                     <sdk>
                         <path>${env.ANDROID_HOME}</path>
-                        <platform>7</platform>
+                        <platform>8</platform>
                     </sdk>
                     <undeployBeforeDeploy>false</undeployBeforeDeploy>
 
@@ -95,63 +89,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>android</groupId>
+            <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
             <version>${android.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>android.support</groupId>
-            <artifactId>compatibility-v4</artifactId>
-            <version>${android-compatibility-v4.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-            <version>${jsr311-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.android</groupId>
-            <artifactId>org.restlet</artifactId>
-            <version>${restlet.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.android</groupId>
-            <artifactId>org.restlet.ext.jackson</artifactId>
-            <version>${restlet.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.codehaus.jackson</groupId>
-                    <artifactId>jackson-core-asl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.jackson</groupId>
-                    <artifactId>jackson-mapper-asl</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>${jackson-mapper-asl.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.pivotallabs</groupId>
-            <artifactId>robolectric</artifactId>
-            <version>${robolectric.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

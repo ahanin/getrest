@@ -13,35 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android;
+package getrest.android.service;
+
+import android.net.Uri;
+import getrest.android.entity.Pack;
+import getrest.android.request.Method;
+import getrest.android.request.Request;
 
 /**
  * @author aha
- * @since 2012-01-13
+ * @since 2012-01-16
  */
-public class Response {
+public class ServiceContext {
 
-    private Representation entity;
-
-    private boolean isFailed;
-
-    /**
-     * Tells if communication error occurred during the request execution.
-     *
-     * @return
-     */
-    public boolean isFailed() {
-        return isFailed;
+    public <T> Pack<T> pack(final Uri uri, final Method post, final T entity) {
+        // TODO finish implementation
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Set communication failure flag.
-     *
-     * @param isFailed {@code true} in case communication error occurred during the request execution,
-     *                 otherwise {@code false}
-     */
-    public void setFailed(final boolean isFailed) {
-        this.isFailed = isFailed;
+    public RequestExecutor getRequestExecutor(final Request request) {
+        return new RequestExecutorImpl(request);
     }
 
 }

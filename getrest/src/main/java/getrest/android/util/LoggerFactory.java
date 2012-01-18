@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android;
-
-import android.os.Parcelable;
+package getrest.android.util;
 
 /**
- * Entity representation.
- *
  * @author aha
- * @since 2012-01-13
+ * @since 2012-01-16
  */
-public abstract class Representation implements Parcelable {
+public final class LoggerFactory {
+
+    private LoggerFactory() {
+    }
+
+    public static Logger getLogger(final String tag) {
+        return new Logger(tag);
+    }
 
 }

@@ -18,7 +18,10 @@ package getrest.android.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import getrest.android.Request;
+import getrest.android.request.Request;
+import getrest.android.request.Response;
+import getrest.android.util.Logger;
+import getrest.android.util.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -30,26 +33,36 @@ import java.util.concurrent.TimeUnit;
  * @author aha
  * @since 2012-01-13
  */
-public class RestService extends Service {
+public class RestService extends Service implements RequestCallback {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("GetRest:RestService");
 
     private final PriorityBlockingQueue<Runnable> jobQueue;
     private final ExecutorService jobExecutorService;
 
-    public RestService(final ExecutorService jobExecutorService) {
-        jobQueue = new PriorityBlockingQueue<Runnable>();
+    public RestService() {
+        this.jobQueue = new PriorityBlockingQueue<Runnable>();
         this.jobExecutorService = new ThreadPoolExecutor(1, 5, 10, TimeUnit.SECONDS, jobQueue);
     }
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final Request request = new RequestWrapper(intent).getRequest();
+
+        LOGGER.debug("Received request: requestId={}, url={}, method={}", request.getRequestId(), request.getUri(),
+                request.getMethod().getName());
+
         try {
             final RequestJob job = new RequestJob(request);
-            jobExecutorService.submit(job);
+            job.setCallback(this);
+            jobQueue.add(job);
+
+            LOGGER.debug("Request job {} added to execution queue", request.getRequestId());
         } catch (RejectedExecutionException ex) {
             // TODO implement rejected execution fallback
             throw new UnsupportedOperationException("Handling of rejected execution exception is yet to implement");
         }
+
         return START_NOT_STICKY;
     }
 
@@ -58,4 +71,8 @@ public class RestService extends Service {
         return null;
     }
 
+    public void onResponse(final Response response) {
+        // TODO implement response broadcasting
+        throw new UnsupportedOperationException("response broadcasting is yet to implement");
+    }
 }

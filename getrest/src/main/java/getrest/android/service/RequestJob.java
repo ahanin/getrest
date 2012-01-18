@@ -15,8 +15,8 @@
  */
 package getrest.android.service;
 
-import getrest.android.Request;
-import getrest.android.Response;
+import getrest.android.request.Request;
+import getrest.android.request.Response;
 
 /**
  * @author aha
@@ -24,22 +24,30 @@ import getrest.android.Response;
  */
 public class RequestJob implements Runnable {
 
-    private RequestExecutor requestExecutor;
-
     private Request request;
 
-    public void setRequestExecutor(final RequestExecutor requestExecutor) {
-        this.requestExecutor = requestExecutor;
-    }
+    private ServiceContext serviceContext;
+
+    private RequestCallback callback;
 
     public RequestJob(final Request request) {
         this.request = request;
     }
 
-    @Override
+    public void setServiceContext(final ServiceContext serviceContext) {
+        this.serviceContext = serviceContext;
+    }
+
+    public void setCallback(final RequestCallback callback) {
+        this.callback = callback;
+    }
+
     public void run() {
-        final Response response = new Response();
-        requestExecutor.execute(request, response);
+        final RequestExecutor requestProcessor = serviceContext.getRequestExecutor(request);
+        final Response response = requestProcessor.execute();
+        if (callback != null) {
+            callback.onResponse(response);
+        }
     }
 
 }

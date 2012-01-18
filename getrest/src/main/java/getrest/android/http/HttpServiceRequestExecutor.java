@@ -15,10 +15,10 @@
  */
 package getrest.android.http;
 
-import getrest.android.Method;
-import getrest.android.Request;
-import getrest.android.Response;
-import getrest.android.service.RequestExecutor;
+import getrest.android.request.Method;
+import getrest.android.service.ServiceRequest;
+import getrest.android.service.ServiceRequestExecutor;
+import getrest.android.service.ServiceResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -27,29 +27,29 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * @author aha
  * @since 2012-01-13
  */
-public class HttpClientRequestExecutor implements RequestExecutor {
+public class HttpServiceRequestExecutor implements ServiceRequestExecutor {
 
-    @Override
-    public void execute(final Request request, final Response response) {
+    public void execute(final ServiceRequest request, final ServiceResponse response) {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         final HttpUriRequest httpRequest = createHttpRequest(request);
 
         final HttpResponse httpResponse;
         try {
             httpResponse = httpClient.execute(httpRequest);
+            response.setEntity(new RepresentationHttpEntity(httpResponse.getEntity()));
         } catch (IOException ex) {
-            response.setFailed(true);
+            throw new UnsupportedOperationException("handling not yet implemented", ex);
         }
-
         // TODO finish HTTP request implementation
     }
 
-    private HttpUriRequest createHttpRequest(final Request request) {
+    private HttpUriRequest createHttpRequest(final ServiceRequest request) {
         final Method method = request.getMethod();
         if (method == null) {
             throw new IllegalArgumentException("Method must be specified in request");
@@ -59,7 +59,10 @@ public class HttpClientRequestExecutor implements RequestExecutor {
         if (Method.GET.equals(method)) {
             httpRequest = new HttpGet();
         } else if (Method.POST.equals(method)) {
-            httpRequest = new HttpPost();
+            final HttpPost post = new HttpPost();
+            post.setURI(URI.create(request.getUri().toString()));
+            post.setEntity(new HttpEntityRepresentation(request.getEntity()));
+            httpRequest = post;
         } else if (Method.DELETE.equals(method)) {
             httpRequest = new HttpDelete();
         } else {
@@ -68,4 +71,5 @@ public class HttpClientRequestExecutor implements RequestExecutor {
 
         return httpRequest;
     }
+
 }

@@ -15,13 +15,12 @@
  */
 package getrest.android.service;
 
-import getrest.android.Request;
-import getrest.android.Response;
+import getrest.android.request.Response;
 
 /**
  * @author aha
  * @since 2012-01-13
  */
 public interface RequestExecutor {
-    void execute(Request request, Response response);
+    Response execute();
 }

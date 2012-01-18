@@ -16,7 +16,7 @@
 package getrest.android.service;
 
 import android.content.Intent;
-import getrest.android.Request;
+import getrest.android.request.Request;
 
 /**
  * @author aha
@@ -29,11 +29,18 @@ public class RequestWrapper {
     private static final String EXTRA_REQUEST = "getrest.android.service.RequestWrapper.REQUEST";
 
     public RequestWrapper(final Intent intent) {
-        this.intent = intent;
+        this.intent = new Intent(intent);
+    }
+
+    public void setRequest(Request request) {
+        intent.putExtra(EXTRA_REQUEST, request);
     }
 
     public Request getRequest() {
         return intent.getParcelableExtra(EXTRA_REQUEST);
     }
 
+    public Intent asIntent() {
+        return intent;
+    }
 }
