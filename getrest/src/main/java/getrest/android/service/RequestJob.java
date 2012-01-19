@@ -16,6 +16,7 @@
 
 package getrest.android.service;
 
+import getrest.android.executor.RequestExecutor;
 import getrest.android.request.Request;
 import getrest.android.request.Response;
 

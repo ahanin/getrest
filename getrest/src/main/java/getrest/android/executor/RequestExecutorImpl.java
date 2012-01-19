@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.service;
+package getrest.android.executor;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Pack;
+import getrest.android.request.Method;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
+import getrest.android.request.RequestLifecycle;
 import getrest.android.request.Response;
+import getrest.android.service.ServiceRequestExecutor;
 
 /**
  * @author aha
@@ -52,36 +53,36 @@ public class RequestExecutorImpl implements RequestExecutor {
     }
 
     public Response execute() {
-        // TODO split into pipelines for each type of request: POST, GET, DELETE
+        final Method method = request.getMethod();
 
-        // marshal
-        requestLifecycle.beforeMarshal();
+        if (method == null) {
+            throw new IllegalArgumentException("Method must not be null");
+        }
 
-        final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
+        final RequestPipeline pipeline;
 
-        final Representation representation = marshaller.marshal(request.getEntity().unpack());
+        if (Method.GET.equals(method)) {
+            // TODO implement GET method pipeline
+            throw new UnsupportedOperationException("GET method is not supported yet");
+        } else if (Method.POST.equals(method)) {
+            final PostMethodPipeline postPipeline = new PostMethodPipeline();
+            postPipeline.setRequest(request);
+            postPipeline.setRequestContext(requestContext);
+            postPipeline.setRequestLifecycle(requestLifecycle);
+            postPipeline.setServiceRequestExecutor(serviceRequestExecutor);
 
-        requestLifecycle.afterMarshal();
+            pipeline = postPipeline;
+        } else if (Method.PUT.equals(method)) {
+            // TODO implement PUT method pipeline
+            throw new UnsupportedOperationException("PUT method is not supported yet");
+        } else if (Method.DELETE.equals(method)) {
+            // TODO implement DELETE method pipeline
+            throw new UnsupportedOperationException("PUT method is not supported yet");
+        } else {
+            throw new IllegalArgumentException("Request method is unsupported: " + method.getName());
+        }
 
-        final ServiceRequest serviceRequest = new ServiceRequest(request);
-        serviceRequest.setEntity(representation);
-
-        // execute
-        final ServiceResponse serviceResponse = new ServiceResponse();
-        serviceRequestExecutor.execute(serviceRequest, serviceResponse);
-
-        // unmarshal
-        requestLifecycle.beforeUnmarshal();
-
-        final Object resultUnmarshalled = marshaller.unmarshal(serviceResponse.getEntity());
-        final Pack result = requestContext.getPacker().pack(resultUnmarshalled);
-
-        requestLifecycle.afterUnmarshal();
-
-        final Response response = new Response();
-        response.setRequest(request);
-        response.setEntity(result);
-
-        return response;
+        return pipeline.execute(request);
     }
+
 }

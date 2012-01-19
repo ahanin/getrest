@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package getrest.android.service;
+package getrest.android.executor;
 
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
+import getrest.android.request.RequestLifecycle;
 import getrest.android.request.Response;
+import getrest.android.service.Representation;
+import getrest.android.service.ServiceRequest;
+import getrest.android.service.ServiceRequestExecutor;
+import getrest.android.service.ServiceResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -36,9 +40,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class RequestExecutorImplTest {
+public class PostMethodPipelineTest {
 
-    private RequestExecutorImpl requestExecutor;
+    private PostMethodPipeline requestExecutor;
     private Request request;
     private Marshaller<Object, Representation> marshaller;
     private Packer packer;
@@ -50,7 +54,7 @@ public class RequestExecutorImplTest {
     public void setUp() throws Exception {
         request = mock(Request.class);
 
-        requestExecutor = new RequestExecutorImpl();
+        requestExecutor = new PostMethodPipeline();
         requestLifecycle = mock(RequestLifecycle.class);
         requestContext = mock(RequestContext.class);
         serviceRequestExecutor = mock(ServiceRequestExecutor.class);
@@ -82,7 +86,7 @@ public class RequestExecutorImplTest {
         final Pack resultEntityPack = mock(Pack.class);
         when(packer.pack(unmarshalledResult)).thenReturn(resultEntityPack);
 
-        final Response response = requestExecutor.execute();
+        final Response response = requestExecutor.execute(request);
 
         assertThat(response.getEntity(), sameInstance(resultEntityPack));
     }
@@ -95,7 +99,7 @@ public class RequestExecutorImplTest {
         final Representation marshalledEntity = mock(Representation.class);
         when(marshaller.marshal(requestEntityPack)).thenReturn(marshalledEntity);
 
-        requestExecutor.execute();
+        requestExecutor.execute(request);
 
         verify(serviceRequestExecutor).execute(any(ServiceRequest.class), any(ServiceResponse.class));
     }
@@ -116,7 +120,7 @@ public class RequestExecutorImplTest {
         doNothing().when(serviceRequestExecutor).execute(serviceRequestCaptor.capture(),
                 serviceResponseCaptor.capture());
 
-        requestExecutor.execute();
+        requestExecutor.execute(request);
 
         final ServiceRequest serviceRequest = serviceRequestCaptor.getValue();
         assertThat(serviceRequest.getEntity(), sameInstance(marshalledEntity));
@@ -144,7 +148,7 @@ public class RequestExecutorImplTest {
         final Pack responseEntityPack = mock(Pack.class);
         when(packer.pack(responseEntity)).thenReturn(responseEntityPack);
 
-        final Response response = requestExecutor.execute();
+        final Response response = requestExecutor.execute(request);
 
         assertThat(response.getEntity(), sameInstance(responseEntityPack));
 
@@ -163,7 +167,7 @@ public class RequestExecutorImplTest {
         final ArgumentCaptor<ServiceResponse> serviceResponse = ArgumentCaptor.forClass(ServiceResponse.class);
         final ArgumentCaptor<Representation> responseRepresentation = ArgumentCaptor.forClass(Representation.class);
 
-        requestExecutor.execute();
+        requestExecutor.execute(request);
 
         inOrder.verify(requestLifecycle).beforeMarshal();
         inOrder.verify(marshaller).marshal(requestEntity);

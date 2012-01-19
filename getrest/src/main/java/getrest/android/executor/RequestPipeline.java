@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package getrest.android.executor;
 
-package getrest.android.service;
-
+import getrest.android.request.Request;
 import getrest.android.request.Response;
 
-/**
- * @author aha
- * @since 2012-01-13
- */
-public interface RequestExecutor {
-    Response execute();
+interface RequestPipeline {
+
+    Response execute(final Request request);
+
 }
