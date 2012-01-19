@@ -17,9 +17,14 @@
 package getrest.android.service;
 
 import android.net.Uri;
-import getrest.android.entity.Pack;
+import getrest.android.ResourceContext;
+import getrest.android.entity.Marshaller;
+import getrest.android.entity.Packer;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
+import getrest.android.request.RequestContext;
+import getrest.android.util.Logger;
+import getrest.android.util.LoggerFactory;
 
 /**
  * @author aha
@@ -27,15 +32,78 @@ import getrest.android.request.Request;
  */
 public class ServiceContext {
 
-    public <T> Pack<T> pack(final Uri uri, final Method post, final T entity) {
-        // TODO finish implementation
+    public ResourceContext getResourceContext(final Uri uri, final Method method) {
+        // TODO resolve ResourceContext by resource URI and method
         throw new UnsupportedOperationException();
     }
 
+    public ResourceContext getResourceContext(Request request) {
+        // TODO resolve ResourceContext by request
+        throw new UnsupportedOperationException();
+    }
+
+    // TODO move to ResourceContext and reuse by leveraging getResourceContext()
     public RequestExecutor getRequestExecutor(final Request request) {
         final RequestExecutorImpl requestExecutor = new RequestExecutorImpl();
         requestExecutor.setRequest(request);
+        requestExecutor.setRequestContext(new DefaultRequestContext());
+        requestExecutor.setRequestLifecycle(new DefaultRequestLifecycle());
         return requestExecutor;
     }
 
+    public static ServiceContext forRequest(final Request request) {
+        // TODO return ServiceContext based on request attributes
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * This is a temporary solution.
+     * TODO remove when "real" class is implemented
+     */
+    private static class DefaultRequestContext implements RequestContext {
+
+        private Packer packer;
+        private Marshaller marshaller;
+
+        public <T> void setPacker(final Packer<T> packer) {
+            this.packer = packer;
+        }
+
+        public <T> Packer<T> getPacker() {
+            return this.packer;
+        }
+
+        public <T> void setMarshaller(final Marshaller<T, Representation> marshaller) {
+            this.marshaller = marshaller;
+        }
+
+        public <T> Marshaller<T, Representation> getMarshaller() {
+            return this.marshaller;
+        }
+    }
+
+    /**
+     * This is a temporary solution.
+     * TODO remove when "real" class is implemented
+     */
+    private static class DefaultRequestLifecycle implements RequestLifecycle {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger("GetRest:RequestCycle");
+
+        public void beforeMarshal() {
+            LOGGER.trace("before marshal");
+        }
+
+        public void afterMarshal() {
+            LOGGER.trace("after marshal");
+        }
+
+        public void beforeUnmarshal() {
+            LOGGER.trace("before unmarshal");
+        }
+
+        public void afterUnmarshal() {
+            LOGGER.trace("after unmarshal");
+        }
+    }
 }

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import getrest.android.entity.Pack;
+import getrest.android.entity.Packer;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
 import getrest.android.service.RequestWrapper;
@@ -63,7 +64,9 @@ public abstract class RestfulClient {
 
         LOGGER.debug("POST: requestId={}, url={}, entity={}", requestId, url, entity);
 
-        final Pack<T> pack = serviceContext.pack(url, Method.POST, entity);
+        final ResourceContext resourceContext = serviceContext.getResourceContext(url, Method.POST);
+        final Packer<T> packer = resourceContext.getPacker();
+        final Pack<T> pack = packer.pack(entity);
 
         final Request request = new Request();
         request.setUri(url);

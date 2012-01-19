@@ -52,6 +52,8 @@ public class RequestExecutorImpl implements RequestExecutor {
     }
 
     public Response execute() {
+        // TODO split into pipelines for each type of request: POST, GET, DELETE
+
         // marshal
         requestLifecycle.beforeMarshal();
 

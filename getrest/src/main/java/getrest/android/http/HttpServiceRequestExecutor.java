@@ -45,7 +45,8 @@ public class HttpServiceRequestExecutor implements ServiceRequestExecutor {
             httpResponse = httpClient.execute(httpRequest);
             response.setEntity(new RepresentationHttpEntity(httpResponse.getEntity()));
         } catch (IOException ex) {
-            throw new UnsupportedOperationException("handling not yet implemented", ex);
+            // TODO implement handling of I/O exception during HTTP request
+            throw new UnsupportedOperationException("handling of I/O exceptions is not yet implemented", ex);
         }
         // TODO finish HTTP request implementation
     }

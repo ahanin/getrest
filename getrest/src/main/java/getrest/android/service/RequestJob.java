@@ -27,16 +27,10 @@ public class RequestJob implements Runnable {
 
     private Request request;
 
-    private ServiceContext serviceContext;
-
     private RequestCallback callback;
 
     public RequestJob(final Request request) {
         this.request = request;
-    }
-
-    public void setServiceContext(final ServiceContext serviceContext) {
-        this.serviceContext = serviceContext;
     }
 
     public void setCallback(final RequestCallback callback) {
@@ -44,6 +38,7 @@ public class RequestJob implements Runnable {
     }
 
     public void run() {
+        final ServiceContext serviceContext = ServiceContext.forRequest(request);
         final RequestExecutor requestProcessor = serviceContext.getRequestExecutor(request);
         final Response response = requestProcessor.execute();
         if (callback != null) {

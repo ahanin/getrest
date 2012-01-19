@@ -26,6 +26,7 @@ public final class LoggerFactory {
     }
 
     public static Logger getLogger(final String tag) {
+        // TODO add check for maximal tag length (23)
         return new Logger(tag);
     }
 
