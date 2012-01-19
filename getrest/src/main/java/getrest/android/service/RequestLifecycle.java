@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.entity;
+package getrest.android.service;
 
-/**
- * @author aha
- * @since 2012-01-17
- */
-public interface Marshaller<F, T> {
+public interface RequestLifecycle {
 
-    T marshal(F source);
+    void beforeMarshal();
 
-    F unmarshal(T entity);
+    void afterMarshal();
+
+    void beforeUnmarshal();
+
+    void afterUnmarshal();
 
 }

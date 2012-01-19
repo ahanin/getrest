@@ -15,7 +15,10 @@
  */
 package getrest.android.service;
 
+import getrest.android.entity.Marshaller;
+import getrest.android.entity.Pack;
 import getrest.android.request.Request;
+import getrest.android.request.RequestContext;
 import getrest.android.request.Response;
 
 /**
@@ -26,12 +29,57 @@ public class RequestExecutorImpl implements RequestExecutor {
 
     private Request request;
 
-    public RequestExecutorImpl(final Request request) {
+    private RequestLifecycle requestLifecycle;
+
+    private RequestContext requestContext;
+
+    private ServiceRequestExecutor serviceRequestExecutor;
+
+    public void setRequest(final Request request) {
         this.request = request;
     }
 
+    public void setRequestLifecycle(final RequestLifecycle requestLifecycle) {
+        this.requestLifecycle = requestLifecycle;
+    }
+
+    public void setRequestContext(final RequestContext requestContext) {
+        this.requestContext = requestContext;
+    }
+
+    public void setServiceRequestExecutor(final ServiceRequestExecutor serviceRequestExecutor) {
+        this.serviceRequestExecutor = serviceRequestExecutor;
+    }
+
     public Response execute() {
-        // TODO finish implementation
-        throw new UnsupportedOperationException("request execution is yet to implement");
+        // marshal
+        requestLifecycle.beforeMarshal();
+
+        final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
+
+        final Representation representation = marshaller.marshal(request.getEntity().unpack());
+
+        requestLifecycle.afterMarshal();
+
+        final ServiceRequest serviceRequest = new ServiceRequest(request);
+        serviceRequest.setEntity(representation);
+
+        // execute
+        final ServiceResponse serviceResponse = new ServiceResponse();
+        serviceRequestExecutor.execute(serviceRequest, serviceResponse);
+
+        // unmarshal
+        requestLifecycle.beforeUnmarshal();
+
+        final Object resultUnmarshalled = marshaller.unmarshal(serviceResponse.getEntity());
+        final Pack result = requestContext.getPacker().pack(resultUnmarshalled);
+
+        requestLifecycle.afterUnmarshal();
+
+        final Response response = new Response();
+        response.setRequest(request);
+        response.setEntity(result);
+
+        return response;
     }
 }

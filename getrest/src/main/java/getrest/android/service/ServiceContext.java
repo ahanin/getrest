@@ -33,7 +33,9 @@ public class ServiceContext {
     }
 
     public RequestExecutor getRequestExecutor(final Request request) {
-        return new RequestExecutorImpl(request);
+        final RequestExecutorImpl requestExecutor = new RequestExecutorImpl();
+        requestExecutor.setRequest(request);
+        return requestExecutor;
     }
 
 }

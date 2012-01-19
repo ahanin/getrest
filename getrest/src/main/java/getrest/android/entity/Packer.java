@@ -15,14 +15,6 @@
  */
 package getrest.android.entity;
 
-/**
- * @author aha
- * @since 2012-01-17
- */
-public interface Marshaller<F, T> {
-
-    T marshal(F source);
-
-    F unmarshal(T entity);
-
+public interface Packer<T> {
+    Pack<T> pack(T object);
 }

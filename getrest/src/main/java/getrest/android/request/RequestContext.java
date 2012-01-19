@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.entity;
+package getrest.android.request;
 
-/**
- * @author aha
- * @since 2012-01-17
- */
-public interface Marshaller<F, T> {
+import getrest.android.entity.Marshaller;
+import getrest.android.entity.Packer;
+import getrest.android.service.Representation;
 
-    T marshal(F source);
+public interface RequestContext {
 
-    F unmarshal(T entity);
+    <T> void setPacker(Packer<T> packer);
+
+    <T> Packer<T> getPacker();
+
+    <T> void setMarshaller(Marshaller<T, Representation> marshaller);
+
+    <T> Marshaller<T, Representation> getMarshaller();
 
 }

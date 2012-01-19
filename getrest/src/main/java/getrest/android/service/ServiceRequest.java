@@ -17,6 +17,7 @@ package getrest.android.service;
 
 import android.net.Uri;
 import getrest.android.request.Method;
+import getrest.android.request.Request;
 
 /**
  * @author aha
@@ -28,6 +29,12 @@ public class ServiceRequest {
     private Uri uri;
     private Method method;
     private Representation entity;
+
+    public ServiceRequest(final Request request) {
+        this.requestId = request.getRequestId();
+        this.uri = request.getUri();
+        this.method = request.getMethod();
+    }
 
     public String getRequestId() {
         return requestId;
