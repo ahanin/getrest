@@ -26,7 +26,9 @@ public final class LoggerFactory {
     }
 
     public static Logger getLogger(final String tag) {
-        // TODO add check for maximal tag length (23)
+        if (tag.length() > 23) {
+            throw new IllegalArgumentException("Log tag can not be longer than 23 characters");
+        }
         return new Logger(tag);
     }
 
