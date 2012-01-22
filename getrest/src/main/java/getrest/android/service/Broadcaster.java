@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.service;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
-import getrest.android.service.Representation;
+import android.content.Intent;
 
-public interface RequestContext {
-
-    void setPacker(Packer packer);
-
-    Packer getPacker();
-
-    <T> void setMarshaller(Marshaller<T, Representation> marshaller);
-
-    <T> Marshaller<T, Representation> getMarshaller();
-
+public interface Broadcaster {
+    void sendBroadcast(Intent intent);
 }

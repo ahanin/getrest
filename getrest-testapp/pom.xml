@@ -54,6 +54,11 @@
             <version>2.2.1</version>
         </dependency>
         <dependency>
+            <groupId>getrest</groupId>
+            <artifactId>getrest</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

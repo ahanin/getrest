@@ -13,20 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.service;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
-import getrest.android.service.Representation;
+public final class RequestEvents {
 
-public interface RequestContext {
+    public static final int PENDING = 1;
+    public static final int EXECUTING = 2;
+    public static final int FINISHED = 3;
 
-    void setPacker(Packer packer);
+    private RequestEvents() {
+    }
 
-    Packer getPacker();
-
-    <T> void setMarshaller(Marshaller<T, Representation> marshaller);
-
-    <T> Marshaller<T, Representation> getMarshaller();
+    public static String getEventName(final int eventType) {
+        switch (eventType) {
+            case PENDING:
+                return "PENDING";
+            case EXECUTING:
+                return "EXECUTING";
+            case FINISHED:
+                return "FINISHED";
+            default:
+                return null;
+        }
+    }
 
 }

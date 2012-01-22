@@ -23,9 +23,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
-* @author aha
-* @since 2012-01-17
-*/
+ * @author aha
+ * @since 2012-01-17
+ */
 class HttpEntityRepresentation extends AbstractHttpEntity {
 
     private final Representation entity;

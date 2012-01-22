@@ -4,7 +4,10 @@
 package getrest.android.testapp.test;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.TouchUtils;
+import android.widget.Button;
 import getrest.android.testapp.MainActivity;
+import getrest.android.testapp.R;
 
 /**
  * @author aha
@@ -20,4 +23,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         final MainActivity activity = getActivity();
         assertNotNull(activity);
     }
+
+    public void testPostRequest() throws Exception {
+        final MainActivity activity = getActivity();
+        final Button button = (Button) activity.findViewById(R.id.Main_CreatePostRequestButton);
+        TouchUtils.clickView(this, button);
+    }
+
 }

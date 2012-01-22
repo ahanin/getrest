@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android;
+package getrest.android.resource;
 
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
@@ -22,26 +22,19 @@ import getrest.android.request.RequestContext;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequestExecutor;
 
-public class ResourceContext {
+public interface ResourceContext {
 
-    public RequestContext getRequestContext(Request request) {
-        // TODO return associated ResourceContext
-        throw new UnsupportedOperationException();
-    }
+    /**
+     * Returns new {@link RequestContext} instance for the given {@link Request}.
+     *
+     * @param request {@link Request} object to create {@link RequestContext} for
+     * @return new instance of {@link RequestContext} associated with given {@link Request}
+     */
+    RequestContext getRequestContext(Request request);
 
-    public <T> Packer<T> getPacker() {
-        // TODO return entity packer
-        throw new UnsupportedOperationException();
-    }
+    Packer getPacker();
 
-    public <T> Marshaller<T, Representation> getMarshaller() {
-        // TODO return entity marshaller
-        throw new UnsupportedOperationException();
-    }
+    <T> Marshaller<T, Representation> getMarshaller();
 
-    public ServiceRequestExecutor getServiceRequestExecutor() {
-        // TODO return ServiceRequestExecutor
-        throw new UnsupportedOperationException();
-    }
-
+    ServiceRequestExecutor getServiceRequestExecutor();
 }

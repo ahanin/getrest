@@ -16,13 +16,19 @@
 
 package getrest.android;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
+import getrest.android.resource.ResourceContext;
+import getrest.android.service.RequestEventBus;
+import getrest.android.service.RequestEventWrapper;
+import getrest.android.service.RequestEvents;
 import getrest.android.service.RequestWrapper;
 import getrest.android.service.RestService;
 import getrest.android.service.ServiceContext;
@@ -37,18 +43,16 @@ import java.util.UUID;
  */
 public abstract class RestfulClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("GetRest:RestfulClient");
+    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
+
+    private String serviceId;
 
     private Context androidContext;
 
-    private ServiceContext serviceContext;
+    private RequestEventBroadcastReceiver requestEventReceiver;
 
-    public void setContext(Context context) {
-        this.androidContext = context;
-    }
-
-    public void setServiceContext(final ServiceContext serviceContext) {
-        this.serviceContext = serviceContext;
+    protected final void setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
     }
 
     /**
@@ -62,10 +66,12 @@ public abstract class RestfulClient {
     public <T> String post(Uri url, T entity) {
         final String requestId = nextRequestId();
 
-        LOGGER.debug("POST: requestId={}, url={}, entity={}", requestId, url, entity);
+        LOGGER.debug("POST: requestId={0}, url={1}, entity={2}", requestId, url, entity);
+
+        final ServiceContext serviceContext = ServiceContext.forServiceId(serviceId);
 
         final ResourceContext resourceContext = serviceContext.getResourceContext(url, Method.POST);
-        final Packer<T> packer = resourceContext.getPacker();
+        final Packer packer = resourceContext.getPacker();
         final Pack<T> pack = packer.pack(entity);
 
         final Request request = new Request();
@@ -96,6 +102,7 @@ public abstract class RestfulClient {
      * @return unique request id
      */
     public String get(Uri url) {
+        // TODO implement GET method
         throw new UnsupportedOperationException();
     }
 
@@ -106,7 +113,51 @@ public abstract class RestfulClient {
      * @return unique request id
      */
     public String delete(Uri url) {
+        // TODO implement DELETE method
         throw new UnsupportedOperationException();
+    }
+
+    protected final void init(Context context) {
+        this.androidContext = context;
+        this.requestEventReceiver = new RequestEventBroadcastReceiver();
+
+        context.registerReceiver(requestEventReceiver, new IntentFilter(RequestEventBus.Intents.REQUEST_EVENT_ACTION));
+    }
+
+    private static class RequestEventBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            final RequestEventWrapper eventWrapper = new RequestEventWrapper(intent);
+            LOGGER.debug("Request event received: requestId={0}, eventType={1}", eventWrapper.getRequestId(),
+                    RequestEvents.getEventName(eventWrapper.getEventType()));
+        }
+    }
+
+    /**
+     * Create new instance of {@link RestfulClient} and attaches it to the given {@link Context}. When client is no
+     * longer needed, {@link #detach()} must be called for clean-up and for releasing all retained resources.
+     *
+     * @param context
+     * @return
+     * @see #detach()
+     */
+    public static RestfulClient getInstance(Context context) {
+        final RestfulClientImpl client = new RestfulClientImpl();
+        client.init(context);
+        return client;
+    }
+
+    /**
+     * Detach {@link RestfulClient} and release all retained resources.
+     */
+    public void detach() {
+        androidContext.unregisterReceiver(requestEventReceiver);
+
+        requestEventReceiver = null;
+    }
+
+    private static class RestfulClientImpl extends RestfulClient {
     }
 
 }

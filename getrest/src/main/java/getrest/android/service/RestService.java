@@ -24,9 +24,9 @@ import getrest.android.request.Response;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -34,31 +34,36 @@ import java.util.concurrent.TimeUnit;
  * @author aha
  * @since 2012-01-13
  */
-public class RestService extends Service implements RequestCallback {
+public class RestService extends Service implements RequestCallback, Broadcaster {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("GetRest:RestService");
+    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
 
-    private final PriorityBlockingQueue<Runnable> jobQueue;
-    private final ExecutorService jobExecutorService;
+    private final ThreadPoolExecutor jobExecutorService;
 
     public RestService() {
-        this.jobQueue = new PriorityBlockingQueue<Runnable>();
-        this.jobExecutorService = new ThreadPoolExecutor(1, 5, 10, TimeUnit.SECONDS, jobQueue);
+        this.jobExecutorService = new ThreadPoolExecutor(1, 5, 5, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadFactoryImpl());
     }
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final Request request = new RequestWrapper(intent).getRequest();
 
-        LOGGER.debug("Received request: requestId={}, url={}, method={}", request.getRequestId(), request.getUri(),
-                request.getMethod().getName());
+        LOGGER.debug("Received request: requestId={0}, url={1}, method={2}. Submitting it to queue.",
+                request.getRequestId(), request.getUri(), request.getMethod().getName());
 
         try {
-            final RequestJob job = new RequestJob(request);
-            job.setCallback(this);
-            jobQueue.add(job);
+            final RequestEventBus eventBus = new RequestEventBus();
+            eventBus.setBroadcaster(this);
 
-            LOGGER.debug("Request job {} added to execution queue", request.getRequestId());
+            eventBus.firePending(request.getRequestId());
+
+            final RequestJob job = new RequestJob(request);
+            job.setRequestEventBus(eventBus);
+            job.setCallback(this);
+
+            jobExecutorService.submit(job);
         } catch (RejectedExecutionException ex) {
             // TODO implement rejected execution fallback
             throw new UnsupportedOperationException("Handling of rejected execution exception is yet to implement");
@@ -75,5 +80,22 @@ public class RestService extends Service implements RequestCallback {
     public void onResponse(final Response response) {
         // TODO implement response broadcasting
         throw new UnsupportedOperationException("response broadcasting is yet to implement");
+    }
+
+    @Override
+    public void sendBroadcast(final Intent intent) {
+        super.sendBroadcast(intent);
+    }
+
+    private static class ThreadFactoryImpl implements ThreadFactory {
+        public Thread newThread(final Runnable runnable) {
+            final Thread thread = new Thread(runnable);
+            thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                public void uncaughtException(final Thread thread, final Throwable throwable) {
+                    LOGGER.error("Uncaught exception in thread '{0}'", throwable, thread.getId());
+                }
+            });
+            return thread;
+        }
     }
 }

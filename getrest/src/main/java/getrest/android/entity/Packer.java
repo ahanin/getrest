@@ -15,6 +15,6 @@
  */
 package getrest.android.entity;
 
-public interface Packer<T> {
-    Pack<T> pack(T object);
+public interface Packer {
+    <T> Pack<T> pack(T object);
 }

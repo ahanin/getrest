@@ -29,6 +29,7 @@ public class RequestJob implements Runnable {
     private Request request;
 
     private RequestCallback callback;
+    private RequestEventBus requestEventBus;
 
     public RequestJob(final Request request) {
         this.request = request;
@@ -38,12 +39,22 @@ public class RequestJob implements Runnable {
         this.callback = callback;
     }
 
+    public void setRequestEventBus(final RequestEventBus requestEventBus) {
+        this.requestEventBus = requestEventBus;
+    }
+
     public void run() {
-        final ServiceContext serviceContext = ServiceContext.forRequest(request);
-        final RequestExecutor requestProcessor = serviceContext.getRequestExecutor(request);
-        final Response response = requestProcessor.execute();
-        if (callback != null) {
-            callback.onResponse(response);
+        final String requestId = request.getRequestId();
+        requestEventBus.fireExecuting(requestId);
+        try {
+            final ServiceContext serviceContext = ServiceContext.forRequest(request);
+            final RequestExecutor requestProcessor = serviceContext.getRequestExecutor(request);
+            final Response response = requestProcessor.execute();
+            if (callback != null) {
+                callback.onResponse(response);
+            }
+        } finally {
+            requestEventBus.fireFinished(requestId);
         }
     }
 

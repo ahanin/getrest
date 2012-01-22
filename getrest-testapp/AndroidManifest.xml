@@ -29,6 +29,12 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name="getrest.android.service.RestService"
+            android:exported="false"/>
+
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
 
 </manifest>
