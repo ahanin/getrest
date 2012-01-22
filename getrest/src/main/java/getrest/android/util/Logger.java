@@ -50,10 +50,9 @@ public final class Logger {
         }
     }
 
-    // TODO fix unused Throwable
     public void debug(String message, Throwable throwable, Object... arguments) {
         if (Log.isLoggable(tag, Log.DEBUG)) {
-            Log.d(tag, MessageFormat.format(message, arguments));
+            Log.d(tag, MessageFormat.format(message, arguments), throwable);
         }
     }
 
