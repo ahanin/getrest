@@ -16,6 +16,7 @@
 package getrest.android.service;
 
 import android.content.Intent;
+import getrest.android.request.Response;
 
 public class RequestEventWrapper {
 
@@ -23,6 +24,7 @@ public class RequestEventWrapper {
 
     private static final String EXTRA_REQUEST_ID = "getrest.android.service.RequestEventWrapper.REQUEST_ID";
     private static final String EXTRA_EVENT_TYPE = "getrest.android.service.RequestEventWrapper.EVENT_TYPE";
+    private static final String EXTRA_RESPONSE = "getrest.android.service.RequestEventWrapper.RESPONSE";
 
     public RequestEventWrapper(final Intent intent) {
         this.intent = intent;
@@ -59,4 +61,13 @@ public class RequestEventWrapper {
     public void setFinished() {
         setEventType(RequestEvents.FINISHED);
     }
+
+    public void setResponse(Response response) {
+        intent.putExtra(EXTRA_RESPONSE, response);
+    }
+
+    public Response getResponse() {
+        return intent.getParcelableExtra(EXTRA_RESPONSE);
+    }
+
 }

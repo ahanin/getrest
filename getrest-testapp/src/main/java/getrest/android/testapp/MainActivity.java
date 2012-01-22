@@ -9,7 +9,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import getrest.android.RestfulClient;
+import getrest.android.client.RequestCallback;
+import getrest.android.client.RequestFuture;
+import getrest.android.request.Request;
+import getrest.android.request.Response;
 
 /**
  * @author aha
@@ -33,7 +38,21 @@ public class MainActivity extends Activity {
                 final ContentValues values = new ContentValues();
                 values.put("title", "Groceries");
                 values.put("note", "Tomatoes\nMeat\nFish\n");
-                restfulClient.post(Uri.parse("http://10.0.2.2:8080/note"), values);
+
+                final RequestFuture future = restfulClient.post(Uri.parse("http://10.0.2.2:8080/note"), values);
+                future.setRequestCallback(new RequestCallback() {
+                    public void onPending(final Request request) {
+                        Toast.makeText(MainActivity.this, "Pending...", Toast.LENGTH_SHORT).show();
+                    }
+
+                    public void onExecuting(final Request request) {
+                        Toast.makeText(MainActivity.this, "Executing...", Toast.LENGTH_SHORT).show();
+                    }
+
+                    public void onFinished(final Response request) {
+                        Toast.makeText(MainActivity.this, "Finished!", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
     }
