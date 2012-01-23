@@ -49,10 +49,12 @@ public class PostMethodPipelineTest {
     private RequestContext requestContext;
     private RequestLifecycle requestLifecycle;
     private ServiceRequestExecutor serviceRequestExecutor;
+    private Response response;
 
     @Before
     public void setUp() throws Exception {
         request = mock(Request.class);
+        response = mock(Response.class);
 
         requestExecutor = new PostMethodPipeline();
         requestLifecycle = mock(RequestLifecycle.class);
@@ -61,6 +63,7 @@ public class PostMethodPipelineTest {
 
         marshaller = mock(Marshaller.class);
         packer = mock(Packer.class);
+
 
         when(requestContext.getMarshaller()).thenReturn(marshaller);
         when(requestContext.getPacker()).thenReturn(packer);
@@ -86,9 +89,9 @@ public class PostMethodPipelineTest {
         final Pack resultEntityPack = mock(Pack.class);
         when(packer.pack(unmarshalledResult)).thenReturn(resultEntityPack);
 
-        final Response response = requestExecutor.execute(request);
+        requestExecutor.handle(request, response);
 
-        assertThat(response.getEntity(), sameInstance(resultEntityPack));
+        verify(response).setEntity(resultEntityPack);
     }
 
     @Test
@@ -99,7 +102,7 @@ public class PostMethodPipelineTest {
         final Representation marshalledEntity = mock(Representation.class);
         when(marshaller.marshal(requestEntityPack)).thenReturn(marshalledEntity);
 
-        requestExecutor.execute(request);
+        requestExecutor.handle(request, response);
 
         verify(serviceRequestExecutor).execute(any(ServiceRequest.class), any(ServiceResponse.class));
     }
@@ -120,7 +123,7 @@ public class PostMethodPipelineTest {
         doNothing().when(serviceRequestExecutor).execute(serviceRequestCaptor.capture(),
                 serviceResponseCaptor.capture());
 
-        requestExecutor.execute(request);
+        requestExecutor.handle(request, response);
 
         final ServiceRequest serviceRequest = serviceRequestCaptor.getValue();
         assertThat(serviceRequest.getEntity(), sameInstance(marshalledEntity));
@@ -148,9 +151,9 @@ public class PostMethodPipelineTest {
         final Pack responseEntityPack = mock(Pack.class);
         when(packer.pack(responseEntity)).thenReturn(responseEntityPack);
 
-        final Response response = requestExecutor.execute(request);
+        requestExecutor.handle(request, response);
 
-        assertThat(response.getEntity(), sameInstance(responseEntityPack));
+        verify(response).setEntity(responseEntityPack);
 
         assertThat(responseEntityCaptor.getValue(), sameInstance(serviceResponseCaptor.getValue().getEntity()));
     }
@@ -167,7 +170,7 @@ public class PostMethodPipelineTest {
         final ArgumentCaptor<ServiceResponse> serviceResponse = ArgumentCaptor.forClass(ServiceResponse.class);
         final ArgumentCaptor<Representation> responseRepresentation = ArgumentCaptor.forClass(Representation.class);
 
-        requestExecutor.execute(request);
+        requestExecutor.handle(request, response);
 
         inOrder.verify(requestLifecycle).beforeMarshal();
         inOrder.verify(marshaller).marshal(requestEntity);

@@ -52,7 +52,7 @@ class PostMethodPipeline implements RequestPipeline {
         this.serviceRequestExecutor = serviceRequestExecutor;
     }
 
-    public Response execute(final Request request) {
+    public void handle(final Request request, final Response response) {
         // marshal
         requestLifecycle.beforeMarshal();
 
@@ -77,11 +77,7 @@ class PostMethodPipeline implements RequestPipeline {
 
         requestLifecycle.afterUnmarshal();
 
-        final Response response = new Response();
-        response.setRequest(this.request);
         response.setEntity(result);
-
-        return response;
     }
 
 }

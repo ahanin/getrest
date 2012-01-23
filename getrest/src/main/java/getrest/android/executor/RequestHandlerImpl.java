@@ -15,6 +15,7 @@
  */
 package getrest.android.executor;
 
+import getrest.android.request.HandlerException;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
@@ -26,19 +27,13 @@ import getrest.android.service.ServiceRequestExecutor;
  * @author aha
  * @since 2012-01-18
  */
-public class RequestExecutorImpl implements RequestExecutor {
-
-    private Request request;
+public class RequestHandlerImpl implements RequestHandler {
 
     private RequestLifecycle requestLifecycle;
 
     private RequestContext requestContext;
 
     private ServiceRequestExecutor serviceRequestExecutor;
-
-    public void setRequest(final Request request) {
-        this.request = request;
-    }
 
     public void setRequestLifecycle(final RequestLifecycle requestLifecycle) {
         this.requestLifecycle = requestLifecycle;
@@ -52,7 +47,7 @@ public class RequestExecutorImpl implements RequestExecutor {
         this.serviceRequestExecutor = serviceRequestExecutor;
     }
 
-    public Response execute() {
+    public void handle(final Request request, final Response response) throws HandlerException {
         final Method method = request.getMethod();
 
         if (method == null) {
@@ -82,7 +77,7 @@ public class RequestExecutorImpl implements RequestExecutor {
             throw new IllegalArgumentException("Request method is unsupported: " + method.getName());
         }
 
-        return pipeline.execute(request);
+        pipeline.handle(request, response);
     }
 
 }

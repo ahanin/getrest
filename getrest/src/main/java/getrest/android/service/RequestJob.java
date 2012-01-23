@@ -16,9 +16,11 @@
 
 package getrest.android.service;
 
-import getrest.android.executor.RequestExecutor;
+import getrest.android.request.Handler;
+import getrest.android.request.HandlerException;
 import getrest.android.request.Request;
 import getrest.android.request.Response;
+import getrest.android.request.Status;
 
 /**
  * @author aha
@@ -46,13 +48,19 @@ public class RequestJob implements Runnable {
     public void run() {
         final String requestId = request.getRequestId();
         requestEventBus.fireExecuting(requestId);
+
+        final Response response = new Response();
+        response.setRequest(request);
+
         try {
             final ServiceContext serviceContext = ServiceContext.forRequest(request);
-            final RequestExecutor requestProcessor = serviceContext.getRequestExecutor(request);
-            final Response response = requestProcessor.execute();
+            final Handler requestProcessor = serviceContext.getRequestHandler(request);
+            requestProcessor.handle(request, response);
             if (callback != null) {
                 callback.onResponse(response);
             }
+        } catch (HandlerException e) {
+            response.setStatus(Status.UNEXPECTED_EXCEPTION);
         } finally {
             requestEventBus.fireFinished(requestId);
         }

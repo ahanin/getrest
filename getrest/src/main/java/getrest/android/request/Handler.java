@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package getrest.android.request;
 
-package getrest.android.executor;
-
-import getrest.android.request.Response;
-
-/**
- * @author aha
- * @since 2012-01-13
- */
-public interface RequestExecutor {
-    Response execute();
+public interface Handler {
+    void handle(Request request, Response response) throws HandlerException;
 }

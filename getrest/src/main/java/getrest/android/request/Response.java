@@ -29,6 +29,7 @@ public class Response implements Parcelable {
     private Request request;
     private Pack entity;
     private boolean isFailed;
+    private Status status;
 
     public Request getRequest() {
         return request;
@@ -56,10 +57,9 @@ public class Response implements Parcelable {
     }
 
     /**
-     * Set communication failure flag.
+     * Set failure flag.
      *
-     * @param isFailed {@code true} in case communication error occurred during the request execution,
-     *                 otherwise {@code false}
+     * @param isFailed flag that says if unexpected problem has occurred and prevented request from execution
      */
     public void setFailed(final boolean isFailed) {
         this.isFailed = isFailed;
@@ -88,5 +88,13 @@ public class Response implements Parcelable {
             return new Response[size];
         }
     };
+
+    public void setStatus(final Status status) {
+        this.status = status;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
 
 }

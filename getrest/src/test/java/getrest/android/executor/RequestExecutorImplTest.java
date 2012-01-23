@@ -16,6 +16,7 @@
 package getrest.android.executor;
 
 import getrest.android.request.Request;
+import getrest.android.request.Response;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,20 +25,21 @@ import static org.mockito.Mockito.mock;
 
 public class RequestExecutorImplTest {
 
-    private RequestExecutorImpl requestExecutor;
+    private RequestHandlerImpl requestExecutor;
     private Request request;
+    private Response response;
 
     @Before
     public void setUp() throws Exception {
-        requestExecutor = new RequestExecutorImpl();
+        requestExecutor = new RequestHandlerImpl();
         request = mock(Request.class);
-        requestExecutor.setRequest(request);
+        response = mock(Response.class);
     }
 
     @Test
     public void testMethodMustNotBeNull() throws Exception {
         try {
-            requestExecutor.execute();
+            requestExecutor.handle(request, response);
             fail("When request method is null, must raise: " + IllegalArgumentException.class.getName());
         } catch (IllegalArgumentException ex) {
             // normal flow

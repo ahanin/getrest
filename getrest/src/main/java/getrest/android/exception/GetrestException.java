@@ -13,9 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.executor;
+package getrest.android.exception;
 
-import getrest.android.request.Handler;
+public class GetrestException extends Exception {
 
-interface RequestPipeline extends Handler {
+    public GetrestException(final String message) {
+        super(message);
+    }
+
+    public GetrestException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
 }

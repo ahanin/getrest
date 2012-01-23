@@ -23,9 +23,9 @@ import android.os.Parcelable;
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
-import getrest.android.executor.RequestExecutor;
-import getrest.android.executor.RequestExecutorImpl;
+import getrest.android.executor.RequestHandlerImpl;
 import getrest.android.http.HttpServiceRequestExecutor;
+import getrest.android.request.Handler;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
@@ -73,15 +73,14 @@ public abstract class ServiceContext {
         return resourceContextSingleton;
     }
 
-    public RequestExecutor getRequestExecutor(final Request request) {
+    public Handler getRequestHandler(final Request request) {
         final ResourceContext resourceContext = getResourceContext(request);
         final RequestContext requestContext = resourceContext.getRequestContext(request);
 
         final DefaultRequestLifecycle requestLifecycle = new DefaultRequestLifecycle();
         requestLifecycle.setRequestContext(requestContext);
 
-        final RequestExecutorImpl requestExecutor = new RequestExecutorImpl();
-        requestExecutor.setRequest(request);
+        final RequestHandlerImpl requestExecutor = new RequestHandlerImpl();
         requestExecutor.setRequestContext(requestContext);
         requestExecutor.setRequestLifecycle(requestLifecycle);
         requestExecutor.setServiceRequestExecutor(resourceContext.getServiceRequestExecutor());
