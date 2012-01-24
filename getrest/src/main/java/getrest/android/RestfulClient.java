@@ -16,8 +16,11 @@
 
 package getrest.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
+import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
 import getrest.android.client.impl.RestfulClientImpl;
 
@@ -26,6 +29,8 @@ import getrest.android.client.impl.RestfulClientImpl;
  * @since 2012-01-13
  */
 public abstract class RestfulClient {
+
+    private RequestCallbackFactory requestCallbackFactory;
 
     protected abstract void init(Context context);
 
@@ -65,12 +70,46 @@ public abstract class RestfulClient {
      *
      * @param context
      * @return
-     * @see #detach()
+     * @see #saveStateAndDetach(Bundle)
      */
     public static RestfulClient getInstance(Context context) {
         final RestfulClient client = new RestfulClientImpl();
         client.init(context);
         return client;
     }
+
+    /**
+     * Associate {@link RequestCallbackFactory} with the client. This factory will be used to automatically create
+     * request callbacks.
+     *
+     * @param requestCallbackFactory
+     */
+    public void setRequestCallbackFactory(RequestCallbackFactory requestCallbackFactory) {
+        this.requestCallbackFactory = requestCallbackFactory;
+    }
+
+    /**
+     * Return associated {@link RequestCallbackFactory}
+     *
+     * @return {@link RequestCallbackFactory} that was previously set by
+     *         {@link #setRequestCallbackFactory(RequestCallbackFactory)}, or {@code null} if it was not.
+     * @see #setRequestCallbackFactory(getrest.android.client.RequestCallbackFactory)
+     */
+    protected RequestCallbackFactory getRequestCallbackFactory() {
+        return requestCallbackFactory;
+    }
+
+    /**
+     * Save current client state to {@link Bundle} and detach client from associated context. This method must be called
+     * on {@link Activity#onSaveInstanceState(Bundle)} callback.
+     *
+     * @param outState activity state {@link Bundle} to which client's state should be written
+     */
+    public abstract void saveStateAndDetach(final Bundle outState);
+
+    /**
+     * @param savedInstanceState
+     */
+    public abstract void restoreState(final Bundle savedInstanceState);
 
 }

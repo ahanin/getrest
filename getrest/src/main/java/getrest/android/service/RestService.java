@@ -20,7 +20,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import getrest.android.request.Request;
-import getrest.android.request.Response;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
@@ -34,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @author aha
  * @since 2012-01-13
  */
-public class RestService extends Service implements RequestCallback, Broadcaster {
+public class RestService extends Service implements Broadcaster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
 
@@ -61,7 +60,6 @@ public class RestService extends Service implements RequestCallback, Broadcaster
 
             final RequestJob job = new RequestJob(request);
             job.setRequestEventBus(eventBus);
-            job.setCallback(this);
 
             jobExecutorService.submit(job);
         } catch (RejectedExecutionException ex) {
@@ -75,11 +73,6 @@ public class RestService extends Service implements RequestCallback, Broadcaster
     @Override
     public IBinder onBind(final Intent intent) {
         return null;
-    }
-
-    public void onResponse(final Response response) {
-        // TODO implement response broadcasting
-        throw new UnsupportedOperationException("response broadcasting is yet to implement");
     }
 
     @Override

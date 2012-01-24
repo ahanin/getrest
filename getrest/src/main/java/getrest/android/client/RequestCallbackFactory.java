@@ -15,27 +15,22 @@
  */
 package getrest.android.client;
 
+import getrest.android.RestfulClient;
 import getrest.android.request.Request;
-import getrest.android.request.Response;
 
-public interface RequestFuture {
-
-    String getRequestId();
-
-    /**
-     * Set {@link RequestCallback} that will receive {@link Request} event notifications.
-     *
-     * @param requestCallback instance of {@link RequestCallback} to receive notifications
-     */
-    void setRequestCallback(RequestCallback requestCallback);
-
-    boolean isFinished();
+/**
+ * Used in {@link RestfulClient} to implicitly create {@link RequestCallback}s and attach them to corresponding
+ * {@link RequestFuture}s.
+ */
+public interface RequestCallbackFactory {
 
     /**
-     * Return {@link Response}. Calling thread will be blocked until the request is finished with any result.
+     * Create {@link RequestCallback}
      *
-     * @return {@link Response}
+     * @param request {@link Request} for which callback should be created
+     * @return instance of {@link RequestCallback}, that will be called for {@link Request} events, or {@code null},
+     *         in which case no callback will be notified about request events
      */
-    Response get();
+    RequestCallback createCallback(Request request);
 
 }

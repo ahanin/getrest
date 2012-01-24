@@ -58,8 +58,22 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onRestoreInstanceState(final Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        restfulClient.restoreState(savedInstanceState);
+    }
+
+    @Override
+    protected void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        restfulClient.saveStateAndDetach(outState);
+    }
+
+    @Override
     protected void onDestroy() {
-        restfulClient.detach();
         super.onDestroy();
+        restfulClient.detach();
     }
 }

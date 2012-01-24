@@ -20,7 +20,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Bundle;
 import getrest.android.RestfulClient;
+import getrest.android.client.RequestCallback;
+import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
@@ -37,6 +40,7 @@ import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -80,11 +84,27 @@ public class RestfulClientImpl extends RestfulClient {
 
         LOGGER.trace("Starting service");
 
-        final RequestFutureImpl requestFuture = new RequestFutureImpl();
-        requestFuture.setRequest(request);
-        futureMap.put(requestId, requestFuture);
+        final RequestFutureImpl requestFuture = obtainRequestFuture(requestId, request);
 
         androidContext.startService(wrapper.asIntent());
+
+        return requestFuture;
+    }
+
+    private RequestFutureImpl obtainRequestFuture(final String requestId, final Request request) {
+        final RequestFutureImpl requestFuture = new RequestFutureImpl();
+        requestFuture.setRequestId(requestId);
+        requestFuture.setRequest(request);
+
+        futureMap.put(requestId, requestFuture);
+
+        final RequestCallbackFactory callbackFactory = getRequestCallbackFactory();
+        if (callbackFactory != null) {
+            final RequestCallback callback = callbackFactory.createCallback(request);
+            if (callback != null) {
+                requestFuture.setRequestCallback(callback);
+            }
+        }
 
         return requestFuture;
     }
@@ -103,7 +123,6 @@ public class RestfulClientImpl extends RestfulClient {
     @Override
     public void detach() {
         androidContext.unregisterReceiver(requestEventReceiver);
-
         requestEventReceiver = null;
     }
 
@@ -117,6 +136,21 @@ public class RestfulClientImpl extends RestfulClient {
     public RequestFuture delete(Uri url) {
         // TODO implement DELETE method
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void saveStateAndDetach(final Bundle outState) {
+        final RestfulClientStateWrapper stateWrapper = new RestfulClientStateWrapper(outState);
+        synchronized (futureMap) {
+            final Set<String> unfinishedRequestIds = futureMap.keySet();
+            stateWrapper.setUnfinishedRequestIds(unfinishedRequestIds.toArray(new String[unfinishedRequestIds.size()]));
+        }
+        detach();
+    }
+
+    @Override
+    public void restoreState(final Bundle savedInstanceState) {
+        new RestfulClientStateWrapper(savedInstanceState);
     }
 
     private static class RequestEventBroadcastReceiver extends BroadcastReceiver {

@@ -30,15 +30,10 @@ public class RequestJob implements Runnable {
 
     private Request request;
 
-    private RequestCallback callback;
     private RequestEventBus requestEventBus;
 
     public RequestJob(final Request request) {
         this.request = request;
-    }
-
-    public void setCallback(final RequestCallback callback) {
-        this.callback = callback;
     }
 
     public void setRequestEventBus(final RequestEventBus requestEventBus) {
@@ -56,9 +51,6 @@ public class RequestJob implements Runnable {
             final ServiceContext serviceContext = ServiceContext.forRequest(request);
             final Handler requestProcessor = serviceContext.getRequestHandler(request);
             requestProcessor.handle(request, response);
-            if (callback != null) {
-                callback.onResponse(response);
-            }
         } catch (HandlerException e) {
             response.setStatus(Status.UNEXPECTED_EXCEPTION);
         } finally {

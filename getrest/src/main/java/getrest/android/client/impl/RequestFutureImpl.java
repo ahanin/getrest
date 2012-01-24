@@ -23,6 +23,7 @@ import getrest.android.request.Response;
 
 class RequestFutureImpl implements RequestFuture {
 
+    private String requestId;
     private Request request;
     private Response response;
 
@@ -36,7 +37,8 @@ class RequestFutureImpl implements RequestFuture {
 
     private final Object lock = new Object();
 
-    public RequestFutureImpl() {
+    public void setRequestId(final String requestId) {
+        this.requestId = requestId;
     }
 
     public void setRequest(final Request request) {
@@ -49,8 +51,12 @@ class RequestFutureImpl implements RequestFuture {
         }
     }
 
-    public void setRequestCallback(final RequestCallback callback) {
-        this.callback = callback;
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestCallback(final RequestCallback requestCallback) {
+        this.callback = requestCallback;
     }
 
     public void finish(Response response) {
