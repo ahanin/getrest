@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -53,22 +54,11 @@ public class MainActivity extends Activity {
                         Toast.makeText(MainActivity.this, "Finished!", Toast.LENGTH_SHORT).show();
                     }
                 });
+
             }
         });
-    }
-
-    @Override
-    protected void onRestoreInstanceState(final Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        restfulClient.restoreState(savedInstanceState);
-    }
-
-    @Override
-    protected void onSaveInstanceState(final Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        restfulClient.saveStateAndDetach(outState);
+        restfulClient.setCallbackHandler(new Handler());
+        restfulClient.replay();
     }
 
     @Override

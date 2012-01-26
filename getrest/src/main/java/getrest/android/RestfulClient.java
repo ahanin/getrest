@@ -16,10 +16,10 @@
 
 package getrest.android;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
 import getrest.android.client.impl.RestfulClientImpl;
@@ -99,17 +99,7 @@ public abstract class RestfulClient {
         return requestCallbackFactory;
     }
 
-    /**
-     * Save current client state to {@link Bundle} and detach client from associated context. This method must be called
-     * on {@link Activity#onSaveInstanceState(Bundle)} callback.
-     *
-     * @param outState activity state {@link Bundle} to which client's state should be written
-     */
-    public abstract void saveStateAndDetach(final Bundle outState);
+    public abstract void setCallbackHandler(Handler callbackHandler);
 
-    /**
-     * @param savedInstanceState
-     */
-    public abstract void restoreState(final Bundle savedInstanceState);
-
+    public abstract void replay();
 }

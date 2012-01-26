@@ -42,24 +42,24 @@ public class RequestEventWrapper {
         return intent;
     }
 
-    public void setEventType(final int eventType) {
-        intent.putExtra(EXTRA_EVENT_TYPE, eventType);
+    public void setEventType(final RequestEvent eventType) {
+        intent.putExtra(EXTRA_EVENT_TYPE, eventType.getId());
     }
 
-    public int getEventType() {
-        return intent.getIntExtra(EXTRA_EVENT_TYPE, -1);
+    public RequestEvent getEventType() {
+        return RequestEvent.byId(intent.getByteExtra(EXTRA_EVENT_TYPE, (byte) -1));
     }
 
     public void setPending() {
-        setEventType(RequestEvents.PENDING);
+        setEventType(RequestEvent.PENDING);
     }
 
     public void setExecuting() {
-        setEventType(RequestEvents.EXECUTING);
+        setEventType(RequestEvent.EXECUTING);
     }
 
     public void setFinished() {
-        setEventType(RequestEvents.FINISHED);
+        setEventType(RequestEvent.FINISHED);
     }
 
     public void setResponse(Response response) {

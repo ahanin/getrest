@@ -15,34 +15,41 @@
  */
 package getrest.android.client.impl;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.Handler;
 import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
+import getrest.android.client.RequestStore;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
+import getrest.android.request.Response;
 import getrest.android.resource.ResourceContext;
+import getrest.android.service.RequestEvent;
 import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestEventWrapper;
-import getrest.android.service.RequestEvents;
 import getrest.android.service.RequestWrapper;
 import getrest.android.service.RestService;
 import getrest.android.service.ServiceContext;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
+import getrest.android.util.WorkQueue;
 
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RestfulClientImpl extends RestfulClient {
 
@@ -54,10 +61,42 @@ public class RestfulClientImpl extends RestfulClient {
 
     private RequestEventBroadcastReceiver requestEventReceiver;
 
+    private Handler callbackHandler;
+
     private final Map<String, RequestFutureImpl> futureMap = new ConcurrentHashMap<String, RequestFutureImpl>();
+
+    private final Set<String> replayedRequestIds = new HashSet<String>();
+
+    private final WorkQueue<RequestEventRecord> eventQueue = new WorkQueue<RequestEventRecord>(
+            new LinkedList<RequestEventRecord>(),
+            new RequestEventRecordWorker(this), 5);
+
+    private final AtomicReference<RequestStore> requestStore = new AtomicReference<RequestStore>();
+
+    private boolean isStarted;
 
     protected final void setServiceId(final String serviceId) {
         this.serviceId = serviceId;
+    }
+
+    @Override
+    public void setCallbackHandler(final Handler callbackHandler) {
+        this.callbackHandler = callbackHandler;
+    }
+
+    public RequestFuture getRequestFuture(String requestId) {
+        final RequestFuture future;
+        if (isStarted) {
+            future = futureMap.get(requestId);
+        } else {
+            future = obtainStoredRequestFuture(requestId);
+        }
+        return future;
+    }
+
+    private RequestFuture obtainStoredRequestFuture(final String requestId) {
+        // TODO obtain Request instance for previously stored ids
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -84,11 +123,27 @@ public class RestfulClientImpl extends RestfulClient {
 
         LOGGER.trace("Starting service");
 
+        getRequestStore().put(requestId);
+
         final RequestFutureImpl requestFuture = obtainRequestFuture(requestId, request);
 
         androidContext.startService(wrapper.asIntent());
 
         return requestFuture;
+    }
+
+    private RequestStore getRequestStore() {
+        if (requestStore.get() == null) {
+            synchronized (requestStore) {
+                if (requestStore.get() == null) {
+                    if (!(androidContext instanceof Activity)) {
+                        throw new IllegalStateException("Context must be an Activity");
+                    }
+                    requestStore.set(new RequestStorePreferencesImpl((Activity) androidContext));
+                }
+            }
+        }
+        return requestStore.get();
     }
 
     private RequestFutureImpl obtainRequestFuture(final String requestId, final Request request) {
@@ -139,18 +194,9 @@ public class RestfulClientImpl extends RestfulClient {
     }
 
     @Override
-    public void saveStateAndDetach(final Bundle outState) {
-        final RestfulClientStateWrapper stateWrapper = new RestfulClientStateWrapper(outState);
-        synchronized (futureMap) {
-            final Set<String> unfinishedRequestIds = futureMap.keySet();
-            stateWrapper.setUnfinishedRequestIds(unfinishedRequestIds.toArray(new String[unfinishedRequestIds.size()]));
-        }
-        detach();
-    }
-
-    @Override
-    public void restoreState(final Bundle savedInstanceState) {
-        new RestfulClientStateWrapper(savedInstanceState);
+    public void replay() {
+        eventQueue.start();
+        isStarted = true;
     }
 
     private static class RequestEventBroadcastReceiver extends BroadcastReceiver {
@@ -163,44 +209,109 @@ public class RestfulClientImpl extends RestfulClient {
 
         @Override
         public void onReceive(final Context context, final Intent intent) {
-            client.onRequestEvent(context, intent);
+            client.onRequestEvent(intent);
         }
 
     }
 
-    private void onRequestEvent(final Context context, final Intent intent) {
+    private void onRequestEvent(final Intent intent) {
         final RequestEventWrapper eventWrapper = new RequestEventWrapper(intent);
 
         final String requestId = eventWrapper.getRequestId();
 
+        final RequestEvent eventType = eventWrapper.getEventType();
         LOGGER.debug("Request event received: requestId={0}, eventType={1}", requestId,
-                RequestEvents.getEventName(eventWrapper.getEventType()));
+                eventType);
 
+        final RequestEventRecord eventRecord = new RequestEventRecord();
+        eventRecord.setRequestId(requestId);
+        eventRecord.setEventType(eventType);
+
+        eventQueue.add(eventRecord);
+    }
+
+    private void handleRequestEvent(final RequestEventRecord eventRecord) {
         synchronized (futureMap) {
-            final RequestFutureImpl future = futureMap.get(requestId);
+            final RequestFutureImpl future = futureMap.get(eventRecord.getRequestId());
+
+            final RequestEvent eventType = eventRecord.getEventType();
             if (future == null) {
-                LOGGER.warn("Request id " + requestId + " is not acknowledged");
-            } else {
-                switch (eventWrapper.getEventType()) {
-                    case RequestEvents.PENDING:
-                        future.firePending();
-                        break;
-
-                    case RequestEvents.EXECUTING:
-                        future.fireExecuting();
-                        break;
-
-                    case RequestEvents.FINISHED:
-                        try {
-                            future.fireFinished(eventWrapper.getResponse());
-                        } finally {
-                            synchronized (future) {
-                                futureMap.remove(requestId);
-                            }
-                        }
-                        break;
-                }
+                LOGGER.warn("Request id " + eventRecord.getRequestId() + " is not registered");
+            } else if (RequestEvent.PENDING.equals(eventType)) {
+                callbackHandler.post(new RequestPendingRunnable(future));
+            } else if (RequestEvent.EXECUTING.equals(eventType)) {
+                callbackHandler.post(new RequestExecutingRunnable(future));
+            } else if (RequestEvent.FINISHED.equals(eventType)) {
+                callbackHandler.post(new RequestFinishedRunnable(future, eventRecord, this));
             }
+        }
+    }
+
+    private static class RequestEventRecordWorker implements WorkQueue.Worker<RequestEventRecord> {
+
+        private RestfulClientImpl client;
+
+        private RequestEventRecordWorker(final RestfulClientImpl client) {
+            this.client = client;
+        }
+
+        public void execute(final RequestEventRecord item) {
+            client.handleRequestEvent(item);
+        }
+    }
+
+    private static class RequestPendingRunnable implements Runnable {
+        private final RequestFutureImpl future;
+
+        public RequestPendingRunnable(final RequestFutureImpl future) {
+            this.future = future;
+        }
+
+        public void run() {
+            future.firePending();
+        }
+    }
+
+    private static class RequestExecutingRunnable implements Runnable {
+        private final RequestFutureImpl future;
+
+        public RequestExecutingRunnable(final RequestFutureImpl future) {
+            this.future = future;
+        }
+
+        public void run() {
+            future.fireExecuting();
+        }
+    }
+
+    private static class RequestFinishedRunnable implements Runnable {
+
+        private final RequestFutureImpl future;
+        private final RequestEventRecord eventRecord;
+        private RestfulClientImpl client;
+
+        public RequestFinishedRunnable(final RequestFutureImpl future, final RequestEventRecord eventRecord,
+                                       final RestfulClientImpl client) {
+            this.future = future;
+            this.eventRecord = eventRecord;
+            this.client = client;
+        }
+
+        public void run() {
+            final String requestId = eventRecord.getRequestId();
+            try {
+                future.fireFinished(eventRecord.<Response>getData());
+            } finally {
+                // TODO rewrite in a nicer manner here
+                client.releaseRequest(requestId);
+            }
+        }
+    }
+
+    private void releaseRequest(final String requestId) {
+        synchronized (this) {
+            futureMap.remove(requestId);
+            getRequestStore().remove(requestId);
         }
     }
 
