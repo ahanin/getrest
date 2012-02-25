@@ -24,31 +24,35 @@ public class RequestEventBus {
         private Intents() {
         }
 
-        public static final String REQUEST_EVENT_ACTION = "getrest.android.intent.action.REQUEST_EVENT";
+        public static final String REQUEST_STATE_CHANGE_EVENT_ACTION = "getrest.android.intent.action." +
+                "REQUEST_STATE_CHANGE_EVENT";
 
     }
 
     private Broadcaster broadcaster;
 
     public void firePending(String requestId) {
-        final RequestEventWrapper eventWrapper = new RequestEventWrapper(new Intent(Intents.REQUEST_EVENT_ACTION));
-        eventWrapper.setRequestId(requestId);
-        eventWrapper.setPending();
-        broadcaster.sendBroadcast(eventWrapper.asIntent());
+        final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(
+                new Intent(Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
+        stateChangeEventWrapper.setRequestId(requestId);
+        stateChangeEventWrapper.setPending();
+        broadcaster.sendBroadcast(stateChangeEventWrapper.asIntent());
     }
 
     public void fireExecuting(String requestId) {
-        final RequestEventWrapper eventWrapper = new RequestEventWrapper(new Intent(Intents.REQUEST_EVENT_ACTION));
-        eventWrapper.setRequestId(requestId);
-        eventWrapper.setExecuting();
-        broadcaster.sendBroadcast(eventWrapper.asIntent());
+        final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(
+                new Intent(Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
+        stateChangeEventWrapper.setRequestId(requestId);
+        stateChangeEventWrapper.setExecuting();
+        broadcaster.sendBroadcast(stateChangeEventWrapper.asIntent());
     }
 
     public void fireFinished(String requestId) {
-        final RequestEventWrapper eventWrapper = new RequestEventWrapper(new Intent(Intents.REQUEST_EVENT_ACTION));
-        eventWrapper.setRequestId(requestId);
-        eventWrapper.setFinished();
-        broadcaster.sendBroadcast(eventWrapper.asIntent());
+        final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(
+                new Intent(Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
+        stateChangeEventWrapper.setRequestId(requestId);
+        stateChangeEventWrapper.setFinished();
+        broadcaster.sendBroadcast(stateChangeEventWrapper.asIntent());
     }
 
     public void setBroadcaster(final Broadcaster broadcaster) {

@@ -15,17 +15,12 @@
  */
 package getrest.android.request;
 
-import getrest.android.exception.GetrestException;
+public interface RequestController {
 
-public class HandlerException extends GetrestException {
+    void prepareRequest(Request request);
 
-    private static final long serialVersionUID = -7091817046265184580L;
+    void beginRequest(String requestId);
 
-    public HandlerException(final String message) {
-        super(message);
-    }
+    void endRequest(Response response);
 
-    public HandlerException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
 }

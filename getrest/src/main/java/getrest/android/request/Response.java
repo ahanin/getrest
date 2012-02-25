@@ -16,6 +16,7 @@
 
 package getrest.android.request;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import getrest.android.entity.Pack;
@@ -27,6 +28,8 @@ import getrest.android.entity.Pack;
 public class Response implements Parcelable {
 
     private Request request;
+
+    private Uri uri;
     private Pack entity;
     private boolean isFailed;
     private Status status;

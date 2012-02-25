@@ -19,7 +19,12 @@ import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 
-public class WorkQueue<T> {
+/**
+ * Implements worker queue.
+ *
+ * @param <T>
+ */
+public class WorkerQueue<T> {
 
     private final Queue<T> queue;
 
@@ -40,7 +45,7 @@ public class WorkQueue<T> {
         void execute(T item);
     }
 
-    public WorkQueue(Queue<T> queue, Worker<T> worker, int maxThreads) {
+    public WorkerQueue(Queue<T> queue, Worker<T> worker, int maxThreads) {
         this.queue = queue;
         this.worker = worker;
         this.maxThreads = maxThreads;
@@ -94,7 +99,6 @@ public class WorkQueue<T> {
             }
         }
     }
-
 
     public void stop() {
         synchronized (this) {

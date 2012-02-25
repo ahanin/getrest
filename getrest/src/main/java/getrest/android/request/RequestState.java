@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.service;
+package getrest.android.request;
 
-public class RequestEvent {
+public class RequestState {
 
-    public static final RequestEvent PENDING = new RequestEvent((byte) 1, "PENDING");
-    public static final RequestEvent EXECUTING = new RequestEvent((byte) 2, "EXECUTING");
-    public static final RequestEvent FINISHED = new RequestEvent((byte) 3, "FINISHED");
+    public static final RequestState PENDING = new RequestState((byte) 1, "PENDING");
+    public static final RequestState EXECUTING = new RequestState((byte) 2, "EXECUTING");
+    public static final RequestState FINISHED = new RequestState((byte) 3, "FINISHED");
 
     private byte id;
     private String name;
 
-    private RequestEvent(final byte id, final String name) {
+    private RequestState(final byte id, final String name) {
         this.name = name;
         this.id = id;
     }
@@ -37,7 +37,7 @@ public class RequestEvent {
         return name;
     }
 
-    public static RequestEvent byId(final byte id) {
+    public static RequestState byId(final byte id) {
         switch (id) {
             case 1:
                 return PENDING;
@@ -52,7 +52,7 @@ public class RequestEvent {
 
     @Override
     public String toString() {
-        return "RequestEvent{" +
+        return "RequestState{" +
                 "name='" + name + '\'' +
                 '}';
     }
@@ -62,7 +62,7 @@ public class RequestEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final RequestEvent that = (RequestEvent) o;
+        final RequestState that = (RequestState) o;
 
         if (id != that.id) return false;
 

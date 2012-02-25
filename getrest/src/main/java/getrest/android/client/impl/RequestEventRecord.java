@@ -15,13 +15,13 @@
  */
 package getrest.android.client.impl;
 
-import getrest.android.service.RequestEvent;
+import getrest.android.request.RequestState;
 
 class RequestEventRecord {
 
     private String requestId;
 
-    private RequestEvent eventType;
+    private RequestState requestState;
 
     private Object data;
 
@@ -29,7 +29,7 @@ class RequestEventRecord {
     public String toString() {
         return "RequestEventRecord{" +
                 "requestId='" + requestId + '\'' +
-                ", eventType=" + eventType +
+                ", requestState=" + requestState +
                 '}';
     }
 
@@ -41,12 +41,12 @@ class RequestEventRecord {
         return requestId;
     }
 
-    public RequestEvent getEventType() {
-        return eventType;
+    public RequestState getRequestState() {
+        return requestState;
     }
 
-    public void setEventType(final RequestEvent eventType) {
-        this.eventType = eventType;
+    public void setRequestState(final RequestState requestState) {
+        this.requestState = requestState;
     }
 
     public <T> void setData(final T data) {

@@ -29,7 +29,9 @@ import getrest.android.request.Handler;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
+import getrest.android.request.RequestController;
 import getrest.android.request.RequestLifecycle;
+import getrest.android.request.Response;
 import getrest.android.resource.ResourceContext;
 import getrest.android.resource.ResourceContextImpl;
 import getrest.android.util.Logger;
@@ -51,8 +53,9 @@ public abstract class ServiceContext {
 
     {
         resourceContextSingleton.setPacker(new ParcelablePacker());
-        resourceContextSingleton.setMarshaller(new SimpleMarshallerImpl());
+        resourceContextSingleton.setMarshaller(new TempMarshallerImpl());
         resourceContextSingleton.setServiceRequestExecutor(new HttpServiceRequestExecutor());
+        resourceContextSingleton.setRequestController(new TempRequestController());
     }
 
 
@@ -73,9 +76,13 @@ public abstract class ServiceContext {
         return resourceContextSingleton;
     }
 
-    public Handler getRequestHandler(final Request request) {
+    public RequestContext getRequestContext(Request request) {
         final ResourceContext resourceContext = getResourceContext(request);
-        final RequestContext requestContext = resourceContext.getRequestContext(request);
+        return resourceContext.getRequestContext(request);
+    }
+
+    public Handler getRequestHandler(final Request request) {
+        final RequestContext requestContext = getRequestContext(request);
 
         final DefaultRequestLifecycle requestLifecycle = new DefaultRequestLifecycle();
         requestLifecycle.setRequestContext(requestContext);
@@ -83,7 +90,7 @@ public abstract class ServiceContext {
         final RequestHandlerImpl requestExecutor = new RequestHandlerImpl();
         requestExecutor.setRequestContext(requestContext);
         requestExecutor.setRequestLifecycle(requestLifecycle);
-        requestExecutor.setServiceRequestExecutor(resourceContext.getServiceRequestExecutor());
+        requestExecutor.setServiceRequestExecutor(requestContext.getResourceContext().getServiceRequestExecutor());
 
         return requestExecutor;
     }
@@ -184,7 +191,6 @@ public abstract class ServiceContext {
     }
 
     private static class ParcelablePacker implements Packer {
-
         public ParcelablePack pack(final Object object) {
             if (object instanceof Parcelable) {
                 return new ParcelablePack((Parcelable) object);
@@ -195,7 +201,7 @@ public abstract class ServiceContext {
 
     }
 
-    private static class SimpleMarshallerImpl implements Marshaller<ContentValues, Representation> {
+    private static class TempMarshallerImpl implements Marshaller<ContentValues, Representation> {
         public Representation marshal(final ContentValues source) {
             return new Representation() {
                 public InputStream getContent() throws IOException {
@@ -206,6 +212,23 @@ public abstract class ServiceContext {
 
         public ContentValues unmarshal(final Representation entity) {
             return new ContentValues();
+        }
+    }
+
+    private static class TempRequestController implements RequestController {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
+
+        public void prepareRequest(final Request request) {
+            LOGGER.debug("prepareRequest: {0}", request.getRequestId());
+        }
+
+        public void beginRequest(final String requestId) {
+            LOGGER.debug("beginRequest: {0}", requestId);
+        }
+
+        public void endRequest(final Response response) {
+            LOGGER.debug("endRequest: {0}", response.getRequest().getRequestId());
         }
     }
 }

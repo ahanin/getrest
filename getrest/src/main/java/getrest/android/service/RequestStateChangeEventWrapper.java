@@ -16,17 +16,18 @@
 package getrest.android.service;
 
 import android.content.Intent;
+import getrest.android.request.RequestState;
 import getrest.android.request.Response;
 
-public class RequestEventWrapper {
+public class RequestStateChangeEventWrapper {
 
     private Intent intent;
 
-    private static final String EXTRA_REQUEST_ID = "getrest.android.service.RequestEventWrapper.REQUEST_ID";
-    private static final String EXTRA_EVENT_TYPE = "getrest.android.service.RequestEventWrapper.EVENT_TYPE";
-    private static final String EXTRA_RESPONSE = "getrest.android.service.RequestEventWrapper.RESPONSE";
+    private static final String EXTRA_REQUEST_ID = "getrest.android.service.RequestStateChangeEventWrapper.REQUEST_ID";
+    private static final String REQUEST_STATE = "getrest.android.service.RequestStateChangeEventWrapper.REQUEST_STATE";
+    private static final String EXTRA_RESPONSE = "getrest.android.service.RequestStateChangeEventWrapper.RESPONSE";
 
-    public RequestEventWrapper(final Intent intent) {
+    public RequestStateChangeEventWrapper(final Intent intent) {
         this.intent = intent;
     }
 
@@ -42,24 +43,24 @@ public class RequestEventWrapper {
         return intent;
     }
 
-    public void setEventType(final RequestEvent eventType) {
-        intent.putExtra(EXTRA_EVENT_TYPE, eventType.getId());
+    public void setRequestState(final RequestState requestState) {
+        intent.putExtra(REQUEST_STATE, requestState.getId());
     }
 
-    public RequestEvent getEventType() {
-        return RequestEvent.byId(intent.getByteExtra(EXTRA_EVENT_TYPE, (byte) -1));
+    public RequestState getRequestState() {
+        return RequestState.byId(intent.getByteExtra(REQUEST_STATE, (byte) -1));
     }
 
     public void setPending() {
-        setEventType(RequestEvent.PENDING);
+        setRequestState(RequestState.PENDING);
     }
 
     public void setExecuting() {
-        setEventType(RequestEvent.EXECUTING);
+        setRequestState(RequestState.EXECUTING);
     }
 
     public void setFinished() {
-        setEventType(RequestEvent.FINISHED);
+        setRequestState(RequestState.FINISHED);
     }
 
     public void setResponse(Response response) {

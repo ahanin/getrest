@@ -70,7 +70,7 @@ public abstract class RestfulClient {
      *
      * @param context
      * @return
-     * @see #saveStateAndDetach(Bundle)
+     * @see #detach()
      */
     public static RestfulClient getInstance(Context context) {
         final RestfulClient client = new RestfulClientImpl();

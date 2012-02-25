@@ -19,6 +19,7 @@ import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
+import getrest.android.request.RequestController;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequestExecutor;
 
@@ -37,4 +38,7 @@ public interface ResourceContext {
     <T> Marshaller<T, Representation> getMarshaller();
 
     ServiceRequestExecutor getServiceRequestExecutor();
+
+    RequestController getRequestController();
+
 }

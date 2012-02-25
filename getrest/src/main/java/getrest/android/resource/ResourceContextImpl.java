@@ -19,6 +19,7 @@ import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
+import getrest.android.request.RequestController;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequestExecutor;
 
@@ -26,7 +27,7 @@ public class ResourceContextImpl implements ResourceContext {
 
     private Packer packer;
     private Marshaller marshaller;
-
+    private RequestController requestController;
     private ServiceRequestExecutor serviceRequestExecutor;
 
     public RequestContext getRequestContext(Request request) {
@@ -34,6 +35,7 @@ public class ResourceContextImpl implements ResourceContext {
         final DefaultRequestContext requestContext = new DefaultRequestContext();
         requestContext.setPacker(packer);
         requestContext.setMarshaller(marshaller);
+        requestContext.setResourceContext(this);
         return requestContext;
     }
 
@@ -61,6 +63,14 @@ public class ResourceContextImpl implements ResourceContext {
         return this.serviceRequestExecutor;
     }
 
+    public void setRequestController(final RequestController requestController) {
+        this.requestController = requestController;
+    }
+
+    public RequestController getRequestController() {
+        return this.requestController;
+    }
+
     /**
      * This is a temporary solution.
      * TODO remove when "real" class is implemented
@@ -69,6 +79,15 @@ public class ResourceContextImpl implements ResourceContext {
 
         private Packer packer;
         private Marshaller marshaller;
+        private ResourceContextImpl resourceContext;
+
+        public void setResourceContext(final ResourceContextImpl resourceContext) {
+            this.resourceContext = resourceContext;
+        }
+
+        public ResourceContext getResourceContext() {
+            return resourceContext;
+        }
 
         public void setPacker(final Packer packer) {
             this.packer = packer;
@@ -84,6 +103,10 @@ public class ResourceContextImpl implements ResourceContext {
 
         public <T> Marshaller<T, Representation> getMarshaller() {
             return this.marshaller;
+        }
+
+        public RequestController getRequestController() {
+            return resourceContext.getRequestController();
         }
     }
 

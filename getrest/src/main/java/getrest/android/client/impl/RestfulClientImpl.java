@@ -31,17 +31,18 @@ import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
+import getrest.android.request.RequestController;
+import getrest.android.request.RequestState;
 import getrest.android.request.Response;
 import getrest.android.resource.ResourceContext;
-import getrest.android.service.RequestEvent;
 import getrest.android.service.RequestEventBus;
-import getrest.android.service.RequestEventWrapper;
+import getrest.android.service.RequestStateChangeEventWrapper;
 import getrest.android.service.RequestWrapper;
 import getrest.android.service.RestService;
 import getrest.android.service.ServiceContext;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
-import getrest.android.util.WorkQueue;
+import getrest.android.util.WorkerQueue;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -67,7 +68,7 @@ public class RestfulClientImpl extends RestfulClient {
 
     private final Set<String> replayedRequestIds = new HashSet<String>();
 
-    private final WorkQueue<RequestEventRecord> eventQueue = new WorkQueue<RequestEventRecord>(
+    private final WorkerQueue<RequestEventRecord> eventQueue = new WorkerQueue<RequestEventRecord>(
             new LinkedList<RequestEventRecord>(),
             new RequestEventRecordWorker(this), 5);
 
@@ -118,10 +119,13 @@ public class RestfulClientImpl extends RestfulClient {
         request.setRequestId(requestId);
         request.setTimestamp(System.currentTimeMillis());
 
+        LOGGER.trace("Starting service");
+
         final RequestWrapper wrapper = new RequestWrapper(new Intent(androidContext, RestService.class));
         wrapper.setRequest(request);
 
-        LOGGER.trace("Starting service");
+        final RequestController requestController = resourceContext.getRequestController();
+        requestController.prepareRequest(request);
 
         getRequestStore().put(requestId);
 
@@ -172,7 +176,7 @@ public class RestfulClientImpl extends RestfulClient {
         this.androidContext = context;
         this.requestEventReceiver = new RequestEventBroadcastReceiver(this);
 
-        context.registerReceiver(requestEventReceiver, new IntentFilter(RequestEventBus.Intents.REQUEST_EVENT_ACTION));
+        context.registerReceiver(requestEventReceiver, new IntentFilter(RequestEventBus.Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
     }
 
     @Override
@@ -215,17 +219,17 @@ public class RestfulClientImpl extends RestfulClient {
     }
 
     private void onRequestEvent(final Intent intent) {
-        final RequestEventWrapper eventWrapper = new RequestEventWrapper(intent);
+        final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(intent);
 
-        final String requestId = eventWrapper.getRequestId();
+        final String requestId = stateChangeEventWrapper.getRequestId();
 
-        final RequestEvent eventType = eventWrapper.getEventType();
-        LOGGER.debug("Request event received: requestId={0}, eventType={1}", requestId,
-                eventType);
+        final RequestState requestState = stateChangeEventWrapper.getRequestState();
+        LOGGER.debug("Request event received: requestId={0}, requestState={1}", requestId,
+                requestState);
 
         final RequestEventRecord eventRecord = new RequestEventRecord();
         eventRecord.setRequestId(requestId);
-        eventRecord.setEventType(eventType);
+        eventRecord.setRequestState(requestState);
 
         eventQueue.add(eventRecord);
     }
@@ -234,20 +238,20 @@ public class RestfulClientImpl extends RestfulClient {
         synchronized (futureMap) {
             final RequestFutureImpl future = futureMap.get(eventRecord.getRequestId());
 
-            final RequestEvent eventType = eventRecord.getEventType();
+            final RequestState requestState = eventRecord.getRequestState();
             if (future == null) {
                 LOGGER.warn("Request id " + eventRecord.getRequestId() + " is not registered");
-            } else if (RequestEvent.PENDING.equals(eventType)) {
+            } else if (RequestState.PENDING.equals(requestState)) {
                 callbackHandler.post(new RequestPendingRunnable(future));
-            } else if (RequestEvent.EXECUTING.equals(eventType)) {
+            } else if (RequestState.EXECUTING.equals(requestState)) {
                 callbackHandler.post(new RequestExecutingRunnable(future));
-            } else if (RequestEvent.FINISHED.equals(eventType)) {
+            } else if (RequestState.FINISHED.equals(requestState)) {
                 callbackHandler.post(new RequestFinishedRunnable(future, eventRecord, this));
             }
         }
     }
 
-    private static class RequestEventRecordWorker implements WorkQueue.Worker<RequestEventRecord> {
+    private static class RequestEventRecordWorker implements WorkerQueue.Worker<RequestEventRecord> {
 
         private RestfulClientImpl client;
 
