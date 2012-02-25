@@ -13,20 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.config;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
-import getrest.android.resource.ResourceContext;
-import getrest.android.service.Representation;
-
-public interface RequestContext {
-
-    ResourceContext getResourceContext();
-
-    Packer getPacker();
-
-    <T> Marshaller<T, Representation> getMarshaller();
-
-    RequestController getRequestController();
+public interface ConfigContributor {
 }

@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.testapp;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
-import getrest.android.resource.ResourceContext;
-import getrest.android.service.Representation;
+import android.app.Application;
+import getrest.android.config.Config;
+import getrest.android.config.HasConfig;
 
-public interface RequestContext {
+public class GetrestTestApplication extends Application implements HasConfig {
 
-    ResourceContext getResourceContext();
+    public Config getGetrestConfig() {
+        return new Config().configure("http://10.0.0.22");
+    }
 
-    Packer getPacker();
-
-    <T> Marshaller<T, Representation> getMarshaller();
-
-    RequestController getRequestController();
 }

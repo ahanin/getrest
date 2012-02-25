@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.config;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
-import getrest.android.resource.ResourceContext;
-import getrest.android.service.Representation;
+import org.junit.Test;
 
-public interface RequestContext {
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
 
-    ResourceContext getResourceContext();
+public class ResourceNodeTest {
 
-    Packer getPacker();
+    @Test
+    public void testShouldSupportAsteriskWildcard() throws Exception {
+        final ResourceNode node = new ResourceNode("http*");
+        assertThat(node.matches("https"), equalTo(true));
+    }
 
-    <T> Marshaller<T, Representation> getMarshaller();
+    @Test
+    public void testShouldSupportQuestionMarkWildcard() throws Exception {
+        final ResourceNode node = new ResourceNode("h??p");
+        assertThat(node.matches("http"), equalTo(true));
+    }
 
-    RequestController getRequestController();
 }
