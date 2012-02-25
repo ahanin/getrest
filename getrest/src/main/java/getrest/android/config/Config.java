@@ -44,14 +44,15 @@ public class Config {
         final String scheme = uri.getScheme();
         final List<String> pathSegments = uri.getPathSegments();
 
-        final ArrayList<String> patternNodes = new ArrayList<String>(pathSegments.size() + 1);
+        final ArrayList<String> patternNodes = new ArrayList<String>(pathSegments.size() + 2);
         patternNodes.add(scheme);
+        patternNodes.add(uri.getAuthority());
         patternNodes.addAll(patternNodes);
 
         ResourceNode currentNode = root;
         for (String patternNode : patternNodes) {
             final ResourceNode existingNode = root.findChild(patternNode);
-            currentNode = existingNode != null ? existingNode : new ResourceNode(patternNode);
+            currentNode = existingNode != null ? existingNode : currentNode.addChild(patternNode);
         }
 
         return currentNode;

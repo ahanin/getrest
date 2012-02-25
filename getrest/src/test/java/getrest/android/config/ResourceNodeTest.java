@@ -18,6 +18,7 @@ package getrest.android.config;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 public class ResourceNodeTest {
@@ -32,6 +33,14 @@ public class ResourceNodeTest {
     public void testShouldSupportQuestionMarkWildcard() throws Exception {
         final ResourceNode node = new ResourceNode("h??p");
         assertThat(node.matches("http"), equalTo(true));
+    }
+
+    @Test
+    public void testShouldMatchChild() throws Exception {
+        final ResourceNode node = new ResourceNode();
+        final ResourceNode child = node.addChild("h??p");
+
+        assertThat(node.matchChild("http"), sameInstance(child));
     }
 
 }

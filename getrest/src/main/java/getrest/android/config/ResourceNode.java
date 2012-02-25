@@ -23,11 +23,13 @@ import java.util.regex.Pattern;
 
 class ResourceNode {
 
-    private Map<String, ResourceNode> childMap = new HashMap<String, ResourceNode>();
+    private static final Pattern SPLIT_PATTERN = Pattern.compile("[\\*\\?]");
+
+    private String patternNode;
 
     private Pattern pattern;
 
-    private static final Pattern SPLIT_PATTERN = Pattern.compile("[\\*\\?]");
+    private Map<String, ResourceNode> childMap = new HashMap<String, ResourceNode>();
 
     /**
      * Constructs root node.
@@ -35,8 +37,9 @@ class ResourceNode {
     ResourceNode() {
     }
 
-    ResourceNode(final String pattern) {
-        this.pattern = toPattern(pattern);
+    ResourceNode(final String patternNode) {
+        this.patternNode = patternNode;
+        this.pattern = toPattern(this.patternNode);
     }
 
     private Pattern toPattern(final String pattern) {
@@ -99,4 +102,14 @@ class ResourceNode {
         return pattern.matcher(node).matches();
     }
 
+    public ResourceNode addChild(final String patternNode) {
+        final ResourceNode child = new ResourceNode(patternNode);
+        childMap.put(patternNode, child);
+        return child;
+    }
+
+    @Override
+    public String toString() {
+        return "ResourceNode{" + patternNode + '}';
+    }
 }

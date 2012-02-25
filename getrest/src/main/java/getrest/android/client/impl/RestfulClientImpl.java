@@ -27,6 +27,8 @@ import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
 import getrest.android.client.RequestStore;
+import getrest.android.config.Config;
+import getrest.android.config.ConfigResolver;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
 import getrest.android.request.Method;
@@ -55,6 +57,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RestfulClientImpl extends RestfulClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
+
+    private Config config;
 
     private String serviceId;
 
@@ -173,10 +177,13 @@ public class RestfulClientImpl extends RestfulClient {
     }
 
     protected final void init(Context context) {
+        this.config = ConfigResolver.getInstance().obtainConfig(context);
+
         this.androidContext = context;
         this.requestEventReceiver = new RequestEventBroadcastReceiver(this);
 
-        context.registerReceiver(requestEventReceiver, new IntentFilter(RequestEventBus.Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
+        context.registerReceiver(requestEventReceiver,
+                new IntentFilter(RequestEventBus.Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
     }
 
     @Override
