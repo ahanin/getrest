@@ -63,7 +63,7 @@ public class RestfulClientImpl extends RestfulClient {
 
     private RequestEventBroadcastReceiver requestEventReceiver;
 
-    private Handler callbackHandler;
+    private Handler callbackHandler = new Handler();
 
     private final Map<String, RequestFutureImpl> futureMap = new ConcurrentHashMap<String, RequestFutureImpl>();
 

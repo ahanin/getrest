@@ -57,8 +57,6 @@ public class MainActivity extends Activity {
 
             }
         });
-        // TODO use new Handler() instance by default (move to RestfulClient)
-        restfulClient.setCallbackHandler(new Handler());
         restfulClient.replay();
     }
 

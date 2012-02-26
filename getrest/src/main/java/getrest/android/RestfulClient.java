@@ -18,7 +18,6 @@ package getrest.android;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
@@ -99,6 +98,12 @@ public abstract class RestfulClient {
         return requestCallbackFactory;
     }
 
+    /**
+     * Set {@link Handler} in which request callbacks will be executed. Default behaviour is the callback of thread in
+     * which client has been created.
+     *
+     * @param callbackHandler {@link Handler} instance to be used to execute callbacks
+     */
     public abstract void setCallbackHandler(Handler callbackHandler);
 
     public abstract void replay();
