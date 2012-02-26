@@ -17,6 +17,7 @@ package getrest.android.resource;
 
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
+import getrest.android.request.Handler;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestController;
@@ -40,5 +41,7 @@ public interface ResourceContext {
     ServiceRequestExecutor getServiceRequestExecutor();
 
     RequestController getRequestController();
+
+    Handler getRequestHandler(Request request);
 
 }

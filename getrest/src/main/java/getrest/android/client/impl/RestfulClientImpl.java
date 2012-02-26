@@ -41,7 +41,6 @@ import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestStateChangeEventWrapper;
 import getrest.android.service.RequestWrapper;
 import getrest.android.service.RestService;
-import getrest.android.service.ServiceContext;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 import getrest.android.util.WorkerQueue;
@@ -60,8 +59,6 @@ public class RestfulClientImpl extends RestfulClient {
 
     private Config config;
 
-    private String serviceId;
-
     private Context androidContext;
 
     private RequestEventBroadcastReceiver requestEventReceiver;
@@ -79,10 +76,6 @@ public class RestfulClientImpl extends RestfulClient {
     private final AtomicReference<RequestStore> requestStore = new AtomicReference<RequestStore>();
 
     private boolean isStarted;
-
-    protected final void setServiceId(final String serviceId) {
-        this.serviceId = serviceId;
-    }
 
     @Override
     public void setCallbackHandler(final Handler callbackHandler) {
@@ -110,9 +103,7 @@ public class RestfulClientImpl extends RestfulClient {
 
         LOGGER.debug("POST: requestId={0}, url={1}, entity={2}", requestId, url, entity);
 
-        final ServiceContext serviceContext = ServiceContext.forServiceId(serviceId);
-
-        final ResourceContext resourceContext = serviceContext.getResourceContext(url, Method.POST);
+        final ResourceContext resourceContext = config.getResourceContext(url);
         final Packer packer = resourceContext.getPacker();
         final Pack<T> pack = packer.pack(entity);
 

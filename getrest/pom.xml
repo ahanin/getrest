@@ -31,7 +31,6 @@
         <jsr311-api.version>1.1.1</jsr311-api.version>
         <restlet.version>2.0.10</restlet.version>
         <jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
-        <robolectric.version>1.0</robolectric.version>
         <mockito.version>1.8.5</mockito.version>
     </properties>
 
@@ -46,16 +45,6 @@
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

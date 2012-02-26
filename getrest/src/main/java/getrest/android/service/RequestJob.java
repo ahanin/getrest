@@ -32,10 +32,16 @@ public class RequestJob implements Runnable {
 
     private Request request;
 
+    private RequestContext requestContext;
+
     private RequestEventBus requestEventBus;
 
     public RequestJob(final Request request) {
         this.request = request;
+    }
+
+    public void setRequestContext(final RequestContext requestContext) {
+        this.requestContext = requestContext;
     }
 
     public void setRequestEventBus(final RequestEventBus requestEventBus) {
@@ -49,11 +55,7 @@ public class RequestJob implements Runnable {
         final Response response = new Response();
         response.setRequest(request);
 
-        final ServiceContext serviceContext = ServiceContext.forRequest(request);
-        final RequestContext requestContext = serviceContext.getRequestContext(request);
-
-        final Handler requestHandler = serviceContext.getRequestHandler(request);
-
+        final Handler requestHandler = requestContext.getResourceContext().getRequestHandler(request);
         final RequestController requestController = requestContext.getRequestController();
         requestController.beginRequest(requestId);
 

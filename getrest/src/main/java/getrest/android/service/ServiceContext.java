@@ -45,6 +45,8 @@ import java.io.InputStream;
  * @author aha
  * @since 2012-01-16
  */
+// TODO remove
+@Deprecated
 public abstract class ServiceContext {
 
     // temporary solution
@@ -103,11 +105,6 @@ public abstract class ServiceContext {
      */
     public static ServiceContext forRequest(final Request request) {
         // TODO return ServiceContext based on request attributes
-        return new ServiceContextImpl();
-    }
-
-    public static ServiceContext forServiceId(final String serviceId) {
-        // TODO return ServiceContext based on service id
         return new ServiceContextImpl();
     }
 
