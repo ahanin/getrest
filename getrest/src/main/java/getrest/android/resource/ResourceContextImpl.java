@@ -34,9 +34,9 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
     private RequestHandlerFactory requestHandlerFactory;
 
     public RequestContext getRequestContext(Request request) {
-        // TODO return new RequestContext associated with ResourceContext 
         final DefaultRequestContext requestContext = new DefaultRequestContext();
         requestContext.setPacker(packer);
+        requestContext.setMarshaller(marshaller);
         requestContext.setResourceContext(this);
         return requestContext;
     }
