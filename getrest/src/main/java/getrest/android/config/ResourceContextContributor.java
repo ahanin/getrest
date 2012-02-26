@@ -15,5 +15,6 @@
  */
 package getrest.android.config;
 
-public interface ConfigContributor {
+public interface ResourceContextContributor {
+    void contribute(ResourceContextContribution contribution);
 }

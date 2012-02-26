@@ -29,6 +29,10 @@ public class Config {
 
     private ResourceNode root = new ResourceNode();
 
+    {
+        root.configure(new DefaultContributor(this));
+    }
+
     private final Map<ResourcePath, ResourceContext> contextCache = new LinkedHashMap<ResourcePath, ResourceContext>() {
         @Override
         protected boolean removeEldestEntry(final Map.Entry<ResourcePath, ResourceContext> eldest) {
@@ -50,13 +54,13 @@ public class Config {
 
     /**
      * Configure resource settings. Resource settings takes precedence over global settings configured by
-     * {@link #configure(ConfigContributor...)}
+     * {@link #configure(ResourceContextContributor...)}
      *
      * @param uriPattern   resource url pattern
      * @param contributors configuration settings contributors
      * @return configuration object for further access
      */
-    public Config configure(final String uriPattern, ConfigContributor... contributors) {
+    public Config configure(final String uriPattern, ResourceContextContributor... contributors) {
         final ResourceNode resourceNode = obtainConfigNode(uriPattern);
         resourceNode.configure(contributors);
         return this;
@@ -97,7 +101,7 @@ public class Config {
      * @param contributors configuration settings contributors
      * @return configuration object for further access
      */
-    public Config configure(ConfigContributor... contributors) {
+    public Config configure(ResourceContextContributor... contributors) {
         root.configure(contributors);
         return this;
     }
@@ -142,7 +146,7 @@ public class Config {
     private ResourceContext createResourceContext(final ResourcePath resourcePath) {
         final ResourceContextImpl resourceContext = new ResourceContextImpl();
         for (ResourceNode resourceNode : resourcePath) {
-            // TODO resourceContext to consume each node contribution
+            resourceNode.contribute(resourceContext);
         }
         return resourceContext;
     }

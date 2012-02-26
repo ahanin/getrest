@@ -31,6 +31,8 @@ class ResourceNode {
 
     private Map<String, ResourceNode> childMap = new HashMap<String, ResourceNode>();
 
+    private ResourceContextContributor[] contributors = new ResourceContextContributor[0];
+
     /**
      * Constructs root node.
      */
@@ -73,8 +75,9 @@ class ResourceNode {
         return Pattern.compile(sb.toString());
     }
 
-    public void configure(final ConfigContributor[] contributors) {
-        // TODO process contributors
+    public void configure(final ResourceContextContributor... contributors) {
+        this.contributors = new ResourceContextContributor[contributors.length];
+        System.arraycopy(contributors, 0, this.contributors, 0, this.contributors.length);
     }
 
     public ResourceNode findChild(final String patternNode) {
@@ -112,4 +115,11 @@ class ResourceNode {
     public String toString() {
         return "ResourceNode{" + patternNode + '}';
     }
+
+    public void contribute(final ResourceContextContribution contribution) {
+        for (ResourceContextContributor contributor : contributors) {
+            contributor.contribute(contribution);
+        }
+    }
+
 }

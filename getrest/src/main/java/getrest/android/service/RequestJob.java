@@ -16,6 +16,7 @@
 
 package getrest.android.service;
 
+import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.request.Handler;
 import getrest.android.request.HandlerException;
 import getrest.android.request.Request;
@@ -23,6 +24,7 @@ import getrest.android.request.RequestContext;
 import getrest.android.request.RequestController;
 import getrest.android.request.Response;
 import getrest.android.request.Status;
+import getrest.android.resource.ResourceContext;
 
 /**
  * @author aha
@@ -55,7 +57,9 @@ public class RequestJob implements Runnable {
         final Response response = new Response();
         response.setRequest(request);
 
-        final Handler requestHandler = requestContext.getResourceContext().getRequestHandler(request);
+        final ResourceContext resourceContext = requestContext.getResourceContext();
+        final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
+        final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
         final RequestController requestController = requestContext.getRequestController();
         requestController.beginRequest(requestId);
 

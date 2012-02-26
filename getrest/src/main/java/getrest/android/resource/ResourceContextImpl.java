@@ -15,23 +15,23 @@
  */
 package getrest.android.resource;
 
+import getrest.android.config.ResourceContextContribution;
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
-import getrest.android.executor.RequestHandler;
-import getrest.android.request.Handler;
+import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestController;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequestExecutor;
 
-public class ResourceContextImpl implements ResourceContext {
+public class ResourceContextImpl implements ResourceContext, ResourceContextContribution {
 
     private Packer packer;
     private Marshaller marshaller;
     private RequestController requestController;
     private ServiceRequestExecutor serviceRequestExecutor;
-    private RequestHandler requestHandler;
+    private RequestHandlerFactory requestHandlerFactory;
 
     public RequestContext getRequestContext(Request request) {
         // TODO return new RequestContext associated with ResourceContext 
@@ -73,12 +73,12 @@ public class ResourceContextImpl implements ResourceContext {
         return this.requestController;
     }
 
-    public void setRequestHandler(final RequestHandler requestHandler) {
-        this.requestHandler = requestHandler;
+    public void setRequestHandlerFactory(final RequestHandlerFactory requestHandler) {
+        this.requestHandlerFactory = requestHandler;
     }
 
-    public Handler getRequestHandler(final Request request) {
-        return requestHandler;
+    public RequestHandlerFactory getRequestHandlerFactory() {
+        return requestHandlerFactory;
     }
 
     /**
