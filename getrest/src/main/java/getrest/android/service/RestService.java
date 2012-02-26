@@ -19,6 +19,8 @@ package getrest.android.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import getrest.android.config.Config;
+import getrest.android.config.ConfigResolver;
 import getrest.android.request.Request;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
@@ -47,6 +49,7 @@ public class RestService extends Service implements Broadcaster {
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
+        final Config config = ConfigResolver.getInstance().obtainConfig(this);
         final Request request = new RequestWrapper(intent).getRequest();
 
         LOGGER.debug("Received request: requestId={0}, url={1}, method={2}. Submitting it to queue.",
@@ -59,6 +62,7 @@ public class RestService extends Service implements Broadcaster {
             eventBus.firePending(request.getRequestId());
 
             final RequestJob job = new RequestJob(request);
+            job.setRequestContext(config.getResourceContext(request.getUri()).getRequestContext(request));
             job.setRequestEventBus(eventBus);
 
             jobExecutorService.submit(job);
