@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package getrest.android.resource;
 
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
 import getrest.android.executor.RequestHandlerFactory;
-import getrest.android.request.Handler;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
-import getrest.android.request.RequestController;
+import getrest.android.request.RequestManager;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequestExecutor;
 
@@ -39,10 +39,14 @@ public interface ResourceContext {
 
     <T> Marshaller<T, Representation> getMarshaller();
 
+    /**
+     * @return
+     * @deprecated TODO remove and encapsulate in {@link getrest.android.executor.RequestHandler} instead
+     */
     ServiceRequestExecutor getServiceRequestExecutor();
 
-    RequestController getRequestController();
-
     RequestHandlerFactory getRequestHandlerFactory();
+
+    RequestManager getRequestManager();
 
 }

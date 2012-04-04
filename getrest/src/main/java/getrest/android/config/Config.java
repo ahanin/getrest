@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package getrest.android.config;
 
 import android.net.Uri;
@@ -152,6 +153,7 @@ public class Config {
     }
 
     private String toResourceKey(final Uri uri) {
+        // TODO enhance key
         return new StringBuffer().append(uri.getScheme()).append("://").append(uri.getAuthority())
                 .toString();
     }

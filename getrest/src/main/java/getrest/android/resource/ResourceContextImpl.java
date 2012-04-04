@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package getrest.android.resource;
 
 import getrest.android.config.ResourceContextContribution;
@@ -21,7 +22,7 @@ import getrest.android.entity.Packer;
 import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
-import getrest.android.request.RequestController;
+import getrest.android.request.RequestManager;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequestExecutor;
 
@@ -29,9 +30,9 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
 
     private Packer packer;
     private Marshaller marshaller;
-    private RequestController requestController;
     private ServiceRequestExecutor serviceRequestExecutor;
     private RequestHandlerFactory requestHandlerFactory;
+    private RequestManager requestManager;
 
     public RequestContext getRequestContext(Request request) {
         final DefaultRequestContext requestContext = new DefaultRequestContext();
@@ -65,20 +66,20 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
         return this.serviceRequestExecutor;
     }
 
-    public void setRequestController(final RequestController requestController) {
-        this.requestController = requestController;
-    }
-
-    public RequestController getRequestController() {
-        return this.requestController;
-    }
-
     public void setRequestHandlerFactory(final RequestHandlerFactory requestHandler) {
         this.requestHandlerFactory = requestHandler;
     }
 
     public RequestHandlerFactory getRequestHandlerFactory() {
         return requestHandlerFactory;
+    }
+
+    public void setRequestManager(final RequestManager requestManager) {
+        this.requestManager = requestManager;
+    }
+
+    public RequestManager getRequestManager() {
+        return requestManager;
     }
 
     /**
@@ -115,8 +116,8 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
             return this.marshaller;
         }
 
-        public RequestController getRequestController() {
-            return resourceContext.getRequestController();
+        public RequestManager getRequestManager() {
+            return resourceContext.getRequestManager();
         }
     }
 

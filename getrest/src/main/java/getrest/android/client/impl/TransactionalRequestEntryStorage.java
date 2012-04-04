@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.client.impl;
 
-public interface RequestController {
+import getrest.android.client.RequestRegistry;
 
-    void prepareRequest(Request request);
+import java.util.Map;
+import java.util.Set;
 
-    void beginRequest(String requestId);
+public interface TransactionalRequestEntryStorage {
 
-    void endRequest(Response response);
+    void commitChanges(Set<String> removedIds, Map<String, RequestRegistry.Entry> newEntries);
 
 }

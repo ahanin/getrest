@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package getrest.android.request;
 
 import getrest.android.entity.Marshaller;
@@ -28,5 +29,6 @@ public interface RequestContext {
 
     <T> Marshaller<T, Representation> getMarshaller();
 
-    RequestController getRequestController();
+    RequestManager getRequestManager();
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package getrest.android.client.impl;
 
 import android.app.Activity;
@@ -26,14 +27,14 @@ import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
-import getrest.android.client.RequestStore;
+import getrest.android.client.RequestRegistry;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
 import getrest.android.request.Method;
 import getrest.android.request.Request;
-import getrest.android.request.RequestController;
+import getrest.android.request.RequestManager;
 import getrest.android.request.RequestState;
 import getrest.android.request.Response;
 import getrest.android.resource.ResourceContext;
@@ -45,7 +46,6 @@ import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 import getrest.android.util.WorkerQueue;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -67,13 +67,11 @@ public class RestfulClientImpl extends RestfulClient {
 
     private final Map<String, RequestFutureImpl> futureMap = new ConcurrentHashMap<String, RequestFutureImpl>();
 
-    private final Set<String> replayedRequestIds = new HashSet<String>();
-
     private final WorkerQueue<RequestEventRecord> eventQueue = new WorkerQueue<RequestEventRecord>(
             new LinkedList<RequestEventRecord>(),
             new RequestEventRecordWorker(this), 5);
 
-    private final AtomicReference<RequestStore> requestStore = new AtomicReference<RequestStore>();
+    private final AtomicReference<RequestRegistry> requestRegistry = new AtomicReference<RequestRegistry>();
 
     private boolean isStarted;
 
@@ -82,6 +80,15 @@ public class RestfulClientImpl extends RestfulClient {
         this.callbackHandler = callbackHandler;
     }
 
+    /**
+     * Return {@link RequestFuture}. Unless client is started by calling {@link #replay()}, this method will return
+     * futures for currently executing requests, otherwise new synthetic future will be created and will be updated
+     * once the client is started.
+     *
+     * @param requestId request id
+     * @return {@link RequestFuture} for currently executing requests
+     */
+    @Override
     public RequestFuture getRequestFuture(String requestId) {
         final RequestFuture future;
         if (isStarted) {
@@ -93,22 +100,31 @@ public class RestfulClientImpl extends RestfulClient {
     }
 
     private RequestFuture obtainStoredRequestFuture(final String requestId) {
-        // TODO obtain Request instance for previously stored ids
-        throw new UnsupportedOperationException();
+        final RequestRegistry requestRegistry = getRequestRegistry();
+        final RequestRegistry.Entry entry = requestRegistry.getEntry(requestId);
+        if (entry == null) {
+            throw new IllegalStateException("Request is not registered: " + requestId);
+        }
+
+        final ResourceContext resourceContext = config.getResourceContext(entry.getResourceUri());
+        final RequestManager requestManager = resourceContext.getRequestManager();
+        final Request request = requestManager.getRequest(requestId);
+
+        return obtainRequestFuture(request);
     }
 
     @Override
-    public <T> RequestFuture post(Uri url, T entity) {
+    public <T> RequestFuture post(Uri uri, T entity) {
         final String requestId = nextRequestId();
 
-        LOGGER.debug("POST: requestId={0}, url={1}, entity={2}", requestId, url, entity);
+        LOGGER.debug("POST: requestId={0}, uri={1}, entity={2}", requestId, uri, entity);
 
-        final ResourceContext resourceContext = config.getResourceContext(url);
+        final ResourceContext resourceContext = config.getResourceContext(uri);
         final Packer packer = resourceContext.getPacker();
         final Pack<T> pack = packer.pack(entity);
 
         final Request request = new Request();
-        request.setUri(url);
+        request.setUri(uri);
         request.setMethod(Method.POST);
         request.setEntity(pack);
         request.setRequestId(requestId);
@@ -119,33 +135,37 @@ public class RestfulClientImpl extends RestfulClient {
         final RequestWrapper wrapper = new RequestWrapper(new Intent(androidContext, RestService.class));
         wrapper.setRequest(request);
 
-        final RequestController requestController = resourceContext.getRequestController();
-        requestController.prepareRequest(request);
+        final RequestManager requestManager = resourceContext.getRequestManager();
+        requestManager.saveRequest(request);
 
-        getRequestStore().put(requestId);
+        RequestRegistry.Editor editor = getRequestRegistry().edit();
+        editor.put(request);
+        editor.commit();
 
-        final RequestFutureImpl requestFuture = obtainRequestFuture(requestId, request);
+        final RequestFutureImpl requestFuture = obtainRequestFuture(request);
 
         androidContext.startService(wrapper.asIntent());
 
         return requestFuture;
     }
 
-    private RequestStore getRequestStore() {
-        if (requestStore.get() == null) {
-            synchronized (requestStore) {
-                if (requestStore.get() == null) {
+    private RequestRegistry getRequestRegistry() {
+        if (requestRegistry.get() == null) {
+            synchronized (requestRegistry) {
+                if (requestRegistry.get() == null) {
                     if (!(androidContext instanceof Activity)) {
                         throw new IllegalStateException("Context must be an Activity");
                     }
-                    requestStore.set(new RequestStorePreferencesImpl((Activity) androidContext));
+                    requestRegistry.set(new RequestRegistryPreferencesImpl((Activity) androidContext));
                 }
             }
         }
-        return requestStore.get();
+        return requestRegistry.get();
     }
 
-    private RequestFutureImpl obtainRequestFuture(final String requestId, final Request request) {
+    private RequestFutureImpl obtainRequestFuture(final Request request) {
+        final String requestId = request.getRequestId();
+
         final RequestFutureImpl requestFuture = new RequestFutureImpl();
         requestFuture.setRequestId(requestId);
         requestFuture.setRequest(request);
@@ -161,6 +181,20 @@ public class RestfulClientImpl extends RestfulClient {
         }
 
         return requestFuture;
+    }
+
+    /**
+     * Obtain request future for previously registered request.
+     *
+     * @param entry
+     * @return
+     */
+    private RequestFutureImpl obtainRequestFuture(final RequestRegistry.Entry entry) {
+        final Uri uri = entry.getResourceUri();
+        final ResourceContext resourceContext = config.getResourceContext(uri);
+        final RequestManager requestManager = resourceContext.getRequestManager();
+        final Request request = requestManager.getRequest(entry.getRequestId());
+        return obtainRequestFuture(request);
     }
 
     private String nextRequestId() {
@@ -197,6 +231,16 @@ public class RestfulClientImpl extends RestfulClient {
 
     @Override
     public void replay() {
+        final Set<RequestRegistry.Entry> entries = getRequestRegistry().getEntries();
+        if (futureMap.isEmpty() && !entries.isEmpty()) {
+            for (final RequestRegistry.Entry entry : entries) {
+                obtainRequestFuture(entry);
+            }
+        }
+        start();
+    }
+
+    public void start() {
         eventQueue.start();
         isStarted = true;
     }
@@ -313,7 +357,9 @@ public class RestfulClientImpl extends RestfulClient {
     private void releaseRequest(final String requestId) {
         synchronized (this) {
             futureMap.remove(requestId);
-            getRequestStore().remove(requestId);
+            final RequestRegistry.Editor editor = getRequestRegistry().edit();
+            editor.remove(requestId);
+            editor.commit();
         }
     }
 

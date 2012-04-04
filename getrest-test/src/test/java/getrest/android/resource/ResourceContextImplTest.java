@@ -8,10 +8,9 @@ import getrest.android.entity.Marshaller;
 import getrest.android.entity.Packer;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
-import getrest.android.request.RequestController;
+import getrest.android.request.RequestManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -26,18 +25,18 @@ public class ResourceContextImplTest {
 
         final Marshaller marshaller = mock(Marshaller.class);
         final Packer packer = mock(Packer.class);
-        final RequestController requestController = mock(RequestController.class);
+        final RequestManager requestManager = mock(RequestManager.class);
 
         resourceContext.setMarshaller(marshaller);
         resourceContext.setPacker(packer);
-        resourceContext.setRequestController(requestController);
+        resourceContext.setRequestManager(requestManager);
 
         final Request request = mock(Request.class);
         final RequestContext requestContext = resourceContext.getRequestContext(request);
         
         assertThat(requestContext.getMarshaller(), sameInstance(marshaller));
         assertThat(requestContext.getPacker(), sameInstance(packer));
-        assertThat(requestContext.getRequestController(), sameInstance(requestController));
+        assertThat(requestContext.getRequestManager(), sameInstance(requestManager));
         assertThat((ResourceContextImpl) requestContext.getResourceContext(), sameInstance(resourceContext));
     }
 

@@ -1,5 +1,17 @@
-/**
- * Copyright
+/*
+ * Copyright 2012 Alexey Hanin
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package getrest.android.config;
 
@@ -15,8 +27,9 @@ import getrest.android.executor.RequestHandlerImpl;
 import getrest.android.http.HttpServiceRequestExecutor;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
-import getrest.android.request.RequestController;
 import getrest.android.request.RequestLifecycle;
+import getrest.android.request.RequestManager;
+import getrest.android.request.RequestState;
 import getrest.android.request.Response;
 import getrest.android.resource.ResourceContext;
 import getrest.android.service.Representation;
@@ -39,8 +52,8 @@ public final class DefaultContributor implements ResourceContextContributor {
         contribution.setPacker(new ParcelablePacker());
         contribution.setMarshaller(new TempMarshallerImpl());
         contribution.setServiceRequestExecutor(new HttpServiceRequestExecutor());
-        contribution.setRequestController(new TempRequestController());
         contribution.setRequestHandlerFactory(new TempRequestHandlerFactory(config));
+        contribution.setRequestManager(new TempRequestManager());
     }
 
     private static class ParcelablePack implements Pack<Parcelable> {
@@ -112,23 +125,6 @@ public final class DefaultContributor implements ResourceContextContributor {
         }
     }
 
-    private static class TempRequestController implements RequestController {
-
-        private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
-
-        public void prepareRequest(final Request request) {
-            LOGGER.debug("prepareRequest: {0}", request.getRequestId());
-        }
-
-        public void beginRequest(final String requestId) {
-            LOGGER.debug("beginRequest: {0}", requestId);
-        }
-
-        public void endRequest(final Response response) {
-            LOGGER.debug("endRequest: {0}", response.getRequest().getRequestId());
-        }
-    }
-
     private static class TempRequestHandlerFactory implements RequestHandlerFactory {
 
         private final Config config;
@@ -187,5 +183,33 @@ public final class DefaultContributor implements ResourceContextContributor {
             LOGGER.trace("after unmarshal");
         }
 
+    }
+
+    private class TempRequestManager implements RequestManager {
+
+        public void saveRequest(final Request request) {
+//            // TODO implement persisting of Request
+//            throw new UnsupportedOperationException();
+        }
+
+        public Request getRequest(final String requestId) {
+            // TODO implement loading of Request
+            throw new UnsupportedOperationException();
+        }
+
+        public void saveResponse(final Response response) {
+            // TODO implement saving of Request
+            throw new UnsupportedOperationException();
+        }
+
+        public Response getResponse(final String requestId) {
+            // TODO implement loading of Response
+            throw new UnsupportedOperationException();
+        }
+
+        public void setRequestState(final String requestId, final RequestState state) {
+//            // TODO implement change of RequestState
+//            throw new UnsupportedOperationException();
+        }
     }
 }

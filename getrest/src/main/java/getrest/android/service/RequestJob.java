@@ -21,7 +21,8 @@ import getrest.android.request.Handler;
 import getrest.android.request.HandlerException;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
-import getrest.android.request.RequestController;
+import getrest.android.request.RequestManager;
+import getrest.android.request.RequestState;
 import getrest.android.request.Response;
 import getrest.android.request.Status;
 import getrest.android.resource.ResourceContext;
@@ -60,16 +61,17 @@ public class RequestJob implements Runnable {
         final ResourceContext resourceContext = requestContext.getResourceContext();
         final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
         final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
-        final RequestController requestController = requestContext.getRequestController();
-        requestController.beginRequest(requestId);
+        final RequestManager requestManager = requestContext.getRequestManager();
+        requestManager.setRequestState(requestId, RequestState.EXECUTING);
 
         try {
             requestHandler.handle(request, response);
+            requestManager.saveResponse(response);
         } catch (HandlerException e) {
             response.setStatus(Status.UNEXPECTED_EXCEPTION);
         } finally {
             requestEventBus.fireFinished(requestId);
-            requestController.endRequest(response);
+            requestManager.setRequestState(requestId, RequestState.FINISHED);
         }
     }
 

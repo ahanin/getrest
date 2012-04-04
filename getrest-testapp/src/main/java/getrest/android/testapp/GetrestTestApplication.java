@@ -22,7 +22,7 @@ import getrest.android.config.HasConfig;
 public class GetrestTestApplication extends Application implements HasConfig {
 
     public Config getGetrestConfig() {
-        return new Config().configure("http://10.0.0.22");
+        return new Config().configure("http://10.0.2.2");
     }
 
 }

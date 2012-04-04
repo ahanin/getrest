@@ -13,9 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.request;
 
-public interface Handler {
-    void handle(Request request, Response response) throws HandlerException;
+public interface RequestManager {
+
+    void saveRequest(Request request);
+
+    Request getRequest(String requestId);
+
+    void saveResponse(Response response);
+
+    Response getResponse(String requestId);
+
+    void setRequestState(String requestId, RequestState state);
+
 }

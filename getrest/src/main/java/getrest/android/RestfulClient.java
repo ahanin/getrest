@@ -106,5 +106,15 @@ public abstract class RestfulClient {
      */
     public abstract void setCallbackHandler(Handler callbackHandler);
 
+    /**
+     * Start the client and replays all unfinished requests.
+     */
     public abstract void replay();
+
+    /**
+     * Start the client.
+     */
+    public abstract void start();
+
+    public abstract RequestFuture getRequestFuture(String requestId);
 }

@@ -31,7 +31,7 @@ public class Response implements Parcelable {
 
     private Uri uri;
     private Pack entity;
-    private boolean isFailed;
+    private boolean isFailed; // TODO remove since obsolete
     private Status status;
 
     public Request getRequest() {
@@ -40,6 +40,14 @@ public class Response implements Parcelable {
 
     public void setRequest(final Request request) {
         this.request = request;
+    }
+
+    public Uri getUri() {
+        return uri;
+    }
+
+    public void setUri(final Uri uri) {
+        this.uri = uri;
     }
 
     public Pack getEntity() {
