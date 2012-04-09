@@ -27,20 +27,10 @@ import getrest.android.entity.Pack;
  */
 public class Response implements Parcelable {
 
-    private Request request;
-
     private Uri uri;
     private Pack entity;
     private boolean isFailed; // TODO remove since obsolete
     private Status status;
-
-    public Request getRequest() {
-        return request;
-    }
-
-    public void setRequest(final Request request) {
-        this.request = request;
-    }
 
     public Uri getUri() {
         return uri;
@@ -81,7 +71,6 @@ public class Response implements Parcelable {
     }
 
     public void writeToParcel(final Parcel parcel, final int flags) {
-        parcel.writeParcelable(request, 0);
         parcel.writeParcelable(entity, 0);
         parcel.writeString(Boolean.toString(isFailed));
     }
@@ -89,7 +78,6 @@ public class Response implements Parcelable {
     public static final Creator<Response> CREATOR = new Creator<Response>() {
         public Response createFromParcel(final Parcel parcel) {
             final Response response = new Response();
-            response.request = parcel.readParcelable(Request.class.getClassLoader());
             response.entity = parcel.readParcelable(Pack.class.getClassLoader());
             response.isFailed = Boolean.valueOf(parcel.readString());
             return response;

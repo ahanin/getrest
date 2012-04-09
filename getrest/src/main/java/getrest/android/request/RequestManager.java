@@ -21,10 +21,12 @@ public interface RequestManager {
 
     Request getRequest(String requestId);
 
-    void saveResponse(Response response);
+    void saveResponse(final String requestId, Response response);
 
     Response getResponse(String requestId);
 
     void setRequestState(String requestId, RequestState state);
+
+    RequestState getRequestState(String requestId);
 
 }

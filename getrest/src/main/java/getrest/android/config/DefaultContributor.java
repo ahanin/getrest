@@ -18,6 +18,7 @@ package getrest.android.config;
 import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
+import getrest.android.client.InMemoryRequestManager;
 import getrest.android.entity.Marshaller;
 import getrest.android.entity.Pack;
 import getrest.android.entity.Packer;
@@ -28,9 +29,6 @@ import getrest.android.http.HttpServiceRequestExecutor;
 import getrest.android.request.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.request.RequestManager;
-import getrest.android.request.RequestState;
-import getrest.android.request.Response;
 import getrest.android.resource.ResourceContext;
 import getrest.android.service.Representation;
 import getrest.android.util.Logger;
@@ -52,7 +50,7 @@ public final class DefaultContributor implements ResourceContextContributor {
         contribution.setPacker(new ParcelablePacker());
         contribution.setMarshaller(new TempMarshallerImpl());
         contribution.setRequestHandlerFactory(new HttpRequestHandlerFactory(config));
-        contribution.setRequestManager(new TempRequestManager());
+        contribution.setRequestManager(new InMemoryRequestManager());
     }
 
     private static class ParcelablePack implements Pack<Parcelable> {
@@ -186,31 +184,4 @@ public final class DefaultContributor implements ResourceContextContributor {
 
     }
 
-    private class TempRequestManager implements RequestManager {
-
-        public void saveRequest(final Request request) {
-//            // TODO implement persisting of Request
-//            throw new UnsupportedOperationException();
-        }
-
-        public Request getRequest(final String requestId) {
-            // TODO implement loading of Request
-            throw new UnsupportedOperationException();
-        }
-
-        public void saveResponse(final Response response) {
-            // TODO implement saving of Request
-            throw new UnsupportedOperationException();
-        }
-
-        public Response getResponse(final String requestId) {
-            // TODO implement loading of Response
-            throw new UnsupportedOperationException();
-        }
-
-        public void setRequestState(final String requestId, final RequestState state) {
-//            // TODO implement change of RequestState
-//            throw new UnsupportedOperationException();
-        }
-    }
 }

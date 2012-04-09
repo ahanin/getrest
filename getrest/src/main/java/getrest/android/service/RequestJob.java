@@ -56,8 +56,6 @@ public class RequestJob implements Runnable {
         requestEventBus.fireExecuting(requestId);
 
         final Response response = new Response();
-        response.setRequest(request);
-
         final ResourceContext resourceContext = requestContext.getResourceContext();
         final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
         final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
@@ -66,7 +64,7 @@ public class RequestJob implements Runnable {
 
         try {
             requestHandler.handle(request, response);
-            requestManager.saveResponse(response);
+            requestManager.saveResponse(requestId, response);
         } catch (HandlerException e) {
             response.setStatus(Status.UNEXPECTED_EXCEPTION);
         } finally {
