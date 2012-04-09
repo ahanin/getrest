@@ -30,7 +30,6 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
 
     private Packer packer;
     private Marshaller marshaller;
-    private ServiceRequestExecutor serviceRequestExecutor;
     private RequestHandlerFactory requestHandlerFactory;
     private RequestManager requestManager;
 
@@ -56,14 +55,6 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
 
     public <T> Marshaller<T, Representation> getMarshaller() {
         return this.marshaller;
-    }
-
-    public void setServiceRequestExecutor(final ServiceRequestExecutor serviceRequestExecutor) {
-        this.serviceRequestExecutor = serviceRequestExecutor;
-    }
-
-    public ServiceRequestExecutor getServiceRequestExecutor() {
-        return this.serviceRequestExecutor;
     }
 
     public void setRequestHandlerFactory(final RequestHandlerFactory requestHandler) {

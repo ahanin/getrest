@@ -28,8 +28,6 @@ public interface ResourceContextContribution {
 
     <T> void setMarshaller(Marshaller<T, Representation> marshaller);
 
-    void setServiceRequestExecutor(ServiceRequestExecutor serviceRequestExecutor);
-
     void setRequestHandlerFactory(RequestHandlerFactory requestHandler);
 
     void setRequestManager(RequestManager requestManager);

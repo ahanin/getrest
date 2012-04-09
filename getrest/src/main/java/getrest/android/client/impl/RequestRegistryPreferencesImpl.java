@@ -21,9 +21,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import getrest.android.client.RequestRegistry;
+import getrest.android.util.Logger;
+import getrest.android.util.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,6 +35,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class RequestRegistryPreferencesImpl implements RequestRegistry, TransactionalRequestEntryStorage {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
 
     static final String ENTRIES = "getrest.android.client.impl.RequestRegistryPreferencesImpl.ENTRIES";
 
@@ -83,14 +87,27 @@ public class RequestRegistryPreferencesImpl implements RequestRegistry, Transact
     }
 
     private Set<Entry> unmarshallEntriesToMap(final String preferencesString, final Map<String, Entry> backedMap) {
-        final Set<Entry> entrySet = new HashSet<Entry>();
+        final Set<Entry> entrySet;
+
         final String[] entryStrings = preferencesString.split(",");
+
+        if (entryStrings.length < 1) {
+            return Collections.emptySet();
+        } else {
+            entrySet = new HashSet<Entry>();
+        }
+
         for (String entryString : entryStrings) {
             final String[] parts = entryString.split(":");
-            final String requestId = parts[0];
-            final Uri uri = Uri.parse(Uri.decode(parts[1]));
-            backedMap.put(requestId, new RequestRegistryEntryFactory.EntryImpl(requestId, uri));
+            if (parts.length == 2) {
+                final String requestId = parts[0];
+                final Uri uri = Uri.parse(Uri.decode(parts[1]));
+                backedMap.put(requestId, new RequestRegistryEntryFactory.EntryImpl(requestId, uri));
+            } else {
+                LOGGER.warn("Invalid request registry entry: {}", entryString);
+            }
         }
+
         return entrySet;
     }
 

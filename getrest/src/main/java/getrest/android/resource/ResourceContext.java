@@ -39,12 +39,6 @@ public interface ResourceContext {
 
     <T> Marshaller<T, Representation> getMarshaller();
 
-    /**
-     * @return
-     * @deprecated TODO remove and encapsulate in {@link getrest.android.executor.RequestHandler} instead
-     */
-    ServiceRequestExecutor getServiceRequestExecutor();
-
     RequestHandlerFactory getRequestHandlerFactory();
 
     RequestManager getRequestManager();

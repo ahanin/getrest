@@ -51,8 +51,7 @@ public final class DefaultContributor implements ResourceContextContributor {
     public void contribute(final ResourceContextContribution contribution) {
         contribution.setPacker(new ParcelablePacker());
         contribution.setMarshaller(new TempMarshallerImpl());
-        contribution.setServiceRequestExecutor(new HttpServiceRequestExecutor());
-        contribution.setRequestHandlerFactory(new TempRequestHandlerFactory(config));
+        contribution.setRequestHandlerFactory(new HttpRequestHandlerFactory(config));
         contribution.setRequestManager(new TempRequestManager());
     }
 
@@ -125,11 +124,13 @@ public final class DefaultContributor implements ResourceContextContributor {
         }
     }
 
-    private static class TempRequestHandlerFactory implements RequestHandlerFactory {
+    private static class HttpRequestHandlerFactory implements RequestHandlerFactory {
+
+        private static final HttpServiceRequestExecutor HTTP_EXECUTOR = new HttpServiceRequestExecutor();
 
         private final Config config;
 
-        public TempRequestHandlerFactory(final Config config) {
+        public HttpRequestHandlerFactory(final Config config) {
             this.config = config;
         }
 
@@ -142,7 +143,7 @@ public final class DefaultContributor implements ResourceContextContributor {
             final RequestHandlerImpl requestHandler = new RequestHandlerImpl();
             requestHandler.setRequestContext(requestContext);
             requestHandler.setRequestLifecycle(requestLifecycle);
-            requestHandler.setServiceRequestExecutor(requestContext.getResourceContext().getServiceRequestExecutor());
+            requestHandler.setServiceRequestExecutor(HTTP_EXECUTOR);
 
             return requestHandler;
         }
