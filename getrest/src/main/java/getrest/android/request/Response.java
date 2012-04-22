@@ -71,15 +71,17 @@ public class Response implements Parcelable {
     }
 
     public void writeToParcel(final Parcel parcel, final int flags) {
+        parcel.writeParcelable(uri, 0);
         parcel.writeParcelable(entity, 0);
-        parcel.writeString(Boolean.toString(isFailed));
+        parcel.writeInt(status.getResponseCode());
     }
 
     public static final Creator<Response> CREATOR = new Creator<Response>() {
         public Response createFromParcel(final Parcel parcel) {
             final Response response = new Response();
+            response.uri = parcel.readParcelable(Uri.class.getClassLoader());
             response.entity = parcel.readParcelable(Pack.class.getClassLoader());
-            response.isFailed = Boolean.valueOf(parcel.readString());
+            response.status = Status.forResponseCode(parcel.readInt());
             return response;
         }
 

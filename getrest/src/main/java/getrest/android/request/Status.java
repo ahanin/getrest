@@ -16,20 +16,45 @@
 
 package getrest.android.request;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Status {
 
-    private int statusCode;
+    private int responseCode;
     private String name;
 
-    public static final Status UNEXPECTED_EXCEPTION = new Status(-1, "Unexpected exception");
+    private static final Map<Integer, Status> CACHE = new HashMap<Integer, Status>();
 
-    public Status(final int statusCode, final String name) {
-        this.statusCode = statusCode;
+    public static final Status UNEXPECTED_EXCEPTION = Status.create(-1, "Unexpected exception");
+
+    private static Status create(final int statusCode, final String message) {
+        if (CACHE.containsKey(statusCode)) {
+            throw new IllegalStateException("Status with code '" + statusCode + "' is already defined.");
+        }
+        final Status status = new Status(statusCode, message);
+        CACHE.put(statusCode, status);
+        return status;
+    }
+
+    private Status(final int responseCode, final String name) {
+        this.responseCode = responseCode;
         this.name = name;
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    public static Status forResponseCode(final int statusCode) {
+        if (!CACHE.containsKey(statusCode)) {
+            synchronized (CACHE) {
+                if (!CACHE.containsKey(statusCode)) {
+                    return create(statusCode, "STATUS: " + statusCode);
+                }
+            }
+        }
+        return CACHE.get(statusCode);
+    }
+
+    public int getResponseCode() {
+        return responseCode;
     }
 
     public String getName() {
@@ -43,13 +68,13 @@ public class Status {
 
         final Status status = (Status) o;
 
-        if (statusCode != status.statusCode) return false;
+        if (responseCode != status.responseCode) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return statusCode;
+        return responseCode;
     }
 }
