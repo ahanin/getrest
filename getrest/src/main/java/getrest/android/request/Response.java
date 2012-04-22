@@ -29,7 +29,6 @@ public class Response implements Parcelable {
 
     private Uri uri;
     private Pack entity;
-    private boolean isFailed; // TODO remove since obsolete
     private Status status;
 
     public Uri getUri() {
@@ -46,24 +45,6 @@ public class Response implements Parcelable {
 
     public void setEntity(final Pack entity) {
         this.entity = entity;
-    }
-
-    /**
-     * Tells if communication error occurred during the request execution.
-     *
-     * @return
-     */
-    public boolean isFailed() {
-        return isFailed;
-    }
-
-    /**
-     * Set failure flag.
-     *
-     * @param isFailed flag that says if unexpected problem has occurred and prevented request from execution
-     */
-    public void setFailed(final boolean isFailed) {
-        this.isFailed = isFailed;
     }
 
     public int describeContents() {
