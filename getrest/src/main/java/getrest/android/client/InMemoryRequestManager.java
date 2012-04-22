@@ -19,67 +19,177 @@ import getrest.android.request.Request;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestState;
 import getrest.android.request.Response;
+import getrest.android.util.Logger;
+import getrest.android.util.LoggerFactory;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryRequestManager implements RequestManager {
 
-    private final Map<String, RequestManagerEntry> backedMap = new ConcurrentHashMap<String, RequestManagerEntry>();
+    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.reqman");
+
+    private final Map<String, RequestState> stateMap = new ConcurrentHashMap<String, RequestState>();
+
+    private final Map<String, WeakValue<Request>> requestMap = new HashMap<String, WeakValue<Request>>();
+    private final Map<String, WeakValue<Response>> responseMap = new HashMap<String, WeakValue<Response>>();
+
+    private final ReferenceQueue<Object> gcQueue = new ReferenceQueue<Object>();
+
+    private final Map<String, CandidateEntry> undeadQueue = new HashMap<String, CandidateEntry>();
+
+    private static final long MAX_UNDEAD_AGE = 30000L;
+
+    private static class WeakValue<T> extends SoftReference<T> {
+
+        private String requestId;
+
+        public WeakValue(String requestId, T referent, ReferenceQueue<? super T> q) {
+            super(referent, q);
+            this.requestId = requestId;
+        }
+
+        public String getRequestId() {
+            return requestId;
+        }
+    }
+
+    private class CleanupWorker implements Runnable {
+        public void run() {
+            while (true) {
+                processQueue();
+                processUndeadQueue();
+                Thread.yield();
+            }
+        }
+    }
+
+    private void processQueue() {
+        try {
+            WeakValue<Object> ref;
+            while ((ref = (WeakValue<Object>) gcQueue.remove()) != null) {
+                final long now = System.currentTimeMillis();
+                synchronized (undeadQueue) {
+                    final Object obj = ref.get();
+                    if (obj instanceof Request) {
+                        final String requestId = ref.getRequestId();
+                        final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
+                        candidateEntry.setRequest((Request) obj);
+                        candidateEntry.setLastAccessedTime(now);
+                    } else if (obj instanceof Response) {
+                        final String requestId = ref.getRequestId();
+                        final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
+                        candidateEntry.setResponse((Response) obj);
+                        candidateEntry.setLastAccessedTime(now);
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Interrupted exception", e);
+        }
+    }
+
+    private void processUndeadQueue() {
+        final long maxUndeadAge = System.currentTimeMillis() - MAX_UNDEAD_AGE;
+        synchronized (undeadQueue) {
+            final Set<String> enqueuedIds = new HashSet<String>();
+            for (Map.Entry<String, CandidateEntry> entry : undeadQueue.entrySet()) {
+                final CandidateEntry candidateEntry = entry.getValue();
+                if (candidateEntry.getLastAccessedTime() < maxUndeadAge) {
+                    enqueuedIds.add(entry.getKey());
+                }
+            }
+
+            if (!enqueuedIds.isEmpty()) {
+                undeadQueue.entrySet().removeAll(enqueuedIds);
+                synchronized (requestMap) {
+                    requestMap.keySet().removeAll(enqueuedIds);
+                }
+                synchronized (responseMap) {
+                    responseMap.keySet().removeAll(enqueuedIds);
+                }
+            }
+        }
+    }
+
+    private CandidateEntry requireCandidateEntry(final String requestId) {
+        final CandidateEntry candidateEntry;
+        synchronized (undeadQueue) {
+            if (!undeadQueue.containsKey(requestId)) {
+                candidateEntry = new CandidateEntry();
+                undeadQueue.put(requestId, candidateEntry);
+            } else {
+                candidateEntry = undeadQueue.get(requestId);
+            }
+        }
+        return candidateEntry;
+    }
+
+    public InMemoryRequestManager() {
+        new Thread(new CleanupWorker()).start();
+    }
 
     public void saveRequest(final Request request) {
         final String requestId = request.getRequestId();
-        synchronized (backedMap) {
-            if (backedMap.containsKey(requestId)) {
+        synchronized (requestMap) {
+            if (stateMap.containsKey(requestId)) {
                 throw new IllegalStateException("Request with id '" + requestId + "' is already registered");
             }
-            backedMap.put(requestId, new RequestManagerEntry(request));
+            requestMap.put(requestId, new WeakValue<Request>(requestId, request, gcQueue));
         }
     }
 
     public Request getRequest(final String requestId) {
-        final RequestManagerEntry entry = backedMap.get(requestId);
-        return entry != null ? entry.getRequest() : null;
+        final WeakValue<Request> entry = requestMap.get(requestId);
+        return entry != null ? entry.get() : null;
     }
 
     public void saveResponse(final String requestId, final Response response) {
-        final RequestManagerEntry entry = backedMap.get(requestId);
-        if (entry == null) {
-            throw new IllegalStateException("Request must be acknowledged prior to response");
+        synchronized (requestMap) {
+            final Request request = getRequest(requestId);
+            if (request == null) {
+                throw new IllegalStateException("Request must be acknowledged prior to response");
+            }
+            responseMap.put(requestId, new WeakValue<Response>(requestId, response, gcQueue));
         }
-        entry.setResponse(response);
     }
 
     public Response getResponse(final String requestId) {
-        final RequestManagerEntry entry = backedMap.get(requestId);
-        return entry == null ? null : entry.getResponse();
+        final WeakValue<Response> entry = responseMap.get(requestId);
+        return entry == null ? null : entry.get();
     }
 
     public void setRequestState(final String requestId, final RequestState state) {
-        final RequestManagerEntry entry = backedMap.get(requestId);
-        if (entry == null) {
-            throw new IllegalStateException("Request must be acknowledged prior to response");
+        synchronized (stateMap) {
+            final Request request = getRequest(requestId);
+            if (request == null) {
+                throw new IllegalStateException("Request must be acknowledged prior to response");
+            }
+            stateMap.put(requestId, state);
         }
-        entry.setRequestState(state);
     }
 
     public RequestState getRequestState(final String requestId) {
-        final RequestManagerEntry entry = backedMap.get(requestId);
-        return entry == null ? null : entry.getRequestState();
+        return stateMap.get(requestId);
     }
 
-    private static class RequestManagerEntry {
+    private class CandidateEntry {
 
         private Request request;
         private Response response;
-        private RequestState requestState;
-
-        public RequestManagerEntry(final Request request) {
-            this.request = request;
-        }
+        private long lastAccessedTime;
 
         public Request getRequest() {
             return request;
+        }
+
+        public void setRequest(final Request request) {
+            this.request = request;
         }
 
         public Response getResponse() {
@@ -90,12 +200,13 @@ public class InMemoryRequestManager implements RequestManager {
             this.response = response;
         }
 
-        public void setRequestState(final RequestState requestState) {
-            this.requestState = requestState;
+        public long getLastAccessedTime() {
+            return lastAccessedTime;
         }
 
-        public RequestState getRequestState() {
-            return requestState;
+        public void setLastAccessedTime(final long lastAccessedTime) {
+            this.lastAccessedTime = lastAccessedTime;
         }
     }
+
 }
