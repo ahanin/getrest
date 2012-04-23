@@ -25,12 +25,13 @@ import getrest.android.entity.Pack;
  * @author aha
  * @since 2012-01-13
  */
-public class Request implements Parcelable {
+public class Request implements HasHeaders, Parcelable {
 
     private String requestId;
     private Uri uri;
     private Method method;
     private Pack entity;
+    private Headers headers = new Headers();
     private long timestamp;
 
     public String getRequestId() {
@@ -73,6 +74,14 @@ public class Request implements Parcelable {
         this.timestamp = timestamp;
     }
 
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public void addHeader(Header header) {
+        this.headers.add(header);
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -82,6 +91,7 @@ public class Request implements Parcelable {
         parcel.writeParcelable(uri, 0);
         parcel.writeInt(method.getId());
         parcel.writeParcelable(entity, 0);
+        parcel.writeParcelable(headers, 0);
         parcel.writeLong(timestamp);
     }
 
@@ -92,6 +102,7 @@ public class Request implements Parcelable {
             request.uri = parcel.readParcelable(Uri.class.getClassLoader());
             request.method = Method.byId(parcel.readByte());
             request.entity = parcel.readParcelable(Pack.class.getClassLoader());
+            request.headers = parcel.readParcelable(Headers.class.getClassLoader());
             request.timestamp = parcel.readLong();
             return request;
         }

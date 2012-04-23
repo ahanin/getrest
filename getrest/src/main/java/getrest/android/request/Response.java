@@ -25,10 +25,11 @@ import getrest.android.entity.Pack;
  * @author aha
  * @since 2012-01-13
  */
-public class Response implements Parcelable {
+public class Response implements Parcelable, HasHeaders {
 
     private Uri uri;
     private Pack entity;
+    private Headers headers = new Headers();
     private Status status;
 
     public Uri getUri() {
@@ -54,6 +55,7 @@ public class Response implements Parcelable {
     public void writeToParcel(final Parcel parcel, final int flags) {
         parcel.writeParcelable(uri, 0);
         parcel.writeParcelable(entity, 0);
+        parcel.writeParcelable(headers, 0);
         parcel.writeInt(status.getResponseCode());
     }
 
@@ -62,6 +64,7 @@ public class Response implements Parcelable {
             final Response response = new Response();
             response.uri = parcel.readParcelable(Uri.class.getClassLoader());
             response.entity = parcel.readParcelable(Pack.class.getClassLoader());
+            response.headers = parcel.readParcelable(Headers.class.getClassLoader());
             response.status = Status.forResponseCode(parcel.readInt());
             return response;
         }
@@ -77,6 +80,14 @@ public class Response implements Parcelable {
 
     public Status getStatus() {
         return status;
+    }
+
+    public Headers getHeaders() {
+        return headers;
+    }
+
+    public void addHeader(final Header header) {
+        headers.add(header);
     }
 
 }
