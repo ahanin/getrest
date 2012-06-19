@@ -15,9 +15,6 @@
  */
 package getrest.android.core;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,11 +22,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Headers implements Iterable<Header>, Parcelable {
 
+public class Headers implements Iterable<Header> {
     private List<Header> headers = new LinkedList<Header>();
+    private Map<String,List<Header>> headerMap = new HashMap<String,List<Header>>();
 
-    private Map<String, List<Header>> headerMap = new HashMap<String, List<Header>>();
+    public Headers() {
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param headers a base for copying
+     */
+    public Headers(final Headers headers) {
+        for (Header header : headers) {
+            add(new Header(header.getName(), header.getValue()));
+        }
+    }
 
     public void add(final Header header) {
         headers.add(header);
@@ -39,12 +49,14 @@ public class Headers implements Iterable<Header>, Parcelable {
     private List<Header> requireHeaderBucket(final String header) {
         final List<Header> bucket;
         final String key = header.toLowerCase();
+
         if (headerMap.containsKey(key)) {
             bucket = headerMap.get(key);
         } else {
             bucket = new LinkedList<Header>();
             headerMap.put(key, bucket);
         }
+
         return bucket;
     }
 
@@ -52,8 +64,10 @@ public class Headers implements Iterable<Header>, Parcelable {
         if (name == null) {
             throw new IllegalArgumentException("Header name cannot be null");
         }
+
         final List<Header> headers = headerMap.get(name.trim().toLowerCase());
-        return headers == null ? null : Collections.unmodifiableList(headers);
+
+        return (headers == null) ? null : Collections.unmodifiableList(headers);
     }
 
     public Iterator<Header> iterator() {
@@ -62,36 +76,5 @@ public class Headers implements Iterable<Header>, Parcelable {
 
     public int count() {
         return headers.size();
-    }
-
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<Headers> CREATOR = new Creator<Headers>() {
-        public Headers createFromParcel(final Parcel parcel) {
-            final Headers headers = new Headers();
-
-            final int count = parcel.readInt();
-            for (int i = 0; i < count; i++) {
-                headers.add(new Header(parcel.readString(), parcel.readString()));
-            }
-
-            return headers;
-        }
-
-        public Headers[] newArray(final int size) {
-            return new Headers[size];
-        }
-    };
-
-    public void writeToParcel(final Parcel dest, final int flags) {
-        dest.writeInt(headers.size());
-        if (!headers.isEmpty()) {
-            for (Header header : headers) {
-                dest.writeString(header.getName());
-                dest.writeString(header.getValue());
-            }
-        }
     }
 }

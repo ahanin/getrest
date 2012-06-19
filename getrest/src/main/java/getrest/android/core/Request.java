@@ -13,49 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.core;
 
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+
 /**
  * @author aha
  * @since 2012-01-13
  */
-public class Request implements HasHeaders, Parcelable {
-
-    private String requestId;
-    private Uri uri;
-    private Method method;
+public class Request extends BaseRequest implements Parcelable {
     private Pack entity;
-    private Headers headers = new Headers();
     private long timestamp;
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(final String requestId) {
-        this.requestId = requestId;
-    }
-
-    public Uri getUri() {
-        return uri;
-    }
-
-    public void setUri(final Uri uri) {
-        this.uri = uri;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public void setMethod(final Method method) {
-        this.method = method;
-    }
 
     public Pack getEntity() {
         return entity;
@@ -73,42 +44,41 @@ public class Request implements HasHeaders, Parcelable {
         this.timestamp = timestamp;
     }
 
-    public Headers getHeaders() {
-        return headers;
-    }
-
-    public void addHeader(Header header) {
-        this.headers.add(header);
-    }
-
     public int describeContents() {
         return 0;
     }
 
     public void writeToParcel(final Parcel parcel, final int i) {
-        parcel.writeString(requestId);
-        parcel.writeParcelable(uri, 0);
-        parcel.writeInt(method.getId());
+        parcel.writeString(getRequestId());
+        parcel.writeParcelable(getUri(), 0);
+        parcel.writeInt(getMethod().getId());
         parcel.writeParcelable(entity, 0);
-        parcel.writeParcelable(headers, 0);
+
+        final Headers headers = getHeaders();
+        HeadersHelper.writeToParcel(parcel, headers);
+
         parcel.writeLong(timestamp);
     }
 
     public static final Creator<Request> CREATOR = new Creator<Request>() {
-        public Request createFromParcel(final Parcel parcel) {
-            final Request request = new Request();
-            request.requestId = parcel.readString();
-            request.uri = parcel.readParcelable(Uri.class.getClassLoader());
-            request.method = Method.byId(parcel.readByte());
-            request.entity = parcel.readParcelable(Pack.class.getClassLoader());
-            request.headers = parcel.readParcelable(Headers.class.getClassLoader());
-            request.timestamp = parcel.readLong();
-            return request;
-        }
+            public Request createFromParcel(final Parcel parcel) {
+                final Request request = new Request();
+                request.setRequestId(parcel.readString());
+                request.setUri((Uri) parcel.readParcelable(
+                        Uri.class.getClassLoader()));
+                request.setMethod(Method.byId(parcel.readByte()));
+                request.entity = parcel.readParcelable(Pack.class.getClassLoader());
 
-        public Request[] newArray(final int i) {
-            return new Request[0];
-        }
-    };
+                HeadersHelper.readFromParcel(parcel, request.getHeaders());
+
+                request.timestamp = parcel.readLong();
+
+                return request;
+            }
+
+            public Request[] newArray(final int i) {
+                return new Request[0];
+            }
+        };
 
 }

@@ -54,7 +54,7 @@ public class Response implements Parcelable, HasHeaders {
     public void writeToParcel(final Parcel parcel, final int flags) {
         parcel.writeParcelable(uri, 0);
         parcel.writeParcelable(entity, 0);
-        parcel.writeParcelable(headers, 0);
+        HeadersHelper.writeToParcel(parcel, headers);
         parcel.writeInt(status.getResponseCode());
     }
 
@@ -63,7 +63,7 @@ public class Response implements Parcelable, HasHeaders {
             final Response response = new Response();
             response.uri = parcel.readParcelable(Uri.class.getClassLoader());
             response.entity = parcel.readParcelable(Pack.class.getClassLoader());
-            response.headers = parcel.readParcelable(Headers.class.getClassLoader());
+            HeadersHelper.readFromParcel(parcel, response.headers);
             response.status = Status.forResponseCode(parcel.readInt());
             return response;
         }

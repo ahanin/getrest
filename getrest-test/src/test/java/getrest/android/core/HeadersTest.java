@@ -15,23 +15,16 @@
  */
 package getrest.android.core;
 
-import android.os.Parcel;
-import com.xtremelabs.robolectric.shadows.ShadowParcel;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-// TODO uncomment when 'testShouldBeParcelable' is not ignored
-//@RunWith(RobolectricTestRunner.class)
-public class HeadersTest {
+import org.junit.Before;
+import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+public class HeadersTest {
     private Headers headers;
 
     @Before
@@ -47,15 +40,17 @@ public class HeadersTest {
     @Test
     public void testShouldAddHeader() throws Exception {
         headers.add(new Header("Accept-Encoding", "gzip"));
-        assertThat(headers.get("Accept-Encoding"), equalTo(Arrays.asList(new Header("Accept-Encoding", "gzip"))));
+        assertThat(headers.get("Accept-Encoding"),
+            equalTo(Arrays.asList(new Header("Accept-Encoding", "gzip"))));
     }
 
     @Test
     public void testShouldAddMultipleHeaders() throws Exception {
         headers.add(new Header("Accept-Encoding", "gzip"));
         headers.add(new Header("Accept-Encoding", "zip"));
-        assertThat(headers.get("Accept-Encoding"), equalTo(Arrays.asList(
-                new Header("Accept-Encoding", "gzip"), new Header("Accept-Encoding", "zip"))));
+        assertThat(headers.get("Accept-Encoding"),
+            equalTo(Arrays.asList(new Header("Accept-Encoding", "gzip"),
+                    new Header("Accept-Encoding", "zip"))));
     }
 
     @Test
@@ -67,27 +62,11 @@ public class HeadersTest {
         headers.add(b);
 
         final ArrayList<Header> iterated = new ArrayList<Header>(2);
+
         for (Header header : headers) {
             iterated.add(header);
         }
 
         assertThat(iterated, equalTo(Arrays.asList(a, b)));
     }
-
-    @Test
-    @Ignore("Parcelable is not fully supported by Robolectric")
-    public void testShouldBeParcelable() throws Exception {
-        final Parcel outgoing = ShadowParcel.obtain();
-        final Headers headers = new Headers();
-        outgoing.writeValue(headers);
-
-        final byte[] bytes = outgoing.marshall();
-
-        final Parcel incoming = ShadowParcel.obtain();
-        incoming.unmarshall(bytes, 0, bytes.length);
-        incoming.setDataPosition(0);
-
-        assertThat(headers, equalTo(incoming.readParcelable(Headers.class.getClassLoader())));
-    }
-
 }

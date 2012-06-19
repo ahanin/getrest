@@ -13,52 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.service;
 
-import android.net.Uri;
-import getrest.android.core.Method;
+import getrest.android.core.BaseRequest;
 import getrest.android.core.Request;
+
 
 /**
  * @author aha
  * @since 2012-01-17
  */
-public class ServiceRequest {
-
-    private String requestId;
-    private Uri uri;
-    private Method method;
+public class ServiceRequest extends BaseRequest {
     private Representation entity;
 
     public ServiceRequest(final Request request) {
-        this.requestId = request.getRequestId();
-        this.uri = request.getUri();
-        this.method = request.getMethod();
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(final String requestId) {
-        this.requestId = requestId;
-    }
-
-    public Uri getUri() {
-        return uri;
-    }
-
-    public void setUri(final Uri uri) {
-        this.uri = uri;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public void setMethod(final Method method) {
-        this.method = method;
+        super(request);
     }
 
     public Representation getEntity() {

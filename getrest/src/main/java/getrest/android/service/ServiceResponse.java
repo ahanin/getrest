@@ -16,6 +16,8 @@
 
 package getrest.android.service;
 
+import getrest.android.core.Headers;
+
 /**
  * @author aha
  * @since 2012-01-17
@@ -24,11 +26,17 @@ public class ServiceResponse {
 
     private Representation entity;
 
+    private Headers headers;
+
     public Representation getEntity() {
         return entity;
     }
 
     public void setEntity(final Representation entity) {
         this.entity = entity;
+    }
+
+    public void setHeaders(final Headers headers) {
+        this.headers = headers;
     }
 }
