@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package getrest.android.request;
+package getrest.android.resource;
 
-public interface Handler {
-    void handle(Request request, Response response) throws HandlerException;
+/**
+ * @author aha
+ * @since 2012-01-17
+ */
+public interface Marshaller<F, T> {
+
+    T marshal(F source);
+
+    F unmarshal(T entity);
+
 }

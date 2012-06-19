@@ -15,10 +15,10 @@
  */
 package getrest.android.client;
 
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 import getrest.android.request.RequestManager;
-import getrest.android.request.RequestState;
-import getrest.android.request.Response;
+import getrest.android.request.RequestStatus;
+import getrest.android.core.Response;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class InMemoryRequestManager implements RequestManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("getrest.reqman");
 
-    private final Map<String, RequestState> stateMap = new ConcurrentHashMap<String, RequestState>();
+    private final Map<String, RequestStatus> stateMap = new ConcurrentHashMap<String, RequestStatus>();
 
     private final Map<String, WeakValue<Request>> requestMap = new HashMap<String, WeakValue<Request>>();
     private final Map<String, WeakValue<Response>> responseMap = new HashMap<String, WeakValue<Response>>();
@@ -164,17 +164,17 @@ public class InMemoryRequestManager implements RequestManager {
         return entry == null ? null : entry.get();
     }
 
-    public void setRequestState(final String requestId, final RequestState state) {
+    public void setRequestState(final String requestId, final RequestStatus status) {
         synchronized (stateMap) {
             final Request request = getRequest(requestId);
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
             }
-            stateMap.put(requestId, state);
+            stateMap.put(requestId, status);
         }
     }
 
-    public RequestState getRequestState(final String requestId) {
+    public RequestStatus getRequestState(final String requestId) {
         return stateMap.get(requestId);
     }
 

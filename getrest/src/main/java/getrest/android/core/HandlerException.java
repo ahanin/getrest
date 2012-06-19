@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package getrest.android.entity;
+package getrest.android.core;
 
-public interface Packer {
-    <T> Pack<T> pack(T object);
+import getrest.android.exception.GetrestException;
+
+public class HandlerException extends GetrestException {
+
+    private static final long serialVersionUID = -7091817046265184580L;
+
+    public HandlerException(final String message) {
+        super(message);
+    }
+
+    public HandlerException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

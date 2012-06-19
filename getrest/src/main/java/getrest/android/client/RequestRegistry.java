@@ -17,7 +17,7 @@
 package getrest.android.client;
 
 import android.net.Uri;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 
 import java.util.Set;
 

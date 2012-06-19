@@ -17,8 +17,8 @@
 package getrest.android.service;
 
 import android.content.Intent;
-import getrest.android.request.RequestState;
-import getrest.android.request.Response;
+import getrest.android.request.RequestStatus;
+import getrest.android.core.Response;
 
 public class RequestStateChangeEventWrapper {
 
@@ -44,24 +44,24 @@ public class RequestStateChangeEventWrapper {
         return intent;
     }
 
-    public void setRequestState(final RequestState requestState) {
-        intent.putExtra(REQUEST_STATE, requestState.getId());
+    public void setRequestState(final RequestStatus requestStatus) {
+        intent.putExtra(REQUEST_STATE, requestStatus.getId());
     }
 
-    public RequestState getRequestState() {
-        return RequestState.byId(intent.getByteExtra(REQUEST_STATE, (byte) -1));
+    public RequestStatus getRequestState() {
+        return RequestStatus.byId(intent.getByteExtra(REQUEST_STATE, (byte) -1));
     }
 
     public void setPending() {
-        setRequestState(RequestState.PENDING);
+        setRequestState(RequestStatus.PENDING);
     }
 
     public void setExecuting() {
-        setRequestState(RequestState.EXECUTING);
+        setRequestState(RequestStatus.EXECUTING);
     }
 
     public void setFinished() {
-        setRequestState(RequestState.FINISHED);
+        setRequestState(RequestStatus.FINISHED);
     }
 
     public void setResponse(Response response) {

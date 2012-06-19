@@ -17,7 +17,7 @@ package getrest.android.client.impl;
 
 import android.net.Uri;
 import getrest.android.client.RequestRegistry;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 
 public class RequestRegistryEntryFactory {
 

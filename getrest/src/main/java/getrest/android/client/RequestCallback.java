@@ -16,8 +16,8 @@
 
 package getrest.android.client;
 
-import getrest.android.request.Request;
-import getrest.android.request.Response;
+import getrest.android.core.Request;
+import getrest.android.core.Response;
 
 public interface RequestCallback {
 

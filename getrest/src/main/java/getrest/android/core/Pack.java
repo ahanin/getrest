@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package getrest.android.entity;
+package getrest.android.core;
 
 import android.os.Parcelable;
 

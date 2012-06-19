@@ -7,15 +7,14 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestFuture;
-import getrest.android.request.Request;
-import getrest.android.request.Response;
+import getrest.android.core.Request;
+import getrest.android.core.Response;
 
 /**
  * @author aha

@@ -16,12 +16,12 @@
 
 package getrest.android.executor;
 
-import getrest.android.request.HandlerException;
-import getrest.android.request.Method;
-import getrest.android.request.Request;
+import getrest.android.core.HandlerException;
+import getrest.android.core.Method;
+import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.request.Response;
+import getrest.android.core.Response;
 import getrest.android.service.ServiceRequestExecutor;
 
 /**

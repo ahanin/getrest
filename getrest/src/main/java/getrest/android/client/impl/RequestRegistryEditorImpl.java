@@ -17,7 +17,7 @@
 package getrest.android.client.impl;
 
 import getrest.android.client.RequestRegistry;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 
 import java.util.HashMap;
 import java.util.HashSet;

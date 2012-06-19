@@ -16,16 +16,16 @@
 
 package getrest.android.request;
 
-public class RequestState {
+public class RequestStatus {
 
-    public static final RequestState PENDING = new RequestState((byte) 1, "PENDING");
-    public static final RequestState EXECUTING = new RequestState((byte) 2, "EXECUTING");
-    public static final RequestState FINISHED = new RequestState((byte) 3, "FINISHED");
+    public static final RequestStatus PENDING = new RequestStatus((byte) 1, "PENDING");
+    public static final RequestStatus EXECUTING = new RequestStatus((byte) 2, "EXECUTING");
+    public static final RequestStatus FINISHED = new RequestStatus((byte) 3, "FINISHED");
 
     private byte id;
     private String name;
 
-    private RequestState(final byte id, final String name) {
+    private RequestStatus(final byte id, final String name) {
         this.name = name;
         this.id = id;
     }
@@ -38,7 +38,7 @@ public class RequestState {
         return name;
     }
 
-    public static RequestState byId(final byte id) {
+    public static RequestStatus byId(final byte id) {
         switch (id) {
             case 1:
                 return PENDING;
@@ -53,7 +53,7 @@ public class RequestState {
 
     @Override
     public String toString() {
-        return "RequestState{" +
+        return "RequestStatus{" +
                 "name='" + name + '\'' +
                 '}';
     }
@@ -63,7 +63,7 @@ public class RequestState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        final RequestState that = (RequestState) o;
+        final RequestStatus that = (RequestStatus) o;
 
         if (id != that.id) return false;
 

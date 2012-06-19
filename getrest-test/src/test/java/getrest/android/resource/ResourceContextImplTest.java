@@ -4,9 +4,7 @@
 package getrest.android.resource;
 
 import com.xtremelabs.robolectric.RobolectricTestRunner;
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import org.junit.Test;

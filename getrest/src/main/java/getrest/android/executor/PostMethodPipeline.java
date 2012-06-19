@@ -16,17 +16,18 @@
 
 package getrest.android.executor;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Pack;
-import getrest.android.request.Request;
+import getrest.android.resource.Marshaller;
+import getrest.android.core.Pack;
+import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.request.Response;
+import getrest.android.core.Response;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;
 import getrest.android.service.ServiceResponse;
 
+// TODO transform to a general-purpose request handler
 class PostMethodPipeline implements RequestPipeline {
 
     private Request request;

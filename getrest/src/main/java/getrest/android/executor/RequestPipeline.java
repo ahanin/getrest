@@ -16,7 +16,5 @@
 
 package getrest.android.executor;
 
-import getrest.android.request.Handler;
-
 interface RequestPipeline extends Handler {
 }

@@ -17,14 +17,11 @@
 package getrest.android.resource;
 
 import getrest.android.config.ResourceContextContribution;
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
 import getrest.android.executor.RequestHandlerFactory;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.service.Representation;
-import getrest.android.service.ServiceRequestExecutor;
 
 public class ResourceContextImpl implements ResourceContext, ResourceContextContribution {
 

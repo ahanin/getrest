@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 

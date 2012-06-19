@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package getrest.android.entity;
+package getrest.android.executor;
 
-/**
- * @author aha
- * @since 2012-01-17
- */
-public interface Marshaller<F, T> {
+import getrest.android.core.HandlerException;
+import getrest.android.core.Request;
+import getrest.android.core.Response;
 
-    T marshal(F source);
-
-    F unmarshal(T entity);
-
+public interface Handler {
+    void handle(Request request, Response response) throws HandlerException;
 }

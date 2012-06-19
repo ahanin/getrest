@@ -17,7 +17,7 @@
 package getrest.android.service;
 
 import android.content.Intent;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 
 /**
  * @author aha

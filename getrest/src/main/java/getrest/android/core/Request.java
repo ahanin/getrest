@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package getrest.android.request;
+package getrest.android.core;
 
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import getrest.android.entity.Pack;
 
 /**
  * @author aha

@@ -16,8 +16,8 @@
 package getrest.android.client.impl;
 
 import getrest.android.client.RequestCallback;
-import getrest.android.request.Request;
-import getrest.android.request.Response;
+import getrest.android.core.Request;
+import getrest.android.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;

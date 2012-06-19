@@ -17,7 +17,7 @@
 package getrest.android.client;
 
 import getrest.android.RestfulClient;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 
 /**
  * Used in {@link RestfulClient} to implicitly create {@link RequestCallback}s and attach them to corresponding

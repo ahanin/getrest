@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package getrest.android.request;
+package getrest.android.core;
 
 /**
  * @author aha

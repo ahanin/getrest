@@ -17,8 +17,8 @@
 package getrest.android.service;
 
 import android.net.Uri;
-import getrest.android.request.Method;
-import getrest.android.request.Request;
+import getrest.android.core.Method;
+import getrest.android.core.Request;
 
 /**
  * @author aha

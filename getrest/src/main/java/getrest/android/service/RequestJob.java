@@ -17,14 +17,14 @@
 package getrest.android.service;
 
 import getrest.android.executor.RequestHandlerFactory;
-import getrest.android.request.Handler;
-import getrest.android.request.HandlerException;
-import getrest.android.request.Request;
+import getrest.android.executor.Handler;
+import getrest.android.core.HandlerException;
+import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
-import getrest.android.request.RequestState;
-import getrest.android.request.Response;
-import getrest.android.request.Status;
+import getrest.android.request.RequestStatus;
+import getrest.android.core.Response;
+import getrest.android.core.Status;
 import getrest.android.resource.ResourceContext;
 
 /**
@@ -60,7 +60,7 @@ public class RequestJob implements Runnable {
         final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
         final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
         final RequestManager requestManager = requestContext.getRequestManager();
-        requestManager.setRequestState(requestId, RequestState.EXECUTING);
+        requestManager.setRequestState(requestId, RequestStatus.EXECUTING);
 
         try {
             requestHandler.handle(request, response);
@@ -69,7 +69,7 @@ public class RequestJob implements Runnable {
             response.setStatus(Status.UNEXPECTED_EXCEPTION);
         } finally {
             requestEventBus.fireFinished(requestId);
-            requestManager.setRequestState(requestId, RequestState.FINISHED);
+            requestManager.setRequestState(requestId, RequestStatus.FINISHED);
         }
     }
 

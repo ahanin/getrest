@@ -15,7 +15,7 @@
  */
 package getrest.android.executor;
 
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 
 public interface RequestHandlerFactory {
     RequestHandler getRequestHandler(Request request);

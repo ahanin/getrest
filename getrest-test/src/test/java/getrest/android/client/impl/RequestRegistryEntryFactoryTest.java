@@ -6,7 +6,7 @@ package getrest.android.client.impl;
 import android.net.Uri;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 import getrest.android.client.RequestRegistry;
-import getrest.android.request.Request;
+import getrest.android.core.Request;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

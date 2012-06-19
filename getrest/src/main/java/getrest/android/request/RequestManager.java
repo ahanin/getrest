@@ -15,6 +15,9 @@
  */
 package getrest.android.request;
 
+import getrest.android.core.Request;
+import getrest.android.core.Response;
+
 public interface RequestManager {
 
     void saveRequest(Request request);
@@ -25,8 +28,8 @@ public interface RequestManager {
 
     Response getResponse(String requestId);
 
-    void setRequestState(String requestId, RequestState state);
+    void setRequestState(String requestId, RequestStatus status);
 
-    RequestState getRequestState(String requestId);
+    RequestStatus getRequestState(String requestId);
 
 }

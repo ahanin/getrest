@@ -15,13 +15,13 @@
  */
 package getrest.android.executor;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Pack;
-import getrest.android.entity.Packer;
-import getrest.android.request.Request;
+import getrest.android.resource.Marshaller;
+import getrest.android.core.Pack;
+import getrest.android.resource.Packer;
+import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.request.Response;
+import getrest.android.core.Response;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;

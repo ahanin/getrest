@@ -15,13 +15,11 @@
  */
 package getrest.android.client;
 
-import getrest.android.request.Request;
-import getrest.android.request.RequestState;
-import getrest.android.request.Response;
+import getrest.android.core.Request;
+import getrest.android.request.RequestStatus;
+import getrest.android.core.Response;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.lang.ref.ReferenceQueue;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -101,7 +99,7 @@ public class InMemoryRequestManagerTest {
     @Test
     public void testShouldNotSaveStateForUnacknowledgedRequest() throws Exception {
         try {
-            requestManager.setRequestState("12345", RequestState.EXECUTING);
+            requestManager.setRequestState("12345", RequestStatus.EXECUTING);
             fail("Must raise " + IllegalStateException.class.getName());
         } catch (IllegalStateException ex) {
             // expected behaviour
@@ -114,9 +112,9 @@ public class InMemoryRequestManagerTest {
         when(request.getRequestId()).thenReturn("12345");
         requestManager.saveRequest(request);
 
-        requestManager.setRequestState("12345", RequestState.FINISHED);
+        requestManager.setRequestState("12345", RequestStatus.FINISHED);
 
-        assertThat(requestManager.getRequestState("12345"), equalTo(RequestState.FINISHED));
+        assertThat(requestManager.getRequestState("12345"), equalTo(RequestStatus.FINISHED));
     }
 
 }

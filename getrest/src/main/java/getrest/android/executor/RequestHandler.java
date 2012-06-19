@@ -16,9 +16,6 @@
 
 package getrest.android.executor;
 
-import getrest.android.request.Handler;
-import getrest.android.request.Response;
-
 /**
  * @author aha
  * @since 2012-01-13

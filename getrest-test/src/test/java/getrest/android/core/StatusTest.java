@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.request;
+package getrest.android.core;
 
-import java.util.List;
+import org.junit.Test;
 
-public interface HasHeaders {
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
 
-    Headers getHeaders();
+public class StatusTest {
+
+    @Test
+    public void testShouldCacheInstances() throws Exception {
+        assertThat(Status.forResponseCode(999), sameInstance(Status.forResponseCode(999)));
+    }
 
 }

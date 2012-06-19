@@ -30,13 +30,13 @@ import getrest.android.client.RequestFuture;
 import getrest.android.client.RequestRegistry;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
-import getrest.android.entity.Pack;
-import getrest.android.entity.Packer;
-import getrest.android.request.Method;
-import getrest.android.request.Request;
+import getrest.android.core.Pack;
+import getrest.android.resource.Packer;
+import getrest.android.core.Method;
+import getrest.android.core.Request;
 import getrest.android.request.RequestManager;
-import getrest.android.request.RequestState;
-import getrest.android.request.Response;
+import getrest.android.request.RequestStatus;
+import getrest.android.core.Response;
 import getrest.android.resource.ResourceContext;
 import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestStateChangeEventWrapper;
@@ -265,13 +265,13 @@ public class RestfulClientImpl extends RestfulClient {
 
         final String requestId = stateChangeEventWrapper.getRequestId();
 
-        final RequestState requestState = stateChangeEventWrapper.getRequestState();
-        LOGGER.debug("Request event received: requestId={0}, requestState={1}", requestId,
-                requestState);
+        final RequestStatus requestStatus = stateChangeEventWrapper.getRequestState();
+        LOGGER.debug("Request event received: requestId={0}, requestStatus={1}", requestId,
+                requestStatus);
 
         final RequestEventRecord eventRecord = new RequestEventRecord();
         eventRecord.setRequestId(requestId);
-        eventRecord.setRequestState(requestState);
+        eventRecord.setRequestStatus(requestStatus);
 
         eventQueue.add(eventRecord);
     }
@@ -280,14 +280,14 @@ public class RestfulClientImpl extends RestfulClient {
         synchronized (futureMap) {
             final RequestFutureImpl future = futureMap.get(eventRecord.getRequestId());
 
-            final RequestState requestState = eventRecord.getRequestState();
+            final RequestStatus requestStatus = eventRecord.getRequestStatus();
             if (future == null) {
                 LOGGER.warn("Request id " + eventRecord.getRequestId() + " is not registered");
-            } else if (RequestState.PENDING.equals(requestState)) {
+            } else if (RequestStatus.PENDING.equals(requestStatus)) {
                 callbackHandler.post(new RequestPendingRunnable(future));
-            } else if (RequestState.EXECUTING.equals(requestState)) {
+            } else if (RequestStatus.EXECUTING.equals(requestStatus)) {
                 callbackHandler.post(new RequestExecutingRunnable(future));
-            } else if (RequestState.FINISHED.equals(requestState)) {
+            } else if (RequestStatus.FINISHED.equals(requestStatus)) {
                 callbackHandler.post(new RequestFinishedRunnable(future, eventRecord, this));
             }
         }

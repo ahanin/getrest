@@ -16,8 +16,8 @@
 
 package getrest.android.request;
 
-import getrest.android.entity.Marshaller;
-import getrest.android.entity.Packer;
+import getrest.android.resource.Marshaller;
+import getrest.android.resource.Packer;
 import getrest.android.resource.ResourceContext;
 import getrest.android.service.Representation;
 
