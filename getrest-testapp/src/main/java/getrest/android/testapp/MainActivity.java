@@ -13,6 +13,7 @@ import android.widget.Toast;
 import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestFuture;
+import getrest.android.core.Method;
 import getrest.android.core.Request;
 import getrest.android.core.Response;
 
@@ -39,7 +40,11 @@ public class MainActivity extends Activity {
                 values.put("title", "Groceries");
                 values.put("note", "Tomatoes\nMeat\nFish\n");
 
-                final RequestFuture future = restfulClient.post(Uri.parse("http://10.0.2.2:8080/note"), values);
+                final RequestFuture future = restfulClient.request(Uri.parse("http://10.0.2.2:8080/note"))
+                        .method(Method.POST)
+                        .entity(values)
+                        .execute();
+
                 future.setRequestCallback(new RequestCallback() {
                     public void onPending(final Request request) {
                         Toast.makeText(MainActivity.this, "Pending...", Toast.LENGTH_SHORT).show();

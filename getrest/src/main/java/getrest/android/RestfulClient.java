@@ -22,6 +22,7 @@ import android.os.Handler;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestFuture;
 import getrest.android.client.impl.RestfulClientImpl;
+import getrest.android.core.Method;
 
 /**
  * @author aha
@@ -37,6 +38,15 @@ public abstract class RestfulClient {
      * Detach {@link RestfulClient} and release all retained resources.
      */
     public abstract void detach();
+
+    /**
+     * Build a request.
+     *
+     *
+     * @param uri@return {@link RequestBuilder} instance, on which {@link getrest.android.RestfulClient.RequestBuilder#execute()}
+     * can be called to execute request
+     */
+    public abstract RequestBuilder request(Uri uri);
 
     /**
      * Pushes a POST request for processing.
@@ -117,4 +127,18 @@ public abstract class RestfulClient {
     public abstract void start();
 
     public abstract RequestFuture getRequestFuture(String requestId);
+
+    public interface RequestBuilder<T> {
+
+        RequestBuilder uri(Uri uri);
+
+        RequestBuilder method(Method method);
+
+        RequestBuilder header(String name, String value);
+
+        RequestBuilder entity(T entity);
+
+        RequestFuture execute();
+
+    }
 }

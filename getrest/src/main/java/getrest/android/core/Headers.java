@@ -15,6 +15,7 @@
  */
 package getrest.android.core;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,4 +78,9 @@ public class Headers implements Iterable<Header> {
     public int count() {
         return headers.size();
     }
+
+    public void addAll(final Collection<Header> headers) {
+        this.headers.addAll(headers);
+    }
+
 }

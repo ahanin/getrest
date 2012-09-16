@@ -26,12 +26,13 @@ import android.os.Handler;
 import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
+import getrest.android.client.RequestExecutor;
 import getrest.android.client.RequestFuture;
 import getrest.android.client.RequestRegistry;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
+import getrest.android.core.Header;
 import getrest.android.core.Pack;
-import getrest.android.resource.Packer;
 import getrest.android.core.Method;
 import getrest.android.core.Request;
 import getrest.android.request.RequestManager;
@@ -46,14 +47,16 @@ import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 import getrest.android.util.WorkerQueue;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RestfulClientImpl extends RestfulClient {
+public class RestfulClientImpl extends RestfulClient implements RequestExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
 
@@ -113,22 +116,9 @@ public class RestfulClientImpl extends RestfulClient {
         return obtainRequestFuture(request);
     }
 
-    @Override
-    public <T> RequestFuture post(Uri uri, T entity) {
-        final String requestId = nextRequestId();
+    public RequestFuture execute(final Request request) {
 
-        LOGGER.debug("POST: requestId={0}, uri={1}, entity={2}", requestId, uri, entity);
-
-        final ResourceContext resourceContext = config.getResourceContext(uri);
-        final Packer packer = resourceContext.getPacker();
-        final Pack<T> pack = packer.pack(entity);
-
-        final Request request = new Request();
-        request.setUri(uri);
-        request.setMethod(Method.POST);
-        request.setEntity(pack);
-        request.setRequestId(requestId);
-        request.setTimestamp(System.currentTimeMillis());
+        final ResourceContext resourceContext = config.getResourceContext(request.getUri());
 
         LOGGER.trace("Starting service");
 
@@ -197,10 +187,6 @@ public class RestfulClientImpl extends RestfulClient {
         return obtainRequestFuture(request);
     }
 
-    private String nextRequestId() {
-        return UUID.randomUUID().toString();
-    }
-
     protected final void init(Context context) {
         this.config = ConfigResolver.getInstance().obtainConfig(context);
 
@@ -215,6 +201,19 @@ public class RestfulClientImpl extends RestfulClient {
     public void detach() {
         androidContext.unregisterReceiver(requestEventReceiver);
         requestEventReceiver = null;
+    }
+
+    @Override
+    public RequestBuilder request(final Uri uri) {
+        return new RequestBuilderImpl(this, this.config).uri(uri);
+    }
+
+    @Override
+    public <T> RequestFuture post(final Uri url, final T entity) {
+        return request(url)
+                .method(Method.POST)
+                .entity(entity)
+                .execute();
     }
 
     @Override
@@ -363,4 +362,70 @@ public class RestfulClientImpl extends RestfulClient {
         }
     }
 
+    private static class RequestBuilderImpl<T> implements RequestBuilder<T> {
+
+        private Uri uri;
+        private Method method;
+        private List<Header> headers = new ArrayList<Header>();
+        private T entity;
+
+        private final RequestExecutor requestExecutor;
+        private final Config config;
+
+        private RequestBuilderImpl(final RequestExecutor requestExecutor, Config config) {
+            this.requestExecutor = requestExecutor;
+            this.config = config;
+        }
+
+        public RequestBuilder uri(final Uri uri) {
+            this.uri = uri;
+            return this;
+        }
+
+        public RequestBuilder method(final Method method) {
+            this.method = method;
+            return this;
+        }
+
+        public RequestBuilder header(final String name, final String value) {
+            this.headers.add(new Header(name, value));
+            return this;
+        }
+
+        public RequestBuilder entity(final T entity) {
+            this.entity = entity;
+            return this;
+        }
+
+        public RequestFuture execute() {
+            if (this.uri == null) {
+                throw new IllegalStateException("URI is not set");
+            }
+
+            if (this.method == null) {
+                throw new IllegalStateException("Method is not set");
+            }
+
+            final ResourceContext resourceContext = config.getResourceContext(uri);
+
+            final Request request = new Request();
+            request.setRequestId(nextRequestId());
+            request.setUri(this.uri);
+            request.setMethod(this.method);
+            request.getHeaders().addAll(headers);
+            request.setTimestamp(System.currentTimeMillis());
+
+            if (this.entity != null) {
+                final Pack<T> pack = resourceContext.getPacker().pack(this.entity);
+                request.setEntity(pack);
+            }
+
+            return requestExecutor.execute(request);
+        }
+
+        private String nextRequestId() {
+            return UUID.randomUUID().toString();
+        }
+
+    }
 }
