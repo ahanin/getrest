@@ -22,7 +22,7 @@
 
     <groupId>getrest</groupId>
     <artifactId>getrest</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0-SNAPSHOT</version>
     <name>getrest</name>
     <packaging>jar</packaging>
 
@@ -37,7 +37,7 @@
     <parent>
         <groupId>getrest</groupId>
         <artifactId>getrest-parent</artifactId>
-        <version>0.0.1</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
