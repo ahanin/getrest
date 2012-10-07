@@ -26,7 +26,6 @@ public class RequestStateChangeEventWrapper {
 
     private static final String EXTRA_REQUEST_ID = "getrest.android.service.RequestStateChangeEventWrapper.REQUEST_ID";
     private static final String REQUEST_STATE = "getrest.android.service.RequestStateChangeEventWrapper.REQUEST_STATE";
-    private static final String EXTRA_RESPONSE = "getrest.android.service.RequestStateChangeEventWrapper.RESPONSE";
 
     public RequestStateChangeEventWrapper(final Intent intent) {
         this.intent = intent;
@@ -50,26 +49,6 @@ public class RequestStateChangeEventWrapper {
 
     public RequestStatus getRequestState() {
         return RequestStatus.byId(intent.getByteExtra(REQUEST_STATE, (byte) -1));
-    }
-
-    public void setPending() {
-        setRequestState(RequestStatus.PENDING);
-    }
-
-    public void setExecuting() {
-        setRequestState(RequestStatus.EXECUTING);
-    }
-
-    public void setFinished() {
-        setRequestState(RequestStatus.FINISHED);
-    }
-
-    public void setResponse(Response response) {
-        intent.putExtra(EXTRA_RESPONSE, response);
-    }
-
-    public Response getResponse() {
-        return intent.getParcelableExtra(EXTRA_RESPONSE);
     }
 
 }

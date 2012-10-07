@@ -31,6 +31,7 @@ class RequestFutureImpl implements RequestFuture {
     private boolean isPendingFired;
     private boolean isExecutingFired;
     private boolean isFinishedFired;
+    private boolean isErrorFired;
 
     private boolean isFinished;
 
@@ -140,6 +141,22 @@ class RequestFutureImpl implements RequestFuture {
             } finally {
                 isFinishedFired = true;
             }
+        }
+    }
+
+    public void fireError() {
+        synchronized (this) {
+            if (callback != null && !isErrorFired) {
+                doFireError();
+            }
+        }
+    }
+
+    private void doFireError() {
+        try {
+            callback.onError(request);
+        } finally {
+            isErrorFired = true;
         }
     }
 

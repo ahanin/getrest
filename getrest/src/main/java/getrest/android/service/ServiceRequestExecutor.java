@@ -16,10 +16,12 @@
 
 package getrest.android.service;
 
+import java.io.IOException;
+
 /**
  * @author aha
  * @since 2012-01-17
  */
 public interface ServiceRequestExecutor {
-    void execute(final ServiceRequest request, final ServiceResponse response);
+    void execute(final ServiceRequest request, final ServiceResponse response) throws IOException;
 }

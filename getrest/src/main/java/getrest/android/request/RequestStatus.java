@@ -21,6 +21,7 @@ public class RequestStatus {
     public static final RequestStatus PENDING = new RequestStatus((byte) 1, "PENDING");
     public static final RequestStatus EXECUTING = new RequestStatus((byte) 2, "EXECUTING");
     public static final RequestStatus FINISHED = new RequestStatus((byte) 3, "FINISHED");
+    public static final RequestStatus ERROR = new RequestStatus((byte) 4, "ERROR");
 
     private byte id;
     private String name;
@@ -46,6 +47,8 @@ public class RequestStatus {
                 return EXECUTING;
             case 3:
                 return FINISHED;
+            case 4:
+                return ERROR;
             default:
                 return null;
         }

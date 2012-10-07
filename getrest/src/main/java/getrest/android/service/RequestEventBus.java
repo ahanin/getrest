@@ -17,6 +17,7 @@
 package getrest.android.service;
 
 import android.content.Intent;
+import getrest.android.request.RequestStatus;
 
 public class RequestEventBus {
 
@@ -33,27 +34,28 @@ public class RequestEventBus {
     private Broadcaster broadcaster;
 
     public void firePending(String requestId) {
+        final RequestStatus status = RequestStatus.PENDING;
+        broadcastRequestStatusUpdate(requestId, status);
+    }
+
+    private void broadcastRequestStatusUpdate(final String requestId, final RequestStatus status) {
         final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(
                 new Intent(Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
         stateChangeEventWrapper.setRequestId(requestId);
-        stateChangeEventWrapper.setPending();
+        stateChangeEventWrapper.setRequestState(status);
         broadcaster.sendBroadcast(stateChangeEventWrapper.asIntent());
     }
 
     public void fireExecuting(String requestId) {
-        final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(
-                new Intent(Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
-        stateChangeEventWrapper.setRequestId(requestId);
-        stateChangeEventWrapper.setExecuting();
-        broadcaster.sendBroadcast(stateChangeEventWrapper.asIntent());
+        broadcastRequestStatusUpdate(requestId, RequestStatus.EXECUTING);
     }
 
     public void fireFinished(String requestId) {
-        final RequestStateChangeEventWrapper stateChangeEventWrapper = new RequestStateChangeEventWrapper(
-                new Intent(Intents.REQUEST_STATE_CHANGE_EVENT_ACTION));
-        stateChangeEventWrapper.setRequestId(requestId);
-        stateChangeEventWrapper.setFinished();
-        broadcaster.sendBroadcast(stateChangeEventWrapper.asIntent());
+        broadcastRequestStatusUpdate(requestId, RequestStatus.FINISHED);
+    }
+
+    public void fireError(final String requestId) {
+        broadcastRequestStatusUpdate(requestId, RequestStatus.ERROR);
     }
 
     public void setBroadcaster(final Broadcaster broadcaster) {

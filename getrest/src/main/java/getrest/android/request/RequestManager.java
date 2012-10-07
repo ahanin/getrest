@@ -15,6 +15,7 @@
  */
 package getrest.android.request;
 
+import getrest.android.core.ErrorState;
 import getrest.android.core.Request;
 import getrest.android.core.Response;
 
@@ -32,4 +33,5 @@ public interface RequestManager {
 
     RequestStatus getRequestState(String requestId);
 
+    void setRequestState(String requestId, ErrorState errorState, String message);
 }

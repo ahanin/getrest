@@ -15,10 +15,10 @@
  */
 package getrest.android.client;
 
-import getrest.android.core.Request;
+import getrest.android.core.*;
+import getrest.android.core.Error;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
-import getrest.android.core.Response;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
@@ -176,6 +176,20 @@ public class InMemoryRequestManager implements RequestManager {
 
     public RequestStatus getRequestState(final String requestId) {
         return stateMap.get(requestId);
+    }
+
+    public void setRequestState(final String requestId, final ErrorState errorState, final String message) {
+        final Request request = getRequest(requestId);
+        if (request == null) {
+            throw new IllegalStateException("Request is not acknowledged: " + requestId);
+        }
+        setRequestState(requestId, RequestStatus.ERROR);
+
+        final Error error = new Error();
+        error.setErrorState(errorState);
+        error.setMessage(message);
+
+        request.setError(error);
     }
 
     private class CandidateEntry {

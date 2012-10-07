@@ -56,7 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RestfulClientImpl extends RestfulClient implements RequestExecutor {
+public class RestfulClientImpl extends RestfulClient implements RequestExecutor, RequestEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
 
@@ -184,7 +184,12 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
         final ResourceContext resourceContext = config.getResourceContext(uri);
         final RequestManager requestManager = resourceContext.getRequestManager();
         final Request request = requestManager.getRequest(entry.getRequestId());
-        return obtainRequestFuture(request);
+        if (request == null) {
+            LOGGER.warn("Request [{0}, {1}] is not acknowledged by request manager", entry.getRequestId(), entry.getResourceUri());
+            return null;
+        } else {
+            return obtainRequestFuture(request);
+        }
     }
 
     protected final void init(Context context) {
@@ -275,7 +280,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
         eventQueue.add(eventRecord);
     }
 
-    private void handleRequestEvent(final RequestEventRecord eventRecord) {
+    public void handleRequestEvent(final RequestEventRecord eventRecord) {
         synchronized (futureMap) {
             final RequestFutureImpl future = futureMap.get(eventRecord.getRequestId());
 
@@ -288,15 +293,17 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
                 callbackHandler.post(new RequestExecutingRunnable(future));
             } else if (RequestStatus.FINISHED.equals(requestStatus)) {
                 callbackHandler.post(new RequestFinishedRunnable(future, eventRecord, this));
+            } else if (RequestStatus.ERROR.equals(requestStatus)) {
+                callbackHandler.post(new RequestErrorRunnable(future));
             }
         }
     }
 
     private static class RequestEventRecordWorker implements WorkerQueue.Worker<RequestEventRecord> {
 
-        private RestfulClientImpl client;
+        private RequestEventHandler client;
 
-        private RequestEventRecordWorker(final RestfulClientImpl client) {
+        private RequestEventRecordWorker(final RequestEventHandler client) {
             this.client = client;
         }
 
@@ -353,6 +360,20 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
         }
     }
 
+    private class RequestErrorRunnable implements Runnable {
+
+        private final RequestFutureImpl future;
+
+        public RequestErrorRunnable(final RequestFutureImpl future) {
+            this.future = future;
+        }
+
+        public void run() {
+            future.fireError();
+        }
+
+    }
+
     private void releaseRequest(final String requestId) {
         synchronized (this) {
             futureMap.remove(requestId);
@@ -362,12 +383,12 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
         }
     }
 
-    private static class RequestBuilderImpl<T> implements RequestBuilder<T> {
+    private static class RequestBuilderImpl implements RequestBuilder {
 
         private Uri uri;
         private Method method;
         private List<Header> headers = new ArrayList<Header>();
-        private T entity;
+        private Object entity;
 
         private final RequestExecutor requestExecutor;
         private final Config config;
@@ -392,7 +413,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
             return this;
         }
 
-        public RequestBuilder entity(final T entity) {
+        public <T> RequestBuilder entity(final T entity) {
             this.entity = entity;
             return this;
         }
@@ -416,7 +437,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
             request.setTimestamp(System.currentTimeMillis());
 
             if (this.entity != null) {
-                final Pack<T> pack = resourceContext.getPacker().pack(this.entity);
+                final Pack pack = resourceContext.getPacker().pack(this.entity);
                 request.setEntity(pack);
             }
 
@@ -428,4 +449,8 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor 
         }
 
     }
+}
+
+interface RequestEventHandler {
+    void handleRequestEvent(RequestEventRecord eventRecord);
 }

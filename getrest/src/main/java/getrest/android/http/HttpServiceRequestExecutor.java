@@ -41,31 +41,29 @@ import java.net.URI;
  * @since 2012-01-13
  */
 public class HttpServiceRequestExecutor implements ServiceRequestExecutor {
+
     public void execute(final ServiceRequest request,
-        final ServiceResponse response) {
+        final ServiceResponse response) throws IOException {
         final DefaultHttpClient httpClient = new DefaultHttpClient();
         final HttpUriRequest httpRequest = createHttpRequest(request);
 
         final HttpResponse httpResponse;
 
-        try {
-            httpResponse = httpClient.execute(httpRequest);
-            response.setEntity(new RepresentationHttpEntity(
-                    httpResponse.getEntity()));
+        httpResponse = httpClient.execute(httpRequest);
+        response.setEntity(new RepresentationHttpEntity(
+                httpResponse.getEntity()));
 
-            final org.apache.http.Header[] allHeaders = httpResponse.getAllHeaders();
-            final Headers headers = new Headers();
-            for (org.apache.http.Header httpHeader : allHeaders) {
-                for (HeaderElement headerElement : httpHeader.getElements()) {
-                    headers.add(new Header(headerElement.getName(), headerElement.getValue()));
-                }
+        final org.apache.http.Header[] allHeaders = httpResponse.getAllHeaders();
+        final Headers headers = new Headers();
+
+        for (org.apache.http.Header httpHeader : allHeaders) {
+            for (HeaderElement headerElement : httpHeader.getElements()) {
+                headers.add(new Header(headerElement.getName(),
+                        headerElement.getValue()));
             }
-            response.setHeaders(headers);
-        } catch (IOException ex) {
-            // TODO implement handling of I/O exception during HTTP request
-            throw new UnsupportedOperationException("handling of I/O exceptions is not yet implemented",
-                ex);
         }
+
+        response.setHeaders(headers);
 
         // TODO finish HTTP request implementation
     }

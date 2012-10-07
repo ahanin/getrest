@@ -16,6 +16,7 @@
 
 package getrest.android.executor;
 
+import getrest.android.core.HandlerException;
 import getrest.android.resource.Marshaller;
 import getrest.android.core.Pack;
 import getrest.android.core.Request;
@@ -26,6 +27,8 @@ import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;
 import getrest.android.service.ServiceResponse;
+
+import java.io.IOException;
 
 // TODO transform to a general-purpose request handler
 class PostMethodPipeline implements RequestPipeline {
@@ -54,7 +57,7 @@ class PostMethodPipeline implements RequestPipeline {
         this.serviceRequestExecutor = serviceRequestExecutor;
     }
 
-    public void handle(final Request request, final Response response) {
+    public void handle(final Request request, final Response response) throws HandlerException {
         // marshal
         requestLifecycle.beforeMarshal();
 
@@ -69,7 +72,11 @@ class PostMethodPipeline implements RequestPipeline {
 
         // execute
         final ServiceResponse serviceResponse = new ServiceResponse();
-        serviceRequestExecutor.execute(serviceRequest, serviceResponse);
+        try {
+            serviceRequestExecutor.execute(serviceRequest, serviceResponse);
+        } catch (IOException ex) {
+            throw new HandlerException("I/O exception", ex);
+        }
 
         // unmarshal
         requestLifecycle.beforeUnmarshal();

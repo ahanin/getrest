@@ -128,7 +128,7 @@ public abstract class RestfulClient {
 
     public abstract RequestFuture getRequestFuture(String requestId);
 
-    public interface RequestBuilder<T> {
+    public interface RequestBuilder {
 
         RequestBuilder uri(Uri uri);
 
@@ -136,7 +136,7 @@ public abstract class RestfulClient {
 
         RequestBuilder header(String name, String value);
 
-        RequestBuilder entity(T entity);
+        <T> RequestBuilder entity(T entity);
 
         RequestFuture execute();
 

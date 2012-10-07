@@ -54,8 +54,12 @@ public class MainActivity extends Activity {
                         Toast.makeText(MainActivity.this, "Executing...", Toast.LENGTH_SHORT).show();
                     }
 
+                    public void onError(final Request request) {
+                        Toast.makeText(MainActivity.this, "Error :(\n" + request.getError(), Toast.LENGTH_SHORT).show();
+                    }
+
                     public void onFinished(final Response request) {
-                        Toast.makeText(MainActivity.this, "Finished!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Finished :)", Toast.LENGTH_SHORT).show();
                     }
                 });
 

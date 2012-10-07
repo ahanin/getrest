@@ -13,20 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package getrest.android.core;
 
-package getrest.android.client;
-
-import getrest.android.core.Request;
-import getrest.android.core.Response;
-
-public interface RequestCallback {
-
-    void onPending(Request request);
-
-    void onExecuting(Request request);
-
-    void onError(Request request);
-
-    void onFinished(Response request);
-
+public enum ErrorState {
+    REJECTED,
+    IO,
+    UNKNOWN
 }

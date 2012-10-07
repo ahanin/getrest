@@ -22,6 +22,9 @@ import android.os.IBinder;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
 import getrest.android.core.Request;
+import getrest.android.request.RequestContext;
+import getrest.android.request.RequestManager;
+import getrest.android.request.RequestStatus;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
@@ -61,12 +64,17 @@ public class RestService extends Service implements Broadcaster {
 
             eventBus.firePending(request.getRequestId());
 
+            final RequestContext requestContext = config.getResourceContext(request.getUri()).getRequestContext(request);
+            final RequestManager requestManager = requestContext.getRequestManager();
+            requestManager.setRequestState(request.getRequestId(), RequestStatus.PENDING);
+
             final RequestJob job = new RequestJob(request);
-            job.setRequestContext(config.getResourceContext(request.getUri()).getRequestContext(request));
+            job.setRequestContext(requestContext);
             job.setRequestEventBus(eventBus);
 
             jobExecutorService.submit(job);
         } catch (RejectedExecutionException ex) {
+
             // TODO implement rejected execution fallback
             throw new UnsupportedOperationException("Handling of rejected execution exception is yet to implement");
         }

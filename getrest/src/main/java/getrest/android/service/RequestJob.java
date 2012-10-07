@@ -16,6 +16,7 @@
 
 package getrest.android.service;
 
+import getrest.android.core.ErrorState;
 import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.executor.Handler;
 import getrest.android.core.HandlerException;
@@ -24,8 +25,9 @@ import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
 import getrest.android.core.Response;
-import getrest.android.core.Status;
 import getrest.android.resource.ResourceContext;
+
+import java.io.IOException;
 
 /**
  * @author aha
@@ -53,24 +55,40 @@ public class RequestJob implements Runnable {
 
     public void run() {
         final String requestId = request.getRequestId();
-        requestEventBus.fireExecuting(requestId);
 
         final Response response = new Response();
         final ResourceContext resourceContext = requestContext.getResourceContext();
+
         final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
         final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
+
         final RequestManager requestManager = requestContext.getRequestManager();
         requestManager.setRequestState(requestId, RequestStatus.EXECUTING);
+
+        requestEventBus.fireExecuting(requestId);
 
         try {
             requestHandler.handle(request, response);
             requestManager.saveResponse(requestId, response);
-        } catch (HandlerException e) {
-            response.setStatus(Status.UNEXPECTED_EXCEPTION);
-        } finally {
-            requestEventBus.fireFinished(requestId);
             requestManager.setRequestState(requestId, RequestStatus.FINISHED);
+            requestEventBus.fireFinished(requestId);
+        } catch (HandlerException e) {
+            final StringBuilder message = new StringBuilder(e.getMessage());
+            final ErrorState errorState;
+            if (e.getCause() instanceof IOException) {
+                errorState = ErrorState.IO;
+            } else {
+                errorState = ErrorState.UNKNOWN;
+            }
+
+            if (e.getCause() != null) {
+                message.append('|').append(e.getCause().getMessage());
+            }
+
+            requestEventBus.fireError(requestId);
+            requestManager.setRequestState(requestId, errorState, message.toString());
         }
+
     }
 
 }
