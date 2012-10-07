@@ -62,7 +62,6 @@ public class RequestHandlerImpl implements RequestHandler {
             throw new UnsupportedOperationException("GET method is not supported yet");
         } else if (Method.POST.equals(method)) {
             final PostMethodPipeline postPipeline = new PostMethodPipeline();
-            postPipeline.setRequest(request);
             postPipeline.setRequestContext(requestContext);
             postPipeline.setRequestLifecycle(requestLifecycle);
             postPipeline.setServiceRequestExecutor(serviceRequestExecutor);

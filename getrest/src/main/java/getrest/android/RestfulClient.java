@@ -30,7 +30,17 @@ import getrest.android.core.Method;
  */
 public abstract class RestfulClient {
 
+    private String baseUrl;
+
     private RequestCallbackFactory requestCallbackFactory;
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(final String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 
     protected abstract void init(Context context);
 
@@ -42,11 +52,33 @@ public abstract class RestfulClient {
     /**
      * Build a request.
      *
-     *
      * @param uri@return {@link RequestBuilder} instance, on which {@link getrest.android.RestfulClient.RequestBuilder#execute()}
      * can be called to execute request
      */
     public abstract RequestBuilder request(Uri uri);
+
+    /**
+     * Build a request to a path resource.
+     *
+     * @param path
+     * @return
+     */
+    public RequestBuilder request(String path) {
+        return request(buildUri(path));
+    }
+
+    private Uri buildUri(final String path) {
+        return this.baseUrl == null ? Uri.parse(path) : Uri.parse(gluePath(baseUrl, path));
+    }
+
+    private String gluePath(final String baseUrl, final String path) {
+        final StringBuilder sb = new StringBuilder(baseUrl);
+        if (sb.charAt(sb.length()-1) != '/' && !path.startsWith("/")) {
+            sb.append('/');
+        }
+        sb.append(path);
+        return sb.toString();
+    }
 
     /**
      * Pushes a POST request for processing.

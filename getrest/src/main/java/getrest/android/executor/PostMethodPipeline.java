@@ -17,33 +17,31 @@
 package getrest.android.executor;
 
 import getrest.android.core.HandlerException;
-import getrest.android.resource.Marshaller;
 import getrest.android.core.Pack;
 import getrest.android.core.Request;
+import getrest.android.core.Response;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.core.Response;
+import getrest.android.resource.Marshaller;
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;
 import getrest.android.service.ServiceResponse;
+import getrest.android.util.Logger;
+import getrest.android.util.LoggerFactory;
 
 import java.io.IOException;
 
 // TODO transform to a general-purpose request handler
 class PostMethodPipeline implements RequestPipeline {
 
-    private Request request;
+    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
 
     private RequestLifecycle requestLifecycle;
 
     private RequestContext requestContext;
 
     private ServiceRequestExecutor serviceRequestExecutor;
-
-    public void setRequest(final Request request) {
-        this.request = request;
-    }
 
     public void setRequestLifecycle(final RequestLifecycle requestLifecycle) {
         this.requestLifecycle = requestLifecycle;
@@ -58,19 +56,26 @@ class PostMethodPipeline implements RequestPipeline {
     }
 
     public void handle(final Request request, final Response response) throws HandlerException {
-        // marshal
+
+        final ServiceRequest serviceRequest = new ServiceRequest(request);
+
+        // marshal entity, if needed
         requestLifecycle.beforeMarshal();
 
-        final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
-
-        final Representation representation = marshaller.marshal(this.request.getEntity().unpack());
+        if (request.getEntity() != null) {
+            try {
+                final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
+                final Representation representation = marshaller.marshal(request.getEntity().unpack());
+                serviceRequest.setEntity(representation);
+            } catch (Exception ex) {
+                LOGGER.error("Exception while marshalling entity", ex);
+                throw new HandlerException("Exception while marshalling entity", ex);
+            }
+        }
 
         requestLifecycle.afterMarshal();
 
-        final ServiceRequest serviceRequest = new ServiceRequest(this.request);
-        serviceRequest.setEntity(representation);
-
-        // execute
+        // execute request
         final ServiceResponse serviceResponse = new ServiceResponse();
         try {
             serviceRequestExecutor.execute(serviceRequest, serviceResponse);
@@ -78,15 +83,21 @@ class PostMethodPipeline implements RequestPipeline {
             throw new HandlerException("I/O exception", ex);
         }
 
-        // unmarshal
+        // unmarshal the entity, if needed
         requestLifecycle.beforeUnmarshal();
 
-        final Object resultUnmarshalled = marshaller.unmarshal(serviceResponse.getEntity());
-        final Pack result = requestContext.getPacker().pack(resultUnmarshalled);
+        if (serviceResponse.getEntity() != null) {
+            try {
+                final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
+                final Object resultUnmarshalled = marshaller.unmarshal(serviceResponse.getEntity());
+                final Pack result = requestContext.getPacker().pack(resultUnmarshalled);
+                response.setEntity(result);
+            } catch (Exception ex) {
+                LOGGER.error("Exception while unmarshalling entity", ex);
+                throw new HandlerException("Exception while marshalling entity", ex);
+            }
+        }
 
         requestLifecycle.afterUnmarshal();
-
-        response.setEntity(result);
     }
-
 }

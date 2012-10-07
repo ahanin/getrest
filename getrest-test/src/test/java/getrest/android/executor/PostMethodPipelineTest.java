@@ -29,6 +29,7 @@ import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;
 import getrest.android.service.ServiceResponse;
+
 import static org.hamcrest.core.IsSame.sameInstance;
 import static org.junit.Assert.assertThat;
 
@@ -37,16 +38,21 @@ import org.junit.Test;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 public class PostMethodPipelineTest {
     private PostMethodPipeline requestExecutor;
     private Request request;
-    private Marshaller<Object,Representation> marshaller;
+    private Marshaller<Object, Representation> marshaller;
     private Packer packer;
     private RequestContext requestContext;
     private RequestLifecycle requestLifecycle;
@@ -69,33 +75,17 @@ public class PostMethodPipelineTest {
         when(requestContext.getMarshaller()).thenReturn(marshaller);
         when(requestContext.getPacker()).thenReturn(packer);
 
-        requestExecutor.setRequest(request);
         requestExecutor.setRequestLifecycle(requestLifecycle);
         requestExecutor.setRequestContext(requestContext);
         requestExecutor.setServiceRequestExecutor(serviceRequestExecutor);
     }
 
     @Test
-    public void testExecute() throws Exception {
-        final Pack requestEntityPack = mock(Pack.class);
-        final Object requestEntity = new Object();
-        when(requestEntityPack.unpack()).thenReturn(requestEntity);
-        request.setEntity(requestEntityPack);
-
-        final Representation requestRepresentation = mock(Representation.class);
-        when(marshaller.marshal(requestEntityPack))
-            .thenReturn(requestRepresentation);
-
-        final Object unmarshalledResult = new Object();
-        when(marshaller.unmarshal(any(Representation.class)))
-            .thenReturn(unmarshalledResult);
-
-        final Pack resultEntityPack = mock(Pack.class);
-        when(packer.pack(unmarshalledResult)).thenReturn(resultEntityPack);
+    public void testShouldExecuteRequest() throws Exception {
 
         requestExecutor.handle(request, response);
 
-        assertThat(response.getEntity(), sameInstance(resultEntityPack));
+        verify(serviceRequestExecutor).execute(any(ServiceRequest.class), any(ServiceResponse.class));
     }
 
     @Test
@@ -109,7 +99,7 @@ public class PostMethodPipelineTest {
         requestExecutor.handle(request, response);
 
         verify(serviceRequestExecutor)
-            .execute(any(ServiceRequest.class), any(ServiceResponse.class));
+                .execute(any(ServiceRequest.class), any(ServiceResponse.class));
     }
 
     @Test
@@ -127,8 +117,8 @@ public class PostMethodPipelineTest {
         final ArgumentCaptor<ServiceResponse> serviceResponseCaptor = ArgumentCaptor.forClass(ServiceResponse.class);
 
         doNothing().when(serviceRequestExecutor)
-            .execute(serviceRequestCaptor.capture(),
-            serviceResponseCaptor.capture());
+                .execute(serviceRequestCaptor.capture(),
+                        serviceResponseCaptor.capture());
 
         requestExecutor.handle(request, response);
 
@@ -144,20 +134,25 @@ public class PostMethodPipelineTest {
         final Object requestEntity = new Object();
         when(requestEntityPack.unpack()).thenReturn(requestEntity);
 
-        final Representation marshalledEntity = mock(Representation.class);
-        when(marshaller.marshal(requestEntity)).thenReturn(marshalledEntity);
+        final Representation representation = mock(Representation.class);
+        when(marshaller.marshal(requestEntity)).thenReturn(representation);
 
         final ArgumentCaptor<ServiceRequest> serviceRequestCaptor = ArgumentCaptor.forClass(ServiceRequest.class);
         final ArgumentCaptor<ServiceResponse> serviceResponseCaptor = ArgumentCaptor.forClass(ServiceResponse.class);
 
-        doNothing().when(serviceRequestExecutor)
-            .execute(serviceRequestCaptor.capture(),
-            serviceResponseCaptor.capture());
+        doAnswer(new Answer() {
+            public Object answer(final InvocationOnMock invocation) throws Throwable {
+                final Object[] args = invocation.getArguments();
+                final ServiceResponse serviceResponse = (ServiceResponse) args[1];
+                serviceResponse.setEntity(representation);
+                return null;
+            }
+        }).when(serviceRequestExecutor).execute(serviceRequestCaptor.capture(), serviceResponseCaptor.capture());
 
         final ArgumentCaptor<Representation> responseEntityCaptor = ArgumentCaptor.forClass(Representation.class);
         final Object responseEntity = mock(Object.class);
         when(marshaller.unmarshal(responseEntityCaptor.capture()))
-            .thenReturn(responseEntity);
+                .thenReturn(responseEntity);
 
         final Pack responseEntityPack = mock(Pack.class);
         when(packer.pack(responseEntity)).thenReturn(responseEntityPack);
@@ -167,29 +162,4 @@ public class PostMethodPipelineTest {
         assertThat(response.getEntity(), sameInstance(responseEntityPack));
     }
 
-    @Test
-    public void testWorkflowOrder() throws Exception {
-        final InOrder inOrder = inOrder(requestLifecycle, requestContext,
-                marshaller, serviceRequestExecutor);
-
-        final Object requestEntity = new Object();
-        final Pack requestEntityPack = mock(Pack.class);
-        request.setEntity(requestEntityPack);
-        when(requestEntityPack.unpack()).thenReturn(requestEntity);
-
-        final ArgumentCaptor<ServiceResponse> serviceResponse = ArgumentCaptor.forClass(ServiceResponse.class);
-        final ArgumentCaptor<Representation> responseRepresentation = ArgumentCaptor.forClass(Representation.class);
-
-        requestExecutor.handle(request, response);
-
-        inOrder.verify(requestLifecycle).beforeMarshal();
-        inOrder.verify(marshaller).marshal(requestEntity);
-        inOrder.verify(requestLifecycle).afterMarshal();
-
-        inOrder.verify(serviceRequestExecutor)
-               .execute(any(ServiceRequest.class), serviceResponse.capture());
-        inOrder.verify(requestLifecycle).beforeUnmarshal();
-        inOrder.verify(marshaller).unmarshal(responseRepresentation.capture());
-        inOrder.verify(requestLifecycle).afterUnmarshal();
-    }
 }
