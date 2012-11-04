@@ -16,7 +16,7 @@
 package getrest.android.executor;
 
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,19 +27,19 @@ public class RequestExecutorImplTest {
 
     private RequestHandlerImpl requestExecutor;
     private Request request;
-    private Response response;
+    private ResponseParcelable responseParcelable;
 
     @Before
     public void setUp() throws Exception {
         requestExecutor = new RequestHandlerImpl();
         request = mock(Request.class);
-        response = mock(Response.class);
+        responseParcelable = mock(ResponseParcelable.class);
     }
 
     @Test
     public void testMethodMustNotBeNull() throws Exception {
         try {
-            requestExecutor.handle(request, response);
+            requestExecutor.handle(request, responseParcelable);
             fail("When request method is null, must raise: " + IllegalArgumentException.class.getName());
         } catch (IllegalArgumentException ex) {
             // normal flow

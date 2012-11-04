@@ -19,7 +19,7 @@ package getrest.android.executor;
 import getrest.android.core.HandlerException;
 import getrest.android.core.Pack;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
 import getrest.android.resource.Marshaller;
@@ -55,7 +55,7 @@ class PostMethodPipeline implements RequestPipeline {
         this.serviceRequestExecutor = serviceRequestExecutor;
     }
 
-    public void handle(final Request request, final Response response) throws HandlerException {
+    public void handle(final Request request, final ResponseParcelable responseParcelable) throws HandlerException {
 
         final ServiceRequest serviceRequest = new ServiceRequest(request);
 
@@ -91,7 +91,7 @@ class PostMethodPipeline implements RequestPipeline {
                 final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
                 final Object resultUnmarshalled = marshaller.unmarshal(serviceResponse.getEntity());
                 final Pack result = requestContext.getPacker().pack(resultUnmarshalled);
-                response.setEntity(result);
+                responseParcelable.setEntity(result);
             } catch (Exception ex) {
                 LOGGER.error("Exception while unmarshalling entity", ex);
                 throw new HandlerException("Exception while marshalling entity", ex);

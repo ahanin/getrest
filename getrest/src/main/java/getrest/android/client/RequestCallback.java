@@ -17,7 +17,7 @@
 package getrest.android.client;
 
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 
 public interface RequestCallback {
 
@@ -27,6 +27,6 @@ public interface RequestCallback {
 
     void onError(Request request);
 
-    void onFinished(Response request);
+    void onFinished(ResponseParcelable request);
 
 }

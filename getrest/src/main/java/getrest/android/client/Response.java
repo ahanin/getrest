@@ -17,26 +17,28 @@
 package getrest.android.client;
 
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 
-public interface RequestFuture {
+import java.util.concurrent.Future;
 
-    String getRequestId();
+public abstract class Response<T> extends javax.ws.rs.core.Response {
+
+    public abstract String getRequestId();
 
     /**
      * Set {@link RequestCallback} that will receive {@link Request} event notifications.
      *
      * @param requestCallback instance of {@link RequestCallback} to receive notifications
      */
-    void setRequestCallback(RequestCallback requestCallback);
+    public abstract void setRequestCallback(RequestCallback requestCallback);
 
-    boolean isFinished();
+    public abstract boolean isFinished();
 
     /**
-     * Return {@link Response}. Calling thread will be blocked until the request is finished with any result.
+     * Return {@link getrest.android.core.ResponseParcelable}. Calling thread will be blocked until the request is finished with any result.
      *
-     * @return {@link Response}
+     * @return {@link getrest.android.core.ResponseParcelable}
      */
-    Response get();
+    public abstract T getEntity();
 
 }

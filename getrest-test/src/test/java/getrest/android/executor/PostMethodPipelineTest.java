@@ -17,7 +17,7 @@ package getrest.android.executor;
 
 import getrest.android.core.Pack;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
@@ -37,14 +37,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,12 +55,12 @@ public class PostMethodPipelineTest {
     private RequestContext requestContext;
     private RequestLifecycle requestLifecycle;
     private ServiceRequestExecutor serviceRequestExecutor;
-    private Response response;
+    private ResponseParcelable responseParcelable;
 
     @Before
     public void setUp() throws Exception {
         request = new Request();
-        response = new Response();
+        responseParcelable = new ResponseParcelable();
 
         requestExecutor = new PostMethodPipeline();
         requestLifecycle = mock(RequestLifecycle.class);
@@ -83,7 +81,7 @@ public class PostMethodPipelineTest {
     @Test
     public void testShouldExecuteRequest() throws Exception {
 
-        requestExecutor.handle(request, response);
+        requestExecutor.handle(request, responseParcelable);
 
         verify(serviceRequestExecutor).execute(any(ServiceRequest.class), any(ServiceResponse.class));
     }
@@ -96,7 +94,7 @@ public class PostMethodPipelineTest {
         final Representation marshalledEntity = mock(Representation.class);
         when(marshaller.marshal(requestEntityPack)).thenReturn(marshalledEntity);
 
-        requestExecutor.handle(request, response);
+        requestExecutor.handle(request, responseParcelable);
 
         verify(serviceRequestExecutor)
                 .execute(any(ServiceRequest.class), any(ServiceResponse.class));
@@ -120,7 +118,7 @@ public class PostMethodPipelineTest {
                 .execute(serviceRequestCaptor.capture(),
                         serviceResponseCaptor.capture());
 
-        requestExecutor.handle(request, response);
+        requestExecutor.handle(request, responseParcelable);
 
         final ServiceRequest serviceRequest = serviceRequestCaptor.getValue();
         assertThat(serviceRequest.getEntity(), sameInstance(marshalledEntity));
@@ -157,9 +155,9 @@ public class PostMethodPipelineTest {
         final Pack responseEntityPack = mock(Pack.class);
         when(packer.pack(responseEntity)).thenReturn(responseEntityPack);
 
-        requestExecutor.handle(request, response);
+        requestExecutor.handle(request, responseParcelable);
 
-        assertThat(response.getEntity(), sameInstance(responseEntityPack));
+        assertThat(responseParcelable.getEntity(), sameInstance(responseEntityPack));
     }
 
 }

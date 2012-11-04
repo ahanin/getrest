@@ -17,16 +17,18 @@
 package getrest.android.client.impl;
 
 import getrest.android.client.RequestCallback;
-import getrest.android.client.RequestFuture;
+import getrest.android.client.Response;
+import getrest.android.core.ResponseParcelable;
 import getrest.android.exception.GetrestRuntimeException;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
 
-class RequestFutureImpl implements RequestFuture {
+import javax.ws.rs.core.MultivaluedMap;
+
+class ResponseImpl<T> extends Response<T> {
 
     private String requestId;
     private Request request;
-    private Response response;
+    private ResponseParcelable responseParcelable;
 
     private boolean isPendingFired;
     private boolean isExecutingFired;
@@ -61,9 +63,9 @@ class RequestFutureImpl implements RequestFuture {
         this.callback = requestCallback;
     }
 
-    public void finish(Response response) {
+    public void finish(ResponseParcelable responseParcelable) {
         synchronized (this) {
-            this.response = response;
+            this.responseParcelable = responseParcelable;
             this.isFinished = true;
             synchronized (lock) {
                 lock.notifyAll();
@@ -71,17 +73,39 @@ class RequestFutureImpl implements RequestFuture {
         }
     }
 
-    public Response get() {
-        synchronized (this) {
-            synchronized (lock) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException ex) {
-                    throw new GetrestRuntimeException("Exception while trying to wait for response", ex);
+    public T getEntity() {
+        return (T) getResponseParcelable().getEntity().unpack();
+    }
+
+    private ResponseParcelable getResponseParcelable() {
+        waitFinished();
+        return responseParcelable;
+    }
+
+    @Override
+    public int getStatus() {
+        return getResponseParcelable().getStatus().getResponseCode();
+    }
+
+    @Override
+    public MultivaluedMap<String, Object> getMetadata() {
+        throw new UnsupportedOperationException();
+    }
+
+    private void waitFinished() {
+        if (!isFinished) {
+            synchronized (this) {
+                if (!isFinished) {
+                    synchronized (lock) {
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException ex) {
+                            throw new GetrestRuntimeException("Exception while trying to wait for response", ex);
+                        }
+                    }
                 }
             }
         }
-        return response;
     }
 
     public void firePending() {
@@ -122,22 +146,22 @@ class RequestFutureImpl implements RequestFuture {
         }
     }
 
-    public void fireFinished(final Response response) {
+    public void fireFinished(final ResponseParcelable responseParcelable) {
         synchronized (this) {
             if (callback != null && !isFinishedFired) {
-                doFireFinished(response);
+                doFireFinished(responseParcelable);
             }
         }
     }
 
-    private void doFireFinished(final Response response) {
+    private void doFireFinished(final ResponseParcelable responseParcelable) {
         try {
             if (!isExecutingFired) {
                 doFireExecuting();
             }
         } finally {
             try {
-                callback.onFinished(response);
+                callback.onFinished(responseParcelable);
             } finally {
                 isFinishedFired = true;
             }

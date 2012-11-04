@@ -27,7 +27,7 @@ import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestExecutor;
-import getrest.android.client.RequestFuture;
+import getrest.android.client.Response;
 import getrest.android.client.RequestRegistry;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
@@ -37,7 +37,7 @@ import getrest.android.core.Method;
 import getrest.android.core.Request;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import getrest.android.resource.ResourceContext;
 import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestStateChangeEventWrapper;
@@ -68,7 +68,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     private Handler callbackHandler = new Handler();
 
-    private final Map<String, RequestFutureImpl> futureMap = new ConcurrentHashMap<String, RequestFutureImpl>();
+    private final Map<String, ResponseImpl> futureMap = new ConcurrentHashMap<String, ResponseImpl>();
 
     private final WorkerQueue<RequestEventRecord> eventQueue = new WorkerQueue<RequestEventRecord>(
             new LinkedList<RequestEventRecord>(),
@@ -84,16 +84,16 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     /**
-     * Return {@link RequestFuture}. Unless client is started by calling {@link #replay()}, this method will return
+     * Return {@link getrest.android.client.Response}. Unless client is started by calling {@link #replay()}, this method will return
      * futures for currently executing requests, otherwise new synthetic future will be created and will be updated
      * once the client is started.
      *
      * @param requestId request id
-     * @return {@link RequestFuture} for currently executing requests
+     * @return {@link getrest.android.client.Response} for currently executing requests
      */
     @Override
-    public RequestFuture getRequestFuture(String requestId) {
-        final RequestFuture future;
+    public Response getRequestFuture(String requestId) {
+        final Response future;
         if (isStarted) {
             future = futureMap.get(requestId);
         } else {
@@ -102,7 +102,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         return future;
     }
 
-    private RequestFuture obtainStoredRequestFuture(final String requestId) {
+    private Response obtainStoredRequestFuture(final String requestId) {
         final RequestRegistry requestRegistry = getRequestRegistry();
         final RequestRegistry.Entry entry = requestRegistry.getEntry(requestId);
         if (entry == null) {
@@ -116,7 +116,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         return obtainRequestFuture(request);
     }
 
-    public RequestFuture execute(final Request request) {
+    public Response execute(final Request request) {
 
         final ResourceContext resourceContext = config.getResourceContext(request.getUri());
 
@@ -132,7 +132,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         editor.put(request);
         editor.commit();
 
-        final RequestFutureImpl requestFuture = obtainRequestFuture(request);
+        final ResponseImpl requestFuture = obtainRequestFuture(request);
 
         androidContext.startService(wrapper.asIntent());
 
@@ -153,10 +153,10 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         return requestRegistry.get();
     }
 
-    private RequestFutureImpl obtainRequestFuture(final Request request) {
+    private ResponseImpl obtainRequestFuture(final Request request) {
         final String requestId = request.getRequestId();
 
-        final RequestFutureImpl requestFuture = new RequestFutureImpl();
+        final ResponseImpl requestFuture = new ResponseImpl();
         requestFuture.setRequestId(requestId);
         requestFuture.setRequest(request);
 
@@ -179,7 +179,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
      * @param entry
      * @return
      */
-    private RequestFutureImpl obtainRequestFuture(final RequestRegistry.Entry entry) {
+    private ResponseImpl obtainRequestFuture(final RequestRegistry.Entry entry) {
         final Uri uri = entry.getResourceUri();
         final ResourceContext resourceContext = config.getResourceContext(uri);
         final RequestManager requestManager = resourceContext.getRequestManager();
@@ -214,7 +214,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     @Override
-    public <T> RequestFuture post(final Uri url, final T entity) {
+    public <T> Response post(final Uri url, final T entity) {
         return request(url)
                 .method(Method.POST)
                 .entity(entity)
@@ -222,13 +222,13 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     @Override
-    public RequestFuture get(Uri url) {
+    public Response get(Uri url) {
         // TODO implement GET method
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public RequestFuture delete(Uri url) {
+    public Response delete(Uri url) {
         // TODO implement DELETE method
         throw new UnsupportedOperationException();
     }
@@ -282,7 +282,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     public void handleRequestEvent(final RequestEventRecord eventRecord) {
         synchronized (futureMap) {
-            final RequestFutureImpl future = futureMap.get(eventRecord.getRequestId());
+            final ResponseImpl future = futureMap.get(eventRecord.getRequestId());
 
             final RequestStatus requestStatus = eventRecord.getRequestStatus();
             if (future == null) {
@@ -313,9 +313,9 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     private static class RequestPendingRunnable implements Runnable {
-        private final RequestFutureImpl future;
+        private final ResponseImpl future;
 
-        public RequestPendingRunnable(final RequestFutureImpl future) {
+        public RequestPendingRunnable(final ResponseImpl future) {
             this.future = future;
         }
 
@@ -325,9 +325,9 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     private static class RequestExecutingRunnable implements Runnable {
-        private final RequestFutureImpl future;
+        private final ResponseImpl future;
 
-        public RequestExecutingRunnable(final RequestFutureImpl future) {
+        public RequestExecutingRunnable(final ResponseImpl future) {
             this.future = future;
         }
 
@@ -338,11 +338,11 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     private static class RequestFinishedRunnable implements Runnable {
 
-        private final RequestFutureImpl future;
+        private final ResponseImpl future;
         private final RequestEventRecord eventRecord;
         private RestfulClientImpl client;
 
-        public RequestFinishedRunnable(final RequestFutureImpl future, final RequestEventRecord eventRecord,
+        public RequestFinishedRunnable(final ResponseImpl future, final RequestEventRecord eventRecord,
                                        final RestfulClientImpl client) {
             this.future = future;
             this.eventRecord = eventRecord;
@@ -352,7 +352,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         public void run() {
             final String requestId = eventRecord.getRequestId();
             try {
-                future.fireFinished(eventRecord.<Response>getData());
+                future.fireFinished(eventRecord.<ResponseParcelable>getData());
             } finally {
                 // TODO rewrite in a nicer manner here
                 client.releaseRequest(requestId);
@@ -362,9 +362,9 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     private class RequestErrorRunnable implements Runnable {
 
-        private final RequestFutureImpl future;
+        private final ResponseImpl future;
 
-        public RequestErrorRunnable(final RequestFutureImpl future) {
+        public RequestErrorRunnable(final ResponseImpl future) {
             this.future = future;
         }
 
@@ -418,7 +418,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
             return this;
         }
 
-        public RequestFuture execute() {
+        public Response execute() {
             if (this.uri == null) {
                 throw new IllegalStateException("URI is not set");
             }

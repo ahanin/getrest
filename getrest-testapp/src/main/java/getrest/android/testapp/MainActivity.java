@@ -12,10 +12,10 @@ import android.widget.Button;
 import android.widget.Toast;
 import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
-import getrest.android.client.RequestFuture;
+import getrest.android.client.Response;
 import getrest.android.core.Method;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 
 /**
  * @author aha
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
                 values.put("title", "Groceries");
                 values.put("note", "Tomatoes\nMeat\nFish\n");
 
-                final RequestFuture future = restfulClient.request(Uri.parse("http://10.0.2.2:8080/note"))
+                final Response future = restfulClient.request(Uri.parse("http://10.0.2.2:8080/note"))
                         .method(Method.POST)
                         .entity(values)
                         .execute();
@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
                         Toast.makeText(MainActivity.this, "Error :(\n" + request.getError(), Toast.LENGTH_SHORT).show();
                     }
 
-                    public void onFinished(final Response request) {
+                    public void onFinished(final ResponseParcelable request) {
                         Toast.makeText(MainActivity.this, "Finished :)", Toast.LENGTH_SHORT).show();
                     }
                 });

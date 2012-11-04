@@ -24,7 +24,7 @@ import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import getrest.android.resource.ResourceContext;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class RequestJob implements Runnable {
     public void run() {
         final String requestId = request.getRequestId();
 
-        final Response response = new Response();
+        final ResponseParcelable responseParcelable = new ResponseParcelable();
         final ResourceContext resourceContext = requestContext.getResourceContext();
 
         final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
@@ -68,8 +68,8 @@ public class RequestJob implements Runnable {
         requestEventBus.fireExecuting(requestId);
 
         try {
-            requestHandler.handle(request, response);
-            requestManager.saveResponse(requestId, response);
+            requestHandler.handle(request, responseParcelable);
+            requestManager.saveResponse(requestId, responseParcelable);
             requestManager.setRequestState(requestId, RequestStatus.FINISHED);
             requestEventBus.fireFinished(requestId);
         } catch (HandlerException e) {

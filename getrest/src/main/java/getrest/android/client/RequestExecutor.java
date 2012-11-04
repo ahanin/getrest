@@ -19,6 +19,6 @@ import getrest.android.core.Request;
 
 public interface RequestExecutor {
 
-    RequestFuture execute(Request request);
+    Response execute(Request request);
 
 }

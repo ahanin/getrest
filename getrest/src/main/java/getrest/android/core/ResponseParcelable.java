@@ -24,7 +24,7 @@ import android.os.Parcelable;
  * @author aha
  * @since 2012-01-13
  */
-public class Response implements Parcelable, HasHeaders {
+public class ResponseParcelable implements Parcelable, HasHeaders {
 
     private Uri uri;
     private Pack entity;
@@ -58,18 +58,18 @@ public class Response implements Parcelable, HasHeaders {
         parcel.writeInt(status.getResponseCode());
     }
 
-    public static final Creator<Response> CREATOR = new Creator<Response>() {
-        public Response createFromParcel(final Parcel parcel) {
-            final Response response = new Response();
-            response.uri = parcel.readParcelable(Uri.class.getClassLoader());
-            response.entity = parcel.readParcelable(Pack.class.getClassLoader());
-            HeadersHelper.readFromParcel(parcel, response.headers);
-            response.status = Status.forResponseCode(parcel.readInt());
-            return response;
+    public static final Creator<ResponseParcelable> CREATOR = new Creator<ResponseParcelable>() {
+        public ResponseParcelable createFromParcel(final Parcel parcel) {
+            final ResponseParcelable responseParcelable = new ResponseParcelable();
+            responseParcelable.uri = parcel.readParcelable(Uri.class.getClassLoader());
+            responseParcelable.entity = parcel.readParcelable(Pack.class.getClassLoader());
+            HeadersHelper.readFromParcel(parcel, responseParcelable.headers);
+            responseParcelable.status = Status.forResponseCode(parcel.readInt());
+            return responseParcelable;
         }
 
-        public Response[] newArray(final int size) {
-            return new Response[size];
+        public ResponseParcelable[] newArray(final int size) {
+            return new ResponseParcelable[size];
         }
     };
 

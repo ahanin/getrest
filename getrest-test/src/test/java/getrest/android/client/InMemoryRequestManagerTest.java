@@ -17,7 +17,7 @@ package getrest.android.client;
 
 import getrest.android.core.Request;
 import getrest.android.request.RequestStatus;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,9 +70,9 @@ public class InMemoryRequestManagerTest {
 
     @Test
     public void testShouldNotSaveResponseBeforeRequestAcknowledged() throws Exception {
-        final Response response = mock(Response.class);
+        final ResponseParcelable responseParcelable = mock(ResponseParcelable.class);
         try {
-            requestManager.saveResponse("12345", response);
+            requestManager.saveResponse("12345", responseParcelable);
             fail("Must raise " + IllegalStateException.class.getName());
         } catch (IllegalStateException ex) {
             // expected behaviour
@@ -85,10 +85,10 @@ public class InMemoryRequestManagerTest {
         when(request.getRequestId()).thenReturn("12345");
         requestManager.saveRequest(request);
 
-        final Response response = mock(Response.class);
-        requestManager.saveResponse("12345", response);
+        final ResponseParcelable responseParcelable = mock(ResponseParcelable.class);
+        requestManager.saveResponse("12345", responseParcelable);
 
-        assertThat(requestManager.getResponse("12345"), sameInstance(response));
+        assertThat(requestManager.getResponse("12345"), sameInstance(responseParcelable));
     }
 
     @Test

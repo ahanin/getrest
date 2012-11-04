@@ -20,7 +20,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import getrest.android.client.RequestCallbackFactory;
-import getrest.android.client.RequestFuture;
+import getrest.android.client.Response;
 import getrest.android.client.impl.RestfulClientImpl;
 import getrest.android.core.Method;
 
@@ -87,7 +87,7 @@ public abstract class RestfulClient {
      * @param entity entity object to be posted
      * @return unique request id
      */
-    public abstract <T> RequestFuture post(Uri url, T entity);
+    public abstract <T> Response post(Uri url, T entity);
 
     /**
      * Pushes a GET request for processing.
@@ -95,7 +95,7 @@ public abstract class RestfulClient {
      * @param url resource url
      * @return unique request id
      */
-    public abstract RequestFuture get(Uri url);
+    public abstract Response get(Uri url);
 
     /**
      * Pushes a DELETE request for processing.
@@ -103,7 +103,7 @@ public abstract class RestfulClient {
      * @param url resource url
      * @return unique request id
      */
-    public abstract RequestFuture delete(Uri url);
+    public abstract Response delete(Uri url);
 
     /**
      * Create new instance of {@link RestfulClient} and attaches it to the given {@link Context}. When client object is
@@ -158,7 +158,7 @@ public abstract class RestfulClient {
      */
     public abstract void start();
 
-    public abstract RequestFuture getRequestFuture(String requestId);
+    public abstract Response getRequestFuture(String requestId);
 
     public interface RequestBuilder {
 
@@ -170,7 +170,7 @@ public abstract class RestfulClient {
 
         <T> RequestBuilder entity(T entity);
 
-        RequestFuture execute();
+        Response execute();
 
     }
 }

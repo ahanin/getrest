@@ -17,7 +17,7 @@ package getrest.android.request;
 
 import getrest.android.core.ErrorState;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 
 public interface RequestManager {
 
@@ -25,9 +25,9 @@ public interface RequestManager {
 
     Request getRequest(String requestId);
 
-    void saveResponse(final String requestId, Response response);
+    void saveResponse(final String requestId, ResponseParcelable responseParcelable);
 
-    Response getResponse(String requestId);
+    ResponseParcelable getResponse(String requestId);
 
     void setRequestState(String requestId, RequestStatus status);
 

@@ -17,7 +17,7 @@ package getrest.android.client.impl;
 
 import getrest.android.client.RequestCallback;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -31,11 +31,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 public class RequestFutureImplTest {
 
-    private RequestFutureImpl requestFuture;
+    private ResponseImpl requestFuture;
 
     @Before
     public void setUp() throws Exception {
-        requestFuture = new RequestFutureImpl();
+        requestFuture = new ResponseImpl();
     }
 
     @Test
@@ -67,10 +67,10 @@ public class RequestFutureImplTest {
         final RequestCallback callback = mock(RequestCallback.class);
         requestFuture.setRequestCallback(callback);
 
-        final Response response = mock(Response.class);
-        requestFuture.fireFinished(response);
+        final ResponseParcelable responseParcelable = mock(ResponseParcelable.class);
+        requestFuture.fireFinished(responseParcelable);
 
-        verify(callback).onFinished(response);
+        verify(callback).onFinished(responseParcelable);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class RequestFutureImplTest {
 
         verify(callback).onPending(any(Request.class));
         verify(callback, never()).onExecuting(any(Request.class));
-        verify(callback, never()).onFinished(any(Response.class));
+        verify(callback, never()).onFinished(any(ResponseParcelable.class));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class RequestFutureImplTest {
 
         inOrder.verify(callback).onPending(any(Request.class));
         inOrder.verify(callback).onExecuting(any(Request.class));
-        verify(callback, never()).onFinished(any(Response.class));
+        verify(callback, never()).onFinished(any(ResponseParcelable.class));
     }
 
     @Test
@@ -106,11 +106,11 @@ public class RequestFutureImplTest {
 
         final InOrder inOrder = inOrder(callback);
 
-        requestFuture.fireFinished(mock(Response.class));
+        requestFuture.fireFinished(mock(ResponseParcelable.class));
 
         inOrder.verify(callback).onPending(any(Request.class));
         inOrder.verify(callback).onExecuting(any(Request.class));
-        inOrder.verify(callback).onFinished(any(Response.class));
+        inOrder.verify(callback).onFinished(any(ResponseParcelable.class));
     }
 
     @Test
@@ -120,11 +120,11 @@ public class RequestFutureImplTest {
 
         requestFuture.firePending();
         requestFuture.fireExecuting();
-        requestFuture.fireFinished(mock(Response.class));
+        requestFuture.fireFinished(mock(ResponseParcelable.class));
 
         verify(callback).onPending(any(Request.class));
         verify(callback).onExecuting(any(Request.class));
-        verify(callback).onFinished(any(Response.class));
+        verify(callback).onFinished(any(ResponseParcelable.class));
 
         verifyNoMoreInteractions(callback);
     }

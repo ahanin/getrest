@@ -13,29 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.resource.impl;
 
+import android.content.ContentValues;
 import getrest.android.resource.Marshaller;
-import getrest.android.resource.Packer;
-import getrest.android.executor.RequestHandlerFactory;
-import getrest.android.request.RequestManager;
-import getrest.android.resource.ResourceContext;
 import getrest.android.service.Representation;
 
-public interface ResourceContextContribution {
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-    ResourceContext getResourceContext();
+public class MarshallerImpl implements Marshaller<Object, Representation> {
 
-    void setPacker(Packer packer);
+    public Representation marshal(final Object source) {
+        return new Representation() {
+            public InputStream getContent() throws IOException {
+                return new ByteArrayInputStream(new byte[0]);
+            }
+        };
+    }
 
-    <T> void setMarshaller(Marshaller<T, Representation> marshaller);
-
-    void setRequestHandlerFactory(RequestHandlerFactory requestHandler);
-
-    void setRequestManager(RequestManager requestManager);
-
-    <T> void setResourceType(Class<T> resourceType);
-
-    void setContentType(String contentType);
-
+    public Object unmarshal(final Representation entity) {
+        return new ContentValues();
+    }
 }

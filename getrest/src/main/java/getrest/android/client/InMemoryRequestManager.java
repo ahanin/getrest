@@ -37,7 +37,7 @@ public class InMemoryRequestManager implements RequestManager {
     private final Map<String, RequestStatus> stateMap = new ConcurrentHashMap<String, RequestStatus>();
 
     private final Map<String, WeakValue<Request>> requestMap = new HashMap<String, WeakValue<Request>>();
-    private final Map<String, WeakValue<Response>> responseMap = new HashMap<String, WeakValue<Response>>();
+    private final Map<String, WeakValue<ResponseParcelable>> responseMap = new HashMap<String, WeakValue<ResponseParcelable>>();
 
     private final ReferenceQueue<Object> gcQueue = new ReferenceQueue<Object>();
 
@@ -81,10 +81,10 @@ public class InMemoryRequestManager implements RequestManager {
                         final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
                         candidateEntry.setRequest((Request) obj);
                         candidateEntry.setLastAccessedTime(now);
-                    } else if (obj instanceof Response) {
+                    } else if (obj instanceof ResponseParcelable) {
                         final String requestId = ref.getRequestId();
                         final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
-                        candidateEntry.setResponse((Response) obj);
+                        candidateEntry.setResponseParcelable((ResponseParcelable) obj);
                         candidateEntry.setLastAccessedTime(now);
                     }
                 }
@@ -149,18 +149,18 @@ public class InMemoryRequestManager implements RequestManager {
         return entry != null ? entry.get() : null;
     }
 
-    public void saveResponse(final String requestId, final Response response) {
+    public void saveResponse(final String requestId, final ResponseParcelable responseParcelable) {
         synchronized (requestMap) {
             final Request request = getRequest(requestId);
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
             }
-            responseMap.put(requestId, new WeakValue<Response>(requestId, response, gcQueue));
+            responseMap.put(requestId, new WeakValue<ResponseParcelable>(requestId, responseParcelable, gcQueue));
         }
     }
 
-    public Response getResponse(final String requestId) {
-        final WeakValue<Response> entry = responseMap.get(requestId);
+    public ResponseParcelable getResponse(final String requestId) {
+        final WeakValue<ResponseParcelable> entry = responseMap.get(requestId);
         return entry == null ? null : entry.get();
     }
 
@@ -195,7 +195,7 @@ public class InMemoryRequestManager implements RequestManager {
     private class CandidateEntry {
 
         private Request request;
-        private Response response;
+        private ResponseParcelable responseParcelable;
         private long lastAccessedTime;
 
         public Request getRequest() {
@@ -206,12 +206,12 @@ public class InMemoryRequestManager implements RequestManager {
             this.request = request;
         }
 
-        public Response getResponse() {
-            return response;
+        public ResponseParcelable getResponseParcelable() {
+            return responseParcelable;
         }
 
-        public void setResponse(final Response response) {
-            this.response = response;
+        public void setResponseParcelable(final ResponseParcelable responseParcelable) {
+            this.responseParcelable = responseParcelable;
         }
 
         public long getLastAccessedTime() {

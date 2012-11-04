@@ -15,11 +15,9 @@
  */
 package getrest.android.config;
 
-import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 import getrest.android.client.InMemoryRequestManager;
-import getrest.android.resource.Marshaller;
 import getrest.android.core.Pack;
 import getrest.android.resource.Packer;
 import getrest.android.executor.RequestHandler;
@@ -30,13 +28,9 @@ import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
 import getrest.android.resource.ResourceContext;
-import getrest.android.service.Representation;
+import getrest.android.resource.impl.MarshallerImpl;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 public final class DefaultContributor implements ResourceContextContributor {
 
@@ -48,7 +42,7 @@ public final class DefaultContributor implements ResourceContextContributor {
 
     public void contribute(final ResourceContextContribution contribution) {
         contribution.setPacker(new ParcelablePacker());
-        contribution.setMarshaller(new TempMarshallerImpl());
+        contribution.setMarshaller(new MarshallerImpl());
         contribution.setRequestHandlerFactory(new HttpRequestHandlerFactory(config));
         contribution.setRequestManager(new InMemoryRequestManager());
     }
@@ -106,20 +100,6 @@ public final class DefaultContributor implements ResourceContextContributor {
             }
         }
 
-    }
-
-    private static class TempMarshallerImpl implements Marshaller<ContentValues, Representation> {
-        public Representation marshal(final ContentValues source) {
-            return new Representation() {
-                public InputStream getContent() throws IOException {
-                    return new ByteArrayInputStream(new byte[0]);
-                }
-            };
-        }
-
-        public ContentValues unmarshal(final Representation entity) {
-            return new ContentValues();
-        }
     }
 
     private static class HttpRequestHandlerFactory implements RequestHandlerFactory {

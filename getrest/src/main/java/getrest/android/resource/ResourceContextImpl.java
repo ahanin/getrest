@@ -29,6 +29,8 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
     private Marshaller marshaller;
     private RequestHandlerFactory requestHandlerFactory;
     private RequestManager requestManager;
+    private String contentType;
+    private Class<?> resourceType;
 
     public RequestContext getRequestContext(Request request) {
         final DefaultRequestContext requestContext = new DefaultRequestContext();
@@ -36,6 +38,10 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
         requestContext.setMarshaller(marshaller);
         requestContext.setResourceContext(this);
         return requestContext;
+    }
+
+    public ResourceContext getResourceContext() {
+        return this;
     }
 
     public void setPacker(final Packer packer) {
@@ -64,6 +70,23 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
 
     public void setRequestManager(final RequestManager requestManager) {
         this.requestManager = requestManager;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Class<T> getResourceType() {
+        return (Class<T>) resourceType;
+    }
+
+    public <T> void setResourceType(final Class<T> resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(final String contentType) {
+        this.contentType = contentType;
     }
 
     public RequestManager getRequestManager() {

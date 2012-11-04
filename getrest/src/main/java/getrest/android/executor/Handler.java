@@ -18,8 +18,8 @@ package getrest.android.executor;
 
 import getrest.android.core.HandlerException;
 import getrest.android.core.Request;
-import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 
 public interface Handler {
-    void handle(Request request, Response response) throws HandlerException;
+    void handle(Request request, ResponseParcelable responseParcelable) throws HandlerException;
 }

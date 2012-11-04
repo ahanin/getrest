@@ -19,9 +19,9 @@ package getrest.android.executor;
 import getrest.android.core.HandlerException;
 import getrest.android.core.Method;
 import getrest.android.core.Request;
+import getrest.android.core.ResponseParcelable;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.core.Response;
 import getrest.android.service.ServiceRequestExecutor;
 
 /**
@@ -48,7 +48,7 @@ public class RequestHandlerImpl implements RequestHandler {
         this.serviceRequestExecutor = serviceRequestExecutor;
     }
 
-    public void handle(final Request request, final Response response) throws HandlerException {
+    public void handle(final Request request, final ResponseParcelable responseParcelable) throws HandlerException {
         final Method method = request.getMethod();
 
         if (method == null) {
@@ -77,7 +77,7 @@ public class RequestHandlerImpl implements RequestHandler {
             throw new IllegalArgumentException("Request method is unsupported: " + method.getName());
         }
 
-        pipeline.handle(request, response);
+        pipeline.handle(request, responseParcelable);
     }
 
 }

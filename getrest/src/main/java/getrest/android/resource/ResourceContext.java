@@ -40,4 +40,7 @@ public interface ResourceContext {
 
     RequestManager getRequestManager();
 
+    String getContentType();
+
+    <T> Class<T> getResourceType();
 }
