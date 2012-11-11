@@ -1,7 +1,7 @@
 /**
  * Copyright
  */
-package getrest.android.test;
+package getrest.android.robolectric;
 
 public class R {
 }

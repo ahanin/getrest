@@ -18,6 +18,7 @@ package getrest.android.config;
 import android.os.Parcel;
 import android.os.Parcelable;
 import getrest.android.client.InMemoryRequestManager;
+import getrest.android.core.Loggers;
 import getrest.android.core.Pack;
 import getrest.android.resource.Packer;
 import getrest.android.executor.RequestHandler;
@@ -28,9 +29,8 @@ import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
 import getrest.android.resource.ResourceContext;
-import getrest.android.resource.impl.MarshallerImpl;
+import getrest.android.resource.impl.MessageBodyWriterImpl;
 import getrest.android.util.Logger;
-import getrest.android.util.LoggerFactory;
 
 public final class DefaultContributor implements ResourceContextContributor {
 
@@ -42,7 +42,7 @@ public final class DefaultContributor implements ResourceContextContributor {
 
     public void contribute(final ResourceContextContribution contribution) {
         contribution.setPacker(new ParcelablePacker());
-        contribution.setMarshaller(new MarshallerImpl());
+        contribution.setMessageBodyWriter(new MessageBodyWriterImpl());
         contribution.setRequestHandlerFactory(new HttpRequestHandlerFactory(config));
         contribution.setRequestManager(new InMemoryRequestManager());
     }
@@ -138,7 +138,7 @@ public final class DefaultContributor implements ResourceContextContributor {
      */
     private static class DefaultRequestLifecycle implements RequestLifecycle {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
+        private static final Logger LOGGER = Loggers.getServiceLogger();
 
         private RequestContext requestContext;
 

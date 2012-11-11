@@ -18,5 +18,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           android:versionCode="1"
           android:versionName="0.0.1"
-          package="getrest.android.test">
+          package="getrest.android.robolectric">
 </manifest>

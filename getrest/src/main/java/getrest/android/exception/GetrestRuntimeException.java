@@ -18,6 +18,8 @@ package getrest.android.exception;
 
 public class GetrestRuntimeException extends RuntimeException {
 
+    private static final long serialVersionUID = 7954094523100669117L;
+
     public GetrestRuntimeException(final String message) {
         super(message);
     }

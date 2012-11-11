@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import getrest.android.client.RequestRegistry;
+import getrest.android.core.Loggers;
 import getrest.android.util.Logger;
 import getrest.android.util.LoggerFactory;
 
@@ -36,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class RequestRegistryPreferencesImpl implements RequestRegistry, TransactionalRequestEntryStorage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
+    private static final Logger LOGGER = Loggers.getClientLogger();
 
     static final String ENTRIES = "getrest.android.client.impl.RequestRegistryPreferencesImpl.ENTRIES";
 

@@ -89,6 +89,7 @@
 
     <modules>
         <module>getrest</module>
+        <module>getrest-jaxrs</module>
         <module>getrest-test</module>
         <module>getrest-testapp</module>
         <module>getrest-it</module>

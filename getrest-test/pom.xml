@@ -16,6 +16,7 @@
 
     <properties>
         <robolectric.version>1.1</robolectric.version>
+        <robolectric.logging>stdout</robolectric.logging>
     </properties>
 
     <dependencies>
@@ -43,8 +44,20 @@
         <dependency>
             <groupId>getrest</groupId>
             <artifactId>getrest</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>getrest</groupId>
+            <artifactId>getrest-jaxrs</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

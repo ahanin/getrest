@@ -21,7 +21,7 @@ import getrest.android.core.Request;
 
 /**
  * Used in {@link RestfulClient} to implicitly create {@link RequestCallback}s and attach them to corresponding
- * {@link Response}s.
+ * {@link getrest.android.core.Response}s.
  */
 public interface RequestCallbackFactory {
 

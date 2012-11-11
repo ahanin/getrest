@@ -18,6 +18,7 @@ package getrest.android.resource;
 
 import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.core.Request;
+import getrest.android.ext.MessageBodyWriter;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.service.Representation;
@@ -34,13 +35,12 @@ public interface ResourceContext {
 
     Packer getPacker();
 
-    <T> Marshaller<T, Representation> getMarshaller();
+    <T> MessageBodyWriter<T> getMessageBodyWriter();
 
     RequestHandlerFactory getRequestHandlerFactory();
 
     RequestManager getRequestManager();
 
-    String getContentType();
-
     <T> Class<T> getResourceType();
+
 }

@@ -13,32 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package getrest.android.core;
 
-package getrest.android.client;
+import getrest.android.client.RequestCallback;
 
-import getrest.android.core.Request;
-import getrest.android.core.ResponseParcelable;
 
-import java.util.concurrent.Future;
-
-public abstract class Response<T> extends javax.ws.rs.core.Response {
+public abstract class Response<T> {
 
     public abstract String getRequestId();
 
     /**
-     * Set {@link RequestCallback} that will receive {@link Request} event notifications.
+     * Set {@link getrest.android.client.RequestCallback} that will receive {@link Request} event notifications.
      *
-     * @param requestCallback instance of {@link RequestCallback} to receive notifications
+     * @param requestCallback instance of {@link getrest.android.client.RequestCallback} to receive notifications
      */
     public abstract void setRequestCallback(RequestCallback requestCallback);
 
     public abstract boolean isFinished();
 
     /**
-     * Return {@link getrest.android.core.ResponseParcelable}. Calling thread will be blocked until the request is finished with any result.
+     * Return response entity. Calling thread will be blocked until the request is finished with any result.
      *
      * @return {@link getrest.android.core.ResponseParcelable}
      */
     public abstract T getEntity();
-
 }

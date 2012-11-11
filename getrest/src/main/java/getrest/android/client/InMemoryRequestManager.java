@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryRequestManager implements RequestManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.reqman");
+    private static final Logger LOGGER = Loggers.getRequestManagerLogger();
 
     private final Map<String, RequestStatus> stateMap = new ConcurrentHashMap<String, RequestStatus>();
 

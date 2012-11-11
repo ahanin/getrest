@@ -22,6 +22,7 @@ public class BaseRequest implements HasHeaders {
     private String requestId;
     private Uri uri;
     private Method method;
+    private MediaType mediaType;
     private Headers headers = new Headers();
 
     public BaseRequest() {
@@ -31,6 +32,7 @@ public class BaseRequest implements HasHeaders {
         this.requestId = request.getRequestId();
         this.uri = request.getUri();
         this.method = request.getMethod();
+        this.mediaType = request.getMediaType();
         this.headers = new Headers(request.getHeaders());
     }
 
@@ -56,6 +58,14 @@ public class BaseRequest implements HasHeaders {
 
     public void setMethod(final Method method) {
         this.method = method;
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(final MediaType mediaType) {
+        this.mediaType = mediaType;
     }
 
     public Headers getHeaders() {

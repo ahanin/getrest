@@ -13,34 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.executor;
 
 import getrest.android.core.HandlerException;
+import getrest.android.core.Headers;
+import getrest.android.core.Loggers;
 import getrest.android.core.Pack;
 import getrest.android.core.Request;
 import getrest.android.core.ResponseParcelable;
+
+import getrest.android.ext.MessageBodyWriter;
+
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestLifecycle;
-import getrest.android.resource.Marshaller;
+
 import getrest.android.service.Representation;
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;
 import getrest.android.service.ServiceResponse;
-import getrest.android.util.Logger;
-import getrest.android.util.LoggerFactory;
 
+import getrest.android.util.Logger;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 // TODO transform to a general-purpose request handler
 class PostMethodPipeline implements RequestPipeline {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
-
+    private static final Logger LOGGER = Loggers.getServiceLogger();
     private RequestLifecycle requestLifecycle;
-
     private RequestContext requestContext;
-
     private ServiceRequestExecutor serviceRequestExecutor;
 
     public void setRequestLifecycle(final RequestLifecycle requestLifecycle) {
@@ -51,12 +52,13 @@ class PostMethodPipeline implements RequestPipeline {
         this.requestContext = requestContext;
     }
 
-    public void setServiceRequestExecutor(final ServiceRequestExecutor serviceRequestExecutor) {
+    public void setServiceRequestExecutor(
+        final ServiceRequestExecutor serviceRequestExecutor) {
         this.serviceRequestExecutor = serviceRequestExecutor;
     }
 
-    public void handle(final Request request, final ResponseParcelable responseParcelable) throws HandlerException {
-
+    public void handle(final Request request,
+        final ResponseParcelable responseParcelable) throws HandlerException {
         final ServiceRequest serviceRequest = new ServiceRequest(request);
 
         // marshal entity, if needed
@@ -64,12 +66,13 @@ class PostMethodPipeline implements RequestPipeline {
 
         if (request.getEntity() != null) {
             try {
-                final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
-                final Representation representation = marshaller.marshal(request.getEntity().unpack());
+                final Representation representation = getRepresentation(request);
+
                 serviceRequest.setEntity(representation);
             } catch (Exception ex) {
                 LOGGER.error("Exception while marshalling entity", ex);
-                throw new HandlerException("Exception while marshalling entity", ex);
+                throw new HandlerException("Exception while marshalling entity",
+                    ex);
             }
         }
 
@@ -77,6 +80,7 @@ class PostMethodPipeline implements RequestPipeline {
 
         // execute request
         final ServiceResponse serviceResponse = new ServiceResponse();
+
         try {
             serviceRequestExecutor.execute(serviceRequest, serviceResponse);
         } catch (IOException ex) {
@@ -88,16 +92,32 @@ class PostMethodPipeline implements RequestPipeline {
 
         if (serviceResponse.getEntity() != null) {
             try {
-                final Marshaller<Object, Representation> marshaller = requestContext.getMarshaller();
-                final Object resultUnmarshalled = marshaller.unmarshal(serviceResponse.getEntity());
-                final Pack result = requestContext.getPacker().pack(resultUnmarshalled);
+                final MessageBodyWriter<Representation> messageBodyWriter =
+                    requestContext.getMessageBodyWriter();
+                final Object resultUnmarshalled = messageBodyWriter.unmarshal(serviceResponse.getEntity());
+                final Pack result = requestContext.getPacker()
+                                                  .pack(resultUnmarshalled);
+
                 responseParcelable.setEntity(result);
             } catch (Exception ex) {
                 LOGGER.error("Exception while unmarshalling entity", ex);
-                throw new HandlerException("Exception while marshalling entity", ex);
+                throw new HandlerException("Exception while marshalling entity",
+                    ex);
             }
         }
 
         requestLifecycle.afterUnmarshal();
+    }
+
+    private Representation getRepresentation(final Request request) {
+        final MessageBodyWriter<Representation> messageBodyWriter = requestContext.getMessageBodyWriter();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        final Headers headers = new Headers();
+
+        messageBodyWriter.write(request.getEntity().unpack(),
+            request.getMediaType(), headers, outputStream);
+
+        return new ByteArrayBufferRepresentation(outputStream.toByteArray());
     }
 }

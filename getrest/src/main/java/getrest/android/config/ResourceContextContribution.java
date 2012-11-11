@@ -15,7 +15,7 @@
  */
 package getrest.android.config;
 
-import getrest.android.resource.Marshaller;
+import getrest.android.ext.MessageBodyWriter;
 import getrest.android.resource.Packer;
 import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.request.RequestManager;
@@ -28,7 +28,7 @@ public interface ResourceContextContribution {
 
     void setPacker(Packer packer);
 
-    <T> void setMarshaller(Marshaller<T, Representation> marshaller);
+    <T> void setMessageBodyWriter(MessageBodyWriter<Representation> messageBodyWriter);
 
     void setRequestHandlerFactory(RequestHandlerFactory requestHandler);
 

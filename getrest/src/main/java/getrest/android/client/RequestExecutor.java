@@ -17,8 +17,8 @@ package getrest.android.client;
 
 import getrest.android.core.Request;
 
-public interface RequestExecutor {
+public interface RequestExecutor<R> {
 
-    Response execute(Request request);
+    R execute(Request request);
 
 }

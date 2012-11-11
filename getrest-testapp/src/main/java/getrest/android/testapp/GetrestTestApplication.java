@@ -16,13 +16,19 @@
 package getrest.android.testapp;
 
 import android.app.Application;
+import getrest.android.Getrest;
 import getrest.android.config.Config;
 import getrest.android.config.HasConfig;
 
 public class GetrestTestApplication extends Application implements HasConfig {
 
     public Config getGetrestConfig() {
-        return new Config().configure("http://10.0.2.2");
+        final Config.ConfigBuilder config = Getrest.newConfigBuilder();
+
+        final Config.ApplicationBuilder twitter = Getrest.newApplicationBuilder();
+        config.addApplication(twitter.build());
+
+        return config.build();
     }
 
 }

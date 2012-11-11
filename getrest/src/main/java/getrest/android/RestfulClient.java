@@ -20,9 +20,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
 import getrest.android.client.RequestCallbackFactory;
-import getrest.android.client.Response;
 import getrest.android.client.impl.RestfulClientImpl;
 import getrest.android.core.Method;
+import getrest.android.core.Response;
+import getrest.android.util.TypeLiteral;
 
 /**
  * @author aha
@@ -30,16 +31,16 @@ import getrest.android.core.Method;
  */
 public abstract class RestfulClient {
 
-    private String baseUrl;
+    private String base;
 
     private RequestCallbackFactory requestCallbackFactory;
 
-    public String getBaseUrl() {
-        return baseUrl;
+    public String getBase() {
+        return base;
     }
 
-    public void setBaseUrl(final String baseUrl) {
-        this.baseUrl = baseUrl;
+    public void setBase(final String baseUrl) {
+        this.base = baseUrl;
     }
 
     protected abstract void init(Context context);
@@ -52,58 +53,33 @@ public abstract class RestfulClient {
     /**
      * Build a request.
      *
-     * @param uri@return {@link RequestBuilder} instance, on which {@link getrest.android.RestfulClient.RequestBuilder#execute()}
-     * can be called to execute request
+     * @param uri@return {@link getrest.android.RestfulClient.RequestAutomate} instance, on which {@link getrest.android.RestfulClient.RequestAutomate#execute()}
+     *                   can be called to execute request
      */
-    public abstract RequestBuilder request(Uri uri);
+    public abstract RequestAutomate request(Uri uri);
 
     /**
-     * Build a request to a path resource.
+     * Create request with path.
      *
      * @param path
      * @return
      */
-    public RequestBuilder request(String path) {
+    public <R> RequestAutomate<R> newRequest(String path) {
         return request(buildUri(path));
     }
 
     private Uri buildUri(final String path) {
-        return this.baseUrl == null ? Uri.parse(path) : Uri.parse(gluePath(baseUrl, path));
+        return this.base == null ? Uri.parse(path) : Uri.parse(gluePath(base, path));
     }
 
     private String gluePath(final String baseUrl, final String path) {
         final StringBuilder sb = new StringBuilder(baseUrl);
-        if (sb.charAt(sb.length()-1) != '/' && !path.startsWith("/")) {
+        if (sb.charAt(sb.length() - 1) != '/' && !path.startsWith("/")) {
             sb.append('/');
         }
         sb.append(path);
         return sb.toString();
     }
-
-    /**
-     * Pushes a POST request for processing.
-     *
-     * @param url    resource url
-     * @param entity entity object to be posted
-     * @return unique request id
-     */
-    public abstract <T> Response post(Uri url, T entity);
-
-    /**
-     * Pushes a GET request for processing.
-     *
-     * @param url resource url
-     * @return unique request id
-     */
-    public abstract Response get(Uri url);
-
-    /**
-     * Pushes a DELETE request for processing.
-     *
-     * @param url resource url
-     * @return unique request id
-     */
-    public abstract Response delete(Uri url);
 
     /**
      * Create new instance of {@link RestfulClient} and attaches it to the given {@link Context}. When client object is
@@ -115,6 +91,21 @@ public abstract class RestfulClient {
      */
     public static RestfulClient getInstance(Context context) {
         final RestfulClient client = new RestfulClientImpl();
+        client.init(context);
+        return client;
+    }
+
+    public static RestfulClient getInstance(Context context, Object applicationId) {
+        final RestfulClient client = new RestfulClientImpl(applicationId);
+        final String applicationBase = "/"; // TODO retrieve preconfigured application's base uri
+        client.setBase(applicationBase);
+        client.init(context);
+        return client;
+    }
+
+    public static RestfulClient getInstance(Context context, String base, Object applicationId) {
+        final RestfulClient client = new RestfulClientImpl(applicationId);
+        client.setBase(base);
         client.init(context);
         return client;
     }
@@ -158,19 +149,23 @@ public abstract class RestfulClient {
      */
     public abstract void start();
 
-    public abstract Response getRequestFuture(String requestId);
+    public abstract Response getResponse(String requestId);
 
-    public interface RequestBuilder {
+    public interface RequestAutomate<R> {
 
-        RequestBuilder uri(Uri uri);
+        RequestAutomate<R> withUri(Uri uri);
 
-        RequestBuilder method(Method method);
+        RequestAutomate<R> withMethod(Method method);
 
-        RequestBuilder header(String name, String value);
+        RequestAutomate<R> withHeader(String name, String value);
 
-        <T> RequestBuilder entity(T entity);
+        <T> RequestAutomate<R> withEntity(T entity);
 
-        Response execute();
+        <T> RequestAutomate<T> withResponseType(Class<T> responseType);
+
+        <T> RequestAutomate<T> withResponseType(TypeLiteral<T> typeLiteral);
+
+        R execute();
 
     }
 }

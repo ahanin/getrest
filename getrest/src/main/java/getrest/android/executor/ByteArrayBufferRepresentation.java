@@ -13,27 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.resource.impl;
+package getrest.android.executor;
 
-import android.content.ContentValues;
-import getrest.android.resource.Marshaller;
 import getrest.android.service.Representation;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MarshallerImpl implements Marshaller<Object, Representation> {
+public class ByteArrayBufferRepresentation implements Representation {
+    private final byte[] buffer;
 
-    public Representation marshal(final Object source) {
-        return new Representation() {
-            public InputStream getContent() throws IOException {
-                return new ByteArrayInputStream(new byte[0]);
-            }
-        };
+    public ByteArrayBufferRepresentation(final byte[] buffer) {
+        this.buffer = buffer;
     }
 
-    public Object unmarshal(final Representation entity) {
-        return new ContentValues();
+    public InputStream getContent() throws IOException {
+        return new ByteArrayInputStream(buffer);
     }
 }

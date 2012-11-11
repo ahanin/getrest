@@ -17,12 +17,10 @@
 package getrest.android.client.impl;
 
 import getrest.android.client.RequestCallback;
-import getrest.android.client.Response;
+import getrest.android.core.Response;
 import getrest.android.core.ResponseParcelable;
 import getrest.android.exception.GetrestRuntimeException;
 import getrest.android.core.Request;
-
-import javax.ws.rs.core.MultivaluedMap;
 
 class ResponseImpl<T> extends Response<T> {
 
@@ -80,16 +78,6 @@ class ResponseImpl<T> extends Response<T> {
     private ResponseParcelable getResponseParcelable() {
         waitFinished();
         return responseParcelable;
-    }
-
-    @Override
-    public int getStatus() {
-        return getResponseParcelable().getStatus().getResponseCode();
-    }
-
-    @Override
-    public MultivaluedMap<String, Object> getMetadata() {
-        throw new UnsupportedOperationException();
     }
 
     private void waitFinished() {

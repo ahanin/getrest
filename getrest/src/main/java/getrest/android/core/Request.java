@@ -27,7 +27,7 @@ import android.os.Parcelable;
 public class Request extends BaseRequest implements Parcelable {
 
     private Pack entity;
-    private long timestamp;
+    private long nanoTime;
     private Error error;
 
     public Pack getEntity() {
@@ -38,12 +38,12 @@ public class Request extends BaseRequest implements Parcelable {
         this.entity = entity;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public long getNanoTime() {
+        return nanoTime;
     }
 
-    public void setTimestamp(final long timestamp) {
-        this.timestamp = timestamp;
+    public void setNanoTime(final long nanoTime) {
+        this.nanoTime = nanoTime;
     }
     public Error getError() {
         return error;
@@ -65,8 +65,9 @@ public class Request extends BaseRequest implements Parcelable {
         parcel.writeString(getRequestId());
         parcel.writeParcelable(getUri(), 0);
         parcel.writeInt(getMethod().getId());
+        parcel.writeString(getMediaType().toString());
         parcel.writeParcelable(entity, 0);
-        parcel.writeLong(timestamp);
+        parcel.writeLong(nanoTime);
         writeErrorToParcel(parcel, error);
         final Headers headers = getHeaders();
         HeadersHelper.writeToParcel(parcel, headers);
@@ -89,8 +90,9 @@ public class Request extends BaseRequest implements Parcelable {
                 request.setUri((Uri) parcel.readParcelable(
                         Uri.class.getClassLoader()));
                 request.setMethod(Method.byId(parcel.readByte()));
+                request.setMediaType(new MediaType(parcel.readString()));
                 request.entity = parcel.readParcelable(Pack.class.getClassLoader());
-                request.timestamp = parcel.readLong();
+                request.nanoTime = parcel.readLong();
                 request.error = readErrorFromParcel(parcel);
 
                 HeadersHelper.readFromParcel(parcel, request.getHeaders());

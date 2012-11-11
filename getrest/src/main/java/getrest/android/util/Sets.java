@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package getrest.android.util;
 
-package getrest.android.resource;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * @author aha
- * @since 2012-01-17
- */
-public interface Marshaller<F, T> {
+public class Sets {
+    public static <T> HashSet<T>newHashSet() {
+        return new HashSet<T>();
+    }
 
-    T marshal(F source);
-
-    F unmarshal(T entity);
-
+    public static <T> Set<T>immutableSet(final Set<T> set) {
+        return Collections.unmodifiableSet(set);
+    }
 }

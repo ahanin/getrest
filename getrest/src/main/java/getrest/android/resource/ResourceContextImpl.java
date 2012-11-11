@@ -19,6 +19,7 @@ package getrest.android.resource;
 import getrest.android.config.ResourceContextContribution;
 import getrest.android.executor.RequestHandlerFactory;
 import getrest.android.core.Request;
+import getrest.android.ext.MessageBodyWriter;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.service.Representation;
@@ -26,7 +27,7 @@ import getrest.android.service.Representation;
 public class ResourceContextImpl implements ResourceContext, ResourceContextContribution {
 
     private Packer packer;
-    private Marshaller marshaller;
+    private MessageBodyWriter messageBodyWriter;
     private RequestHandlerFactory requestHandlerFactory;
     private RequestManager requestManager;
     private String contentType;
@@ -35,7 +36,7 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
     public RequestContext getRequestContext(Request request) {
         final DefaultRequestContext requestContext = new DefaultRequestContext();
         requestContext.setPacker(packer);
-        requestContext.setMarshaller(marshaller);
+        requestContext.setMessageBodyWriter(messageBodyWriter);
         requestContext.setResourceContext(this);
         return requestContext;
     }
@@ -52,12 +53,12 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
         return this.packer;
     }
 
-    public <T> void setMarshaller(final Marshaller<T, Representation> marshaller) {
-        this.marshaller = marshaller;
+    public <T> void setMessageBodyWriter(final MessageBodyWriter<Representation> messageBodyWriter) {
+        this.messageBodyWriter = messageBodyWriter;
     }
 
-    public <T> Marshaller<T, Representation> getMarshaller() {
-        return this.marshaller;
+    public <T> MessageBodyWriter<T> getMessageBodyWriter() {
+        return this.messageBodyWriter;
     }
 
     public void setRequestHandlerFactory(final RequestHandlerFactory requestHandler) {
@@ -81,10 +82,6 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
         this.resourceType = resourceType;
     }
 
-    public String getContentType() {
-        return contentType;
-    }
-
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
@@ -100,7 +97,7 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
     private static class DefaultRequestContext implements RequestContext {
 
         private Packer packer;
-        private Marshaller marshaller;
+        private MessageBodyWriter messageBodyWriter;
         private ResourceContextImpl resourceContext;
 
         public void setResourceContext(final ResourceContextImpl resourceContext) {
@@ -119,12 +116,12 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
             return this.packer;
         }
 
-        public <T> void setMarshaller(final Marshaller<T, Representation> marshaller) {
-            this.marshaller = marshaller;
+        public <T> void setMessageBodyWriter(final MessageBodyWriter<Representation> messageBodyWriter) {
+            this.messageBodyWriter = messageBodyWriter;
         }
 
-        public <T> Marshaller<T, Representation> getMarshaller() {
-            return this.marshaller;
+        public <T> MessageBodyWriter<Representation> getMessageBodyWriter() {
+            return this.messageBodyWriter;
         }
 
         public RequestManager getRequestManager() {

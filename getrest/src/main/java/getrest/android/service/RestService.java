@@ -21,12 +21,12 @@ import android.content.Intent;
 import android.os.IBinder;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
+import getrest.android.core.Loggers;
 import getrest.android.core.Request;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
 import getrest.android.util.Logger;
-import getrest.android.util.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RestService extends Service implements Broadcaster {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.service");
+    private static final Logger LOGGER = Loggers.getServiceLogger();
 
     private final ThreadPoolExecutor jobExecutorService;
 

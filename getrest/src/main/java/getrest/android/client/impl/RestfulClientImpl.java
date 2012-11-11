@@ -27,24 +27,25 @@ import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestExecutor;
-import getrest.android.client.Response;
 import getrest.android.client.RequestRegistry;
 import getrest.android.config.Config;
 import getrest.android.config.ConfigResolver;
 import getrest.android.core.Header;
-import getrest.android.core.Pack;
+import getrest.android.core.Loggers;
 import getrest.android.core.Method;
+import getrest.android.core.Pack;
 import getrest.android.core.Request;
+import getrest.android.core.Response;
+import getrest.android.core.ResponseParcelable;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
-import getrest.android.core.ResponseParcelable;
 import getrest.android.resource.ResourceContext;
 import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestStateChangeEventWrapper;
 import getrest.android.service.RequestWrapper;
 import getrest.android.service.RestService;
 import getrest.android.util.Logger;
-import getrest.android.util.LoggerFactory;
+import getrest.android.util.TypeLiteral;
 import getrest.android.util.WorkerQueue;
 
 import java.util.ArrayList;
@@ -58,9 +59,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RestfulClientImpl extends RestfulClient implements RequestExecutor, RequestEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("getrest.client");
+    private static final Logger LOGGER = Loggers.getClientLogger();
 
     private Config config;
+
+    private final Object applicationId;
 
     private Context androidContext;
 
@@ -78,21 +81,29 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     private boolean isStarted;
 
+    public RestfulClientImpl() {
+        this.applicationId = null;
+    }
+
+    public RestfulClientImpl(final Object applicationId) {
+        this.applicationId = applicationId;
+    }
+
     @Override
     public void setCallbackHandler(final Handler callbackHandler) {
         this.callbackHandler = callbackHandler;
     }
 
     /**
-     * Return {@link getrest.android.client.Response}. Unless client is started by calling {@link #replay()}, this method will return
+     * Return {@link getrest.android.core.Response}. Unless client is started by calling {@link #replay()}, this method will return
      * futures for currently executing requests, otherwise new synthetic future will be created and will be updated
      * once the client is started.
      *
      * @param requestId request id
-     * @return {@link getrest.android.client.Response} for currently executing requests
+     * @return {@link getrest.android.core.Response} for currently executing requests
      */
     @Override
-    public Response getRequestFuture(String requestId) {
+    public Response getResponse(String requestId) {
         final Response future;
         if (isStarted) {
             future = futureMap.get(requestId);
@@ -116,7 +127,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         return obtainRequestFuture(request);
     }
 
-    public Response execute(final Request request) {
+    public Object execute(final Request request) {
 
         final ResourceContext resourceContext = config.getResourceContext(request.getUri());
 
@@ -209,28 +220,8 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     @Override
-    public RequestBuilder request(final Uri uri) {
-        return new RequestBuilderImpl(this, this.config).uri(uri);
-    }
-
-    @Override
-    public <T> Response post(final Uri url, final T entity) {
-        return request(url)
-                .method(Method.POST)
-                .entity(entity)
-                .execute();
-    }
-
-    @Override
-    public Response get(Uri url) {
-        // TODO implement GET method
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Response delete(Uri url) {
-        // TODO implement DELETE method
-        throw new UnsupportedOperationException();
+    public RequestAutomate request(final Uri uri) {
+        return new RequestAutomateImpl(this, this.config).withUri(uri);
     }
 
     @Override
@@ -383,42 +374,52 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         }
     }
 
-    private static class RequestBuilderImpl implements RequestBuilder {
+    private static class RequestAutomateImpl<R> implements RequestAutomate<R> {
 
         private Uri uri;
         private Method method;
         private List<Header> headers = new ArrayList<Header>();
         private Object entity;
 
-        private final RequestExecutor requestExecutor;
+        private final RequestExecutor<R> requestExecutor;
         private final Config config;
+        private Class<?> responseType;
 
-        private RequestBuilderImpl(final RequestExecutor requestExecutor, Config config) {
+        private RequestAutomateImpl(final RequestExecutor<R> requestExecutor, Config config) {
             this.requestExecutor = requestExecutor;
             this.config = config;
         }
 
-        public RequestBuilder uri(final Uri uri) {
+        public RequestAutomate<R> withUri(final Uri uri) {
             this.uri = uri;
             return this;
         }
 
-        public RequestBuilder method(final Method method) {
+        public RequestAutomate<R> withMethod(final Method method) {
             this.method = method;
             return this;
         }
 
-        public RequestBuilder header(final String name, final String value) {
+        public RequestAutomate<R> withHeader(final String name, final String value) {
             this.headers.add(new Header(name, value));
             return this;
         }
 
-        public <T> RequestBuilder entity(final T entity) {
+        public <T> RequestAutomate<R> withEntity(final T entity) {
             this.entity = entity;
             return this;
         }
 
-        public Response execute() {
+        public <T> RequestAutomate<T> withResponseType(final Class<T> responseType) {
+            this.responseType = responseType;
+            return (RequestAutomate<T>) this;
+        }
+
+        public <T> RequestAutomate<T> withResponseType(final TypeLiteral<T> typeLiteral) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public R execute() {
             if (this.uri == null) {
                 throw new IllegalStateException("URI is not set");
             }
@@ -434,7 +435,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
             request.setUri(this.uri);
             request.setMethod(this.method);
             request.getHeaders().addAll(headers);
-            request.setTimestamp(System.currentTimeMillis());
+            request.setNanoTime(System.nanoTime());
 
             if (this.entity != null) {
                 final Pack pack = resourceContext.getPacker().pack(this.entity);
