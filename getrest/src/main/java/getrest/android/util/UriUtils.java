@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.util;
 
-import getrest.android.core.MediaType;
+public class UriUtils {
+    public static String gluePath(final CharSequence...elements) {
+        final StringBuilder path = new StringBuilder();
 
-import java.util.Collections;
-import java.util.Set;
+        for (final CharSequence element : elements) {
+            if (element.length() > 0 && element.charAt(0) != '/') {
+                path.append('/');
+            }
 
-public class Resource extends ResourceEndPoint {
-    private Set<ResourceMethod> methods;
+            path.append(element);
 
-    public Resource(final String path,
-        final Set<MediaType> consumableMediaTypes,
-        final Set<ResourceMethod> methods) {
-        super(path, consumableMediaTypes);
-        this.methods = Collections.unmodifiableSet(methods);
-    }
+            if (path.length() > 0 && path.charAt(path.length() - 1) == '/') {
+                path.deleteCharAt(path.length() - 1);
+            }
+        }
 
-    public Set<ResourceMethod> getMethods() {
-        return methods;
+        return path.toString();
     }
 }

@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.config;
 
-import android.net.Uri;
-import getrest.android.resource.ResourceContext;
 import getrest.android.util.Sets;
 
 import java.util.Set;
 
 class GenericConfig implements Config {
-
     private final Set<Application> applications;
 
     GenericConfig(final Set<Application> applications) {
         this.applications = Sets.immutableSet(applications);
     }
 
-    public ResourceContext getResourceContext(final Uri uri) {
-        // TODO implement
-        throw new UnsupportedOperationException();
+    public Set<Application> getApplications() {
+        return applications;
     }
+
 }

@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.util;
 
-import getrest.android.core.MediaType;
-
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
-public class Resource extends ResourceEndPoint {
-    private Set<ResourceMethod> methods;
-
-    public Resource(final String path,
-        final Set<MediaType> consumableMediaTypes,
-        final Set<ResourceMethod> methods) {
-        super(path, consumableMediaTypes);
-        this.methods = Collections.unmodifiableSet(methods);
+public class Lists {
+    public static <T> LinkedList<T> newLinkedList() {
+        return new LinkedList<T>();
     }
 
-    public Set<ResourceMethod> getMethods() {
-        return methods;
+    public static <T> List<T> newArrayList() {
+        return new ArrayList<T>();
+    }
+
+    public static <T> List<T> immutableList(final List<T> list) {
+        return Collections.unmodifiableList(list);
     }
 }

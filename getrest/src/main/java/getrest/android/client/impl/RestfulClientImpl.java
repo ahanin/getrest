@@ -28,8 +28,6 @@ import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestExecutor;
 import getrest.android.client.RequestRegistry;
-import getrest.android.config.Config;
-import getrest.android.config.ConfigResolver;
 import getrest.android.core.Header;
 import getrest.android.core.Loggers;
 import getrest.android.core.Method;
@@ -37,9 +35,10 @@ import getrest.android.core.Pack;
 import getrest.android.core.Request;
 import getrest.android.core.Response;
 import getrest.android.core.ResponseParcelable;
+import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.request.RequestStatus;
-import getrest.android.resource.ResourceContext;
+import getrest.android.runtime.GetrestRuntime;
 import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestStateChangeEventWrapper;
 import getrest.android.service.RequestWrapper;
@@ -48,6 +47,7 @@ import getrest.android.util.Logger;
 import getrest.android.util.TypeLiteral;
 import getrest.android.util.WorkerQueue;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +61,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     private static final Logger LOGGER = Loggers.getClientLogger();
 
-    private Config config;
+    private GetrestRuntime runtime;
 
     private final Object applicationId;
 
@@ -120,8 +120,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
             throw new IllegalStateException("Request is not registered: " + requestId);
         }
 
-        final ResourceContext resourceContext = config.getResourceContext(entry.getResourceUri());
-        final RequestManager requestManager = resourceContext.getRequestManager();
+        final RequestManager requestManager = runtime.getRequestManager();
         final Request request = requestManager.getRequest(requestId);
 
         return obtainRequestFuture(request);
@@ -129,14 +128,12 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     public Object execute(final Request request) {
 
-        final ResourceContext resourceContext = config.getResourceContext(request.getUri());
-
         LOGGER.trace("Starting service");
 
         final RequestWrapper wrapper = new RequestWrapper(new Intent(androidContext, RestService.class));
         wrapper.setRequest(request);
 
-        final RequestManager requestManager = resourceContext.getRequestManager();
+        final RequestManager requestManager = runtime.getRequestManager();
         requestManager.saveRequest(request);
 
         RequestRegistry.Editor editor = getRequestRegistry().edit();
@@ -191,9 +188,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
      * @return
      */
     private ResponseImpl obtainRequestFuture(final RequestRegistry.Entry entry) {
-        final Uri uri = entry.getResourceUri();
-        final ResourceContext resourceContext = config.getResourceContext(uri);
-        final RequestManager requestManager = resourceContext.getRequestManager();
+        final RequestManager requestManager = runtime.getRequestManager();
         final Request request = requestManager.getRequest(entry.getRequestId());
         if (request == null) {
             LOGGER.warn("Request [{0}, {1}] is not acknowledged by request manager", entry.getRequestId(), entry.getResourceUri());
@@ -204,7 +199,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     protected final void init(Context context) {
-        this.config = ConfigResolver.getInstance().obtainConfig(context);
+        this.runtime = GetrestRuntime.getInstance(context);
 
         this.androidContext = context;
         this.requestEventReceiver = new RequestEventBroadcastReceiver(this);
@@ -220,8 +215,8 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     @Override
-    public RequestAutomate request(final Uri uri) {
-        return new RequestAutomateImpl(this, this.config).withUri(uri);
+    public <R> RequestAutomate<R> newRequest(final String uri) {
+        return new RequestAutomateImpl<R>(this, this.runtime).withUri(Uri.parse(uri));
     }
 
     @Override
@@ -382,12 +377,13 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         private Object entity;
 
         private final RequestExecutor<R> requestExecutor;
-        private final Config config;
-        private Class<?> responseType;
+        private final GetrestRuntime runtime;
 
-        private RequestAutomateImpl(final RequestExecutor<R> requestExecutor, Config config) {
+        private Type responseType;
+
+        private RequestAutomateImpl(final RequestExecutor<R> requestExecutor, GetrestRuntime runtime) {
             this.requestExecutor = requestExecutor;
-            this.config = config;
+            this.runtime = runtime;
         }
 
         public RequestAutomate<R> withUri(final Uri uri) {
@@ -416,7 +412,8 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         }
 
         public <T> RequestAutomate<T> withResponseType(final TypeLiteral<T> typeLiteral) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            this.responseType = typeLiteral.getType();
+            return (RequestAutomate<T>) this;
         }
 
         public R execute() {
@@ -428,8 +425,6 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
                 throw new IllegalStateException("Method is not set");
             }
 
-            final ResourceContext resourceContext = config.getResourceContext(uri);
-
             final Request request = new Request();
             request.setRequestId(nextRequestId());
             request.setUri(this.uri);
@@ -437,8 +432,10 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
             request.getHeaders().addAll(headers);
             request.setNanoTime(System.nanoTime());
 
+            final RequestContext requestContext = runtime.getRequestContext(request);
+
             if (this.entity != null) {
-                final Pack pack = resourceContext.getPacker().pack(this.entity);
+                final Pack pack = requestContext.getPacker().pack(this.entity);
                 request.setEntity(pack);
             }
 

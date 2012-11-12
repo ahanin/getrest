@@ -16,13 +16,18 @@
 
 package getrest.android.request;
 
+import getrest.android.config.ResourceMethod;
 import getrest.android.ext.MessageBodyWriter;
 import getrest.android.resource.Packer;
 import getrest.android.resource.ResourceContext;
+import getrest.android.runtime.GetrestRuntime;
 import getrest.android.service.Representation;
 
 public interface RequestContext {
 
+    GetrestRuntime getRuntime();
+
+    @Deprecated
     ResourceContext getResourceContext();
 
     Packer getPacker();
@@ -31,4 +36,5 @@ public interface RequestContext {
 
     RequestManager getRequestManager();
 
+    ResourceMethod getResourceMethod();
 }

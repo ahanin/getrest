@@ -22,6 +22,7 @@ import getrest.android.core.Request;
 import getrest.android.ext.MessageBodyWriter;
 import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
+import getrest.android.runtime.GetrestRuntime;
 import getrest.android.service.Representation;
 
 public class ResourceContextImpl implements ResourceContext, ResourceContextContribution {
@@ -34,10 +35,9 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
     private Class<?> resourceType;
 
     public RequestContext getRequestContext(Request request) {
-        final DefaultRequestContext requestContext = new DefaultRequestContext();
+        final GetrestRuntime.DefaultRequestContext requestContext = new GetrestRuntime.DefaultRequestContext();
         requestContext.setPacker(packer);
         requestContext.setMessageBodyWriter(messageBodyWriter);
-        requestContext.setResourceContext(this);
         return requestContext;
     }
 
@@ -88,45 +88,6 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
 
     public RequestManager getRequestManager() {
         return requestManager;
-    }
-
-    /**
-     * This is a temporary solution.
-     * TODO remove when "real" class is implemented
-     */
-    private static class DefaultRequestContext implements RequestContext {
-
-        private Packer packer;
-        private MessageBodyWriter messageBodyWriter;
-        private ResourceContextImpl resourceContext;
-
-        public void setResourceContext(final ResourceContextImpl resourceContext) {
-            this.resourceContext = resourceContext;
-        }
-
-        public ResourceContext getResourceContext() {
-            return resourceContext;
-        }
-
-        public void setPacker(final Packer packer) {
-            this.packer = packer;
-        }
-
-        public Packer getPacker() {
-            return this.packer;
-        }
-
-        public <T> void setMessageBodyWriter(final MessageBodyWriter<Representation> messageBodyWriter) {
-            this.messageBodyWriter = messageBodyWriter;
-        }
-
-        public <T> MessageBodyWriter<Representation> getMessageBodyWriter() {
-            return this.messageBodyWriter;
-        }
-
-        public RequestManager getRequestManager() {
-            return resourceContext.getRequestManager();
-        }
     }
 
 }

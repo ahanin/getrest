@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.util;
 
-import getrest.android.core.MediaType;
+import org.junit.Test;
 
-import java.util.Collections;
-import java.util.Set;
+import static junit.framework.Assert.assertEquals;
 
-public class Resource extends ResourceEndPoint {
-    private Set<ResourceMethod> methods;
+public class UriUtilsTest {
 
-    public Resource(final String path,
-        final Set<MediaType> consumableMediaTypes,
-        final Set<ResourceMethod> methods) {
-        super(path, consumableMediaTypes);
-        this.methods = Collections.unmodifiableSet(methods);
+    @Test
+    public void testShouldGluePath() throws Exception {
+        assertEquals("/path/to/resource", UriUtils.gluePath("path", "to", "resource/"));
+        assertEquals("/path/to/resource", UriUtils.gluePath("/path", "to", "resource/"));
     }
 
-    public Set<ResourceMethod> getMethods() {
-        return methods;
-    }
 }

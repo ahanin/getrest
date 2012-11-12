@@ -51,22 +51,12 @@ public abstract class RestfulClient {
     public abstract void detach();
 
     /**
-     * Build a request.
+     * Create request with uri.
      *
-     * @param uri@return {@link getrest.android.RestfulClient.RequestAutomate} instance, on which {@link getrest.android.RestfulClient.RequestAutomate#execute()}
-     *                   can be called to execute request
-     */
-    public abstract RequestAutomate request(Uri uri);
-
-    /**
-     * Create request with path.
-     *
-     * @param path
+     * @param uri
      * @return
      */
-    public <R> RequestAutomate<R> newRequest(String path) {
-        return request(buildUri(path));
-    }
+    public abstract <R> RequestAutomate<R> newRequest(String uri);
 
     private Uri buildUri(final String path) {
         return this.base == null ? Uri.parse(path) : Uri.parse(gluePath(base, path));

@@ -16,13 +16,23 @@
 package getrest.android.config;
 
 import getrest.android.core.MediaType;
+import getrest.android.core.Method;
+
+import getrest.android.util.Sets;
 
 import java.util.Set;
 
 public class ResourceMethod extends ResourceEndPoint {
 
-    public ResourceMethod(final String path, final Set<MediaType> consumableMediaTypes) {
+    private final Set<Method> methods;
+
+    public ResourceMethod(final String path,
+        final Set<MediaType> consumableMediaTypes, final Set<Method> methods) {
         super(path, consumableMediaTypes);
+        this.methods = Sets.immutableSet(methods);
     }
 
+    public Set<Method> getMethods() {
+        return methods;
+    }
 }

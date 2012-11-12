@@ -25,7 +25,7 @@ import java.util.Set;
 
 public interface Config {
 
-    ResourceContext getResourceContext(Uri uri);
+    Set<Application> getApplications();
 
     public static class ConfigBuilder {
 

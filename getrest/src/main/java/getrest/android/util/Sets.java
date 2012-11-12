@@ -15,16 +15,32 @@
  */
 package getrest.android.util;
 
+import getrest.android.core.MediaType;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Sets {
-    public static <T> HashSet<T>newHashSet() {
-        return new HashSet<T>();
+    public static <E> HashSet<E>newHashSet() {
+        return new HashSet<E>();
     }
 
-    public static <T> Set<T>immutableSet(final Set<T> set) {
+    public static <E> HashSet<E>newHashSet(final E...elements) {
+        return new HashSet<E>(Arrays.asList(elements));
+    }
+
+    public static <E> Set<E>immutableSet(final Set<E> set) {
         return Collections.unmodifiableSet(set);
+    }
+
+    public static <E> Set<E>immutableSet(final E...elements) {
+        return Collections.unmodifiableSet(new HashSet<E>(Arrays.asList(
+                    elements)));
+    }
+
+    public static Set<MediaType> emptySet() {
+        return Collections.emptySet();
     }
 }

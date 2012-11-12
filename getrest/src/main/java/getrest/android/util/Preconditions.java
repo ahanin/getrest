@@ -13,24 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.util;
 
-import getrest.android.core.MediaType;
-
-import java.util.Collections;
-import java.util.Set;
-
-public class Resource extends ResourceEndPoint {
-    private Set<ResourceMethod> methods;
-
-    public Resource(final String path,
-        final Set<MediaType> consumableMediaTypes,
-        final Set<ResourceMethod> methods) {
-        super(path, consumableMediaTypes);
-        this.methods = Collections.unmodifiableSet(methods);
-    }
-
-    public Set<ResourceMethod> getMethods() {
-        return methods;
+public class Preconditions {
+    public static void checkState(final boolean state, final String message) {
+        if (!state) {
+            throw new IllegalStateException(message);
+        }
     }
 }

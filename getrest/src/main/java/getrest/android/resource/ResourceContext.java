@@ -23,6 +23,7 @@ import getrest.android.request.RequestContext;
 import getrest.android.request.RequestManager;
 import getrest.android.service.Representation;
 
+@Deprecated
 public interface ResourceContext {
 
     /**
