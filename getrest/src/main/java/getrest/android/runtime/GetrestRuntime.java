@@ -106,13 +106,14 @@ public class GetrestRuntime {
         final Resource resource, final ResourceMethod method) {
         final StringBuffer patternRegexp = new StringBuffer();
         final String uri = Uri.encode(UriUtils.gluePath(resource.getPath(),
-                    method.getPath()));
+                    method.getPath())).replace(Uri.encode("{"), "{")
+                              .replace(Uri.encode("}"), "}");
 
         final Matcher m = URI_PARAM_PATTERN.matcher(uri);
         final List<String> params = Lists.newArrayList();
 
         while (m.find()) {
-            patternRegexp.append("([^/]+?)");
+            m.appendReplacement(patternRegexp, "([^/]+?)");
             params.add(m.group(1));
         }
 
@@ -136,6 +137,7 @@ public class GetrestRuntime {
         Preconditions.checkState(!tuples.isEmpty(), "No matching methods found");
 
         final DefaultRequestContext requestContext = new DefaultRequestContext();
+
         requestContext.setRuntime(this);
         requestContext.setResourceMethod(tuples.iterator().next().getMethod());
 
@@ -241,8 +243,9 @@ public class GetrestRuntime {
         }
 
         public boolean accept(final ResourceMethodTuple tuple) {
-            return tuple.getPattern().matcher(Uri.encode(request.getUri().toString()))
-                        .matches();
+            return tuple.getMethod().getMethods().contains(request.getMethod()) &&
+            tuple.getPattern().matcher(Uri.encode(request.getUri().toString()))
+                 .matches();
         }
     }
 }

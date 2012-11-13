@@ -56,7 +56,7 @@ public class RestService extends Service implements Broadcaster {
         final Request request = new RequestWrapper(intent).getRequest();
 
         LOGGER.debug("Received request: requestId={0}, url={1}, method={2}. Submitting it to queue.",
-                request.getRequestId(), request.getUri(), request.getMethod().getName());
+                request.getRequestId(), request.getUri(), request.getMethod());
 
         try {
             final RequestEventBus eventBus = new RequestEventBus();

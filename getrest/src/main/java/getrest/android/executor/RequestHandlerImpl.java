@@ -74,7 +74,7 @@ public class RequestHandlerImpl implements RequestHandler {
             // TODO implement DELETE method pipeline
             throw new UnsupportedOperationException("PUT method is not supported yet");
         } else {
-            throw new IllegalArgumentException("Request method is unsupported: " + method.getName());
+            throw new IllegalArgumentException("Request method is unsupported: " + method);
         }
 
         pipeline.handle(request, responseParcelable);

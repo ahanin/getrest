@@ -16,62 +16,40 @@
 
 package getrest.android.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author aha
  * @since 2012-01-13
  */
-public final class Method {
+public enum Method {
 
-    public static final Method GET = new Method((byte) 1, "GET");
-    public static final Method POST = new Method((byte) 2, "POST");
-    public static final Method PUT = new Method((byte) 3, "PUT");
-    public static final Method DELETE = new Method((byte) 4, "DELETE");
+    GET    ((byte) 1),
+    POST   ((byte) 2),
+    PUT    ((byte) 3),
+    DELETE ((byte) 4);
 
     private byte id;
-    private String name;
 
-    private Method(byte id, final String name) {
+    private static Map<Byte, Method> INDEX = new HashMap<Byte, Method>();
+
+    static {
+        for (Method method : INDEX.values()) {
+            INDEX.put(method.getId(), method);
+        }
+    }
+
+    private Method(byte id) {
         this.id = id;
-        this.name = name;
     }
 
     public byte getId() {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public static Method byId(final byte id) {
-        switch (id) {
-            case 1:
-                return GET;
-            case 2:
-                return POST;
-            case 3:
-                return PUT;
-            case 4:
-                return DELETE;
-            default:
-                return null;
-        }
+        return INDEX.get(id);
     }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        final Method method = (Method) o;
-
-        if (id != method.id) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
-    }
 }

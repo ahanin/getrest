@@ -33,37 +33,46 @@ import getrest.android.core.Method;
 import getrest.android.core.Request;
 
 import getrest.android.request.RequestContext;
+
 import getrest.android.util.Sets;
+import static junit.framework.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+
+import java.util.HashSet;
+
 @RunWith(RobolectricTestRunner.class)
 public class GetrestRuntimeTest {
-
     private Context app;
-
     private ResourceMethod postBookMethod;
+    private ResourceMethod getBookByIsbnMethod;
+    private ResourceMethod deleteBookByIsbnMethod;
 
     @Before
     public void setUp() throws Exception {
         final Config.ConfigBuilder config = Getrest.newConfigBuilder();
         final Config.ApplicationBuilder application = Getrest.newApplicationBuilder();
 
-        postBookMethod = new ResourceMethod("/create",
+        postBookMethod = new ResourceMethod("/",
                 Sets.newHashSet(new MediaType("text/xml")),
                 Sets.newHashSet(Method.POST));
 
+        getBookByIsbnMethod = new ResourceMethod("/{isbn}",
+                Sets.newHashSet(new MediaType("text/xml")),
+                Sets.newHashSet(Method.GET));
+
+        deleteBookByIsbnMethod = new ResourceMethod("/{isbn}",
+                new HashSet<MediaType>(), Sets.newHashSet(Method.DELETE));
+
         application.addResource(new Resource("/book", Sets.emptySet(),
-                Sets.newHashSet(postBookMethod)));
+                Sets.newHashSet(postBookMethod, getBookByIsbnMethod,
+                    deleteBookByIsbnMethod)));
         config.addApplication(application.build());
 
         app = mock(Context.class,
@@ -75,15 +84,41 @@ public class GetrestRuntimeTest {
     }
 
     @Test
-    public void testShouldCreateRequestContext() throws Exception {
-        final Request request = new Request();
+    public void testShouldMatchMethodByEquality() throws Exception {
+        final Request request = createRequest("/book", Method.POST);
 
-        request.setMethod(Method.POST);
-        request.setUri(Uri.parse("/book/create"));
-
-        final RequestContext requestContext = GetrestRuntime.getInstance(app).getRequestContext(request);
+        final RequestContext requestContext = GetrestRuntime.getInstance(app)
+                                                            .getRequestContext(request);
 
         assertEquals(postBookMethod, requestContext.getResourceMethod());
     }
 
+    @Test
+    public void testShouldMatchGetMethodByUriParam() throws Exception {
+        final Request request = createRequest("/book/17283", Method.GET);
+
+        final RequestContext requestContext = GetrestRuntime.getInstance(app)
+                                                            .getRequestContext(request);
+
+        assertEquals(getBookByIsbnMethod, requestContext.getResourceMethod());
+    }
+
+    @Test
+    public void testShouldMatchDeleteMethodByUriParam()
+        throws Exception {
+        final Request request = createRequest("/book/17283", Method.DELETE);
+        final RequestContext requestContext = GetrestRuntime.getInstance(app)
+                                                            .getRequestContext(request);
+
+        assertEquals(deleteBookByIsbnMethod, requestContext.getResourceMethod());
+    }
+
+    private Request createRequest(final String uri, final Method method) {
+        final Request request = new Request();
+
+        request.setMethod(method);
+        request.setUri(Uri.parse(uri));
+
+        return request;
+    }
 }
