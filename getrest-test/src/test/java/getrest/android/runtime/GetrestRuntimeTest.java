@@ -44,15 +44,23 @@ import org.junit.runner.RunWith;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-
-import java.util.HashSet;
-
 @RunWith(RobolectricTestRunner.class)
 public class GetrestRuntimeTest {
     private Context app;
     private ResourceMethod postBookMethod;
     private ResourceMethod getBookByIsbnMethod;
     private ResourceMethod deleteBookByIsbnMethod;
+    private ResourceMethod allNewsSubpathMethod;
+    private GetrestRuntime runtime;
+
+    private Request createRequest(final String uri, final Method method) {
+        final Request request = new Request();
+
+        request.setMethod(method);
+        request.setUri(Uri.parse(uri));
+
+        return request;
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -67,12 +75,19 @@ public class GetrestRuntimeTest {
                 Sets.newHashSet(new MediaType("text/xml")),
                 Sets.newHashSet(Method.GET));
 
-        deleteBookByIsbnMethod = new ResourceMethod("/{isbn}",
-                new HashSet<MediaType>(), Sets.newHashSet(Method.DELETE));
+        deleteBookByIsbnMethod = new ResourceMethod("/{isbn}", Sets.emptySet(),
+                Sets.newHashSet(Method.DELETE));
 
         application.addResource(new Resource("/book", Sets.emptySet(),
                 Sets.newHashSet(postBookMethod, getBookByIsbnMethod,
                     deleteBookByIsbnMethod)));
+
+        allNewsSubpathMethod = new ResourceMethod("/*", Sets.emptySet(),
+                Sets.newHashSet(Method.GET));
+
+        application.addResource(new Resource("/news", Sets.emptySet(),
+                Sets.newHashSet(allNewsSubpathMethod)));
+
         config.addApplication(application.build());
 
         app = mock(Context.class,
@@ -81,14 +96,15 @@ public class GetrestRuntimeTest {
         when(((HasConfig) app).getGetrestConfig()).thenReturn(config.build());
 
         when(app.getApplicationContext()).thenReturn(app);
+
+        runtime = GetrestRuntime.getInstance(app);
     }
 
     @Test
     public void testShouldMatchMethodByEquality() throws Exception {
         final Request request = createRequest("/book", Method.POST);
 
-        final RequestContext requestContext = GetrestRuntime.getInstance(app)
-                                                            .getRequestContext(request);
+        final RequestContext requestContext = runtime.getRequestContext(request);
 
         assertEquals(postBookMethod, requestContext.getResourceMethod());
     }
@@ -97,8 +113,7 @@ public class GetrestRuntimeTest {
     public void testShouldMatchGetMethodByUriParam() throws Exception {
         final Request request = createRequest("/book/17283", Method.GET);
 
-        final RequestContext requestContext = GetrestRuntime.getInstance(app)
-                                                            .getRequestContext(request);
+        final RequestContext requestContext = runtime.getRequestContext(request);
 
         assertEquals(getBookByIsbnMethod, requestContext.getResourceMethod());
     }
@@ -107,18 +122,16 @@ public class GetrestRuntimeTest {
     public void testShouldMatchDeleteMethodByUriParam()
         throws Exception {
         final Request request = createRequest("/book/17283", Method.DELETE);
-        final RequestContext requestContext = GetrestRuntime.getInstance(app)
-                                                            .getRequestContext(request);
+        final RequestContext requestContext = runtime.getRequestContext(request);
 
         assertEquals(deleteBookByIsbnMethod, requestContext.getResourceMethod());
     }
 
-    private Request createRequest(final String uri, final Method method) {
-        final Request request = new Request();
+    @Test
+    public void testShouldMatchMethodByWildcard() throws Exception {
+        final Request request = createRequest("/news/2012-11-18/all-the-jelly-beans-you-can-eat",
+                Method.GET);
 
-        request.setMethod(method);
-        request.setUri(Uri.parse(uri));
-
-        return request;
+        assertEquals(allNewsSubpathMethod, runtime.getRequestContext(request).getResourceMethod());
     }
 }

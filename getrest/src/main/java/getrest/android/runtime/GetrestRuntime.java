@@ -84,7 +84,7 @@ public class GetrestRuntime {
     }
 
     private static final Pattern URI_PARAM_PATTERN = Pattern.compile(
-            "\\{([^\\}]+?)\\}");
+            "(?:(\\{([^\\}]+?)\\})|(\\*))");
     private final List<ResourceMethodTuple> index = Lists.newLinkedList();
 
     private GetrestRuntime(final Config config) {
@@ -113,11 +113,16 @@ public class GetrestRuntime {
         final List<String> params = Lists.newArrayList();
 
         while (m.find()) {
-            m.appendReplacement(patternRegexp, "([^/]+?)");
-            params.add(m.group(1));
+            if (m.group(1) != null) { // {param}
+                m.appendReplacement(patternRegexp, "([^/]+?)");
+                params.add(m.group(1));
+            } else if (m.group(3) != null) { // *
+                m.appendReplacement(patternRegexp, ".*");
+            }
         }
 
         m.appendTail(patternRegexp);
+        patternRegexp.append('$');
 
         return new ResourceMethodTuple(uri,
             Pattern.compile(patternRegexp.toString()), params, resource, method);
