@@ -19,6 +19,9 @@ import java.util.Collections;
 import java.util.Map;
 
 public class MediaType {
+
+    public static final MediaType ANY = new MediaType("*/*");
+
     private final String type = "*";
     private final String subtype = "*";
     private final Map<String,String> params = Collections.emptyMap();

@@ -40,7 +40,7 @@ public class Sets {
                     elements)));
     }
 
-    public static Set<MediaType> emptySet() {
+    public static <E> Set<E> emptySet() {
         return Collections.emptySet();
     }
 }

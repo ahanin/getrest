@@ -76,7 +76,7 @@ public class PostMethodPipelineTest {
         packer = mock(Packer.class);
 
         when(requestContext.getMessageBodyWriter()).thenReturn(messageBodyWriter);
-        when(requestContext.getPacker()).thenReturn(packer);
+        when(requestContext.getEntityPacker()).thenReturn(packer);
 
         requestExecutor.setRequestLifecycle(requestLifecycle);
         requestExecutor.setRequestContext(requestContext);

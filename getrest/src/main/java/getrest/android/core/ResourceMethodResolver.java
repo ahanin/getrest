@@ -15,35 +15,19 @@
  */
 package getrest.android.core;
 
+import getrest.android.config.ResourceMethod;
+
 /**
- * Non thread safe.
+ * {@link ResourceMethodResolver} is used to search within the {@link Application} a {@link ResourceMethod} that is best
+ * matching a request.
  */
-public class Error {
-
-    private ErrorState errorState;
-    private String message;
-
-    public void setErrorState(final ErrorState errorState) {
-        this.errorState = errorState;
-    }
-
-    public void setMessage(final String message) {
-        this.message = message;
-    }
-
-    public ErrorState getErrorState() {
-        return errorState;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    @Override
-    public String toString() {
-        return "Error{" +
-                "errorState=" + errorState +
-                ", message='" + message + '\'' +
-                '}';
-    }
+public interface ResourceMethodResolver {
+    /**
+     * Find a resource method matching the request. The result must be consistent. That is, same request must result
+     * in the same resource method object.
+     *
+     * @param request
+     * @return {@link ResourceMethod} matched the request, or {@code null} if request does not match any methods defined
+     */
+    ResourceMethod getResourceMethod(final Request request);
 }

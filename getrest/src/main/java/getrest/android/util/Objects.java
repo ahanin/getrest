@@ -13,19 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.util;
 
-import getrest.android.ext.MessageBodyReader;
-import getrest.android.ext.MessageBodyWriter;
+public final class Objects {
 
-import java.util.Set;
+    public static <E> E firstNotNull(E... objects) {
+        final E firstNotNull = safeFirstNotNull(objects);
+        if (firstNotNull!=null) {
+            return firstNotNull;
+        }
+        throw new IllegalStateException("No not-null objects found");
+    }
 
-public interface Application {
-
-    Set<MessageBodyWriter> getMessageBodyWriters();
-
-    Set<MessageBodyReader> getMessageBodyReaders();
-
-    Set<Resource> getResources();
+    public static <E> E safeFirstNotNull(E... objects) {
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] != null) {
+                return objects[i];
+            }
+        }
+        return null;
+    }
 
 }

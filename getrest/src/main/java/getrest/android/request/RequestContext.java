@@ -30,7 +30,7 @@ public interface RequestContext {
     @Deprecated
     ResourceContext getResourceContext();
 
-    Packer getPacker();
+    Packer getEntityPacker();
 
     <T> MessageBodyWriter<Representation> getMessageBodyWriter();
 

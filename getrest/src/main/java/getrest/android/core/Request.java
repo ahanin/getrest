@@ -27,6 +27,8 @@ import android.os.Parcelable;
 public class Request extends BaseRequest implements Parcelable {
 
     private Pack entity;
+    private Class entityType;
+    private Class returnType;
     private long nanoTime;
     private Error error;
 
@@ -36,6 +38,22 @@ public class Request extends BaseRequest implements Parcelable {
 
     public void setEntity(final Pack entity) {
         this.entity = entity;
+    }
+
+    public Class getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(final Class entityType) {
+        this.entityType = entityType;
+    }
+
+    public Class getReturnType() {
+        return returnType;
+    }
+
+    public void setReturnType(final Class returnType) {
+        this.returnType = returnType;
     }
 
     public long getNanoTime() {
@@ -63,6 +81,8 @@ public class Request extends BaseRequest implements Parcelable {
 
     public void writeToParcel(final Parcel parcel, final int i) {
         parcel.writeString(getRequestId());
+        parcel.writeSerializable(entityType);
+        parcel.writeSerializable(returnType);
         parcel.writeParcelable(getUri(), 0);
         parcel.writeInt(getMethod().getId());
         parcel.writeString(getMediaType().toString());
@@ -87,6 +107,8 @@ public class Request extends BaseRequest implements Parcelable {
             public Request createFromParcel(final Parcel parcel) {
                 final Request request = new Request();
                 request.setRequestId(parcel.readString());
+                request.setEntityType((Class) parcel.readSerializable());
+                request.setReturnType((Class) parcel.readSerializable());
                 request.setUri((Uri) parcel.readParcelable(
                         Uri.class.getClassLoader()));
                 request.setMethod(Method.byId(parcel.readByte()));

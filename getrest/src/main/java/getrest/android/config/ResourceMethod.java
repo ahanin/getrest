@@ -25,11 +25,32 @@ import java.util.Set;
 public class ResourceMethod extends ResourceEndPoint {
 
     private final Set<Method> methods;
+    private Class entityType;
+    private Class resultType;
 
     public ResourceMethod(final String path,
-        final Set<MediaType> consumableMediaTypes, final Set<Method> methods) {
+                          final Set<MediaType> consumableMediaTypes,
+                          final Set<Method> methods) {
         super(path, consumableMediaTypes);
         this.methods = Sets.immutableSet(methods);
+    }
+
+    public ResourceMethod setEntityType(Class entityType) {
+        this.entityType = entityType;
+        return this;
+    }
+
+    public Class getEntityType() {
+        return entityType;
+    }
+
+    public ResourceMethod setResultType(final Class resultType) {
+        this.resultType = resultType;
+        return this;
+    }
+
+    public Class getResultType() {
+        return resultType;
     }
 
     public Set<Method> getMethods() {

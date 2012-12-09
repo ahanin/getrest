@@ -44,6 +44,7 @@ import getrest.android.service.RequestStateChangeEventWrapper;
 import getrest.android.service.RequestWrapper;
 import getrest.android.service.RestService;
 import getrest.android.util.Logger;
+import getrest.android.util.Preconditions;
 import getrest.android.util.TypeLiteral;
 import getrest.android.util.WorkerQueue;
 
@@ -417,13 +418,8 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         }
 
         public R execute() {
-            if (this.uri == null) {
-                throw new IllegalStateException("URI is not set");
-            }
-
-            if (this.method == null) {
-                throw new IllegalStateException("Method is not set");
-            }
+            Preconditions.checkState(this.uri != null, "URI is not set");
+            Preconditions.checkState(this.method != null, "Method is not set");
 
             final Request request = new Request();
             request.setRequestId(nextRequestId());
@@ -432,10 +428,16 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
             request.getHeaders().addAll(headers);
             request.setNanoTime(System.nanoTime());
 
+            if (this.entity != null) {
+                request.setEntityType(this.entity.getClass());
+            }
+
             final RequestContext requestContext = runtime.getRequestContext(request);
+            Preconditions.checkState(this.entity == null || requestContext.getEntityPacker() != null,
+                    "Request contains entity, but packer is not defined for the request method.");
 
             if (this.entity != null) {
-                final Pack pack = requestContext.getPacker().pack(this.entity);
+                final Pack pack = requestContext.getEntityPacker().pack(this.entity);
                 request.setEntity(pack);
             }
 

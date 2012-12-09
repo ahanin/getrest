@@ -95,7 +95,7 @@ class PostMethodPipeline implements RequestPipeline {
                 final MessageBodyWriter<Representation> messageBodyWriter =
                     requestContext.getMessageBodyWriter();
                 final Object resultUnmarshalled = messageBodyWriter.unmarshal(serviceResponse.getEntity());
-                final Pack result = requestContext.getPacker()
+                final Pack result = requestContext.getEntityPacker()
                                                   .pack(resultUnmarshalled);
 
                 responseParcelable.setEntity(result);

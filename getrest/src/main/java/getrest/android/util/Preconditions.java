@@ -16,9 +16,16 @@
 package getrest.android.util;
 
 public class Preconditions {
+
     public static void checkState(final boolean state, final String message) {
         if (!state) {
             throw new IllegalStateException(message);
+        }
+    }
+
+    public static <E> void checkArgNotNull(final E arg, final String message) {
+        if (arg == null) {
+            throw new IllegalArgumentException(message);
         }
     }
 }

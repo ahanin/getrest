@@ -36,7 +36,7 @@ public class ResourceContextImpl implements ResourceContext, ResourceContextCont
 
     public RequestContext getRequestContext(Request request) {
         final GetrestRuntime.DefaultRequestContext requestContext = new GetrestRuntime.DefaultRequestContext();
-        requestContext.setPacker(packer);
+        requestContext.setEntityPacker(packer);
         requestContext.setMessageBodyWriter(messageBodyWriter);
         return requestContext;
     }

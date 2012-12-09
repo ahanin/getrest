@@ -15,10 +15,9 @@
  */
 package getrest.android.config;
 
-import android.net.Uri;
+import getrest.android.core.Application;
 import getrest.android.ext.MessageBodyReader;
 import getrest.android.ext.MessageBodyWriter;
-import getrest.android.resource.ResourceContext;
 import getrest.android.util.Sets;
 
 import java.util.Set;

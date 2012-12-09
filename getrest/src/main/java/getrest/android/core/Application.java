@@ -13,22 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.core;
 
-import getrest.android.core.Application;
-import getrest.android.util.Sets;
+import getrest.android.config.Resource;
 
 import java.util.Set;
 
-class GenericConfig implements Config {
-    private final Set<Application> applications;
+public interface Application {
 
-    GenericConfig(final Set<Application> applications) {
-        this.applications = Sets.immutableSet(applications);
-    }
+    ResourceMethodResolver getResourceMethodResolver();
 
-    public Set<Application> getApplications() {
-        return applications;
-    }
+    PackerResolver getPackerResolver();
 
 }
