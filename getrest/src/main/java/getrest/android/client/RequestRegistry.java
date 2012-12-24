@@ -16,7 +16,6 @@
 
 package getrest.android.client;
 
-import android.net.Uri;
 import getrest.android.core.Request;
 
 import java.util.Set;
@@ -26,8 +25,6 @@ public interface RequestRegistry {
     interface Entry {
 
         String getRequestId();
-
-        Uri getResourceUri();
 
     }
 

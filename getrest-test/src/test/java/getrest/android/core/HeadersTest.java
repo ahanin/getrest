@@ -19,6 +19,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import getrest.android.http.Header;
+import getrest.android.http.Headers;
 import org.junit.Before;
 import org.junit.Test;
 

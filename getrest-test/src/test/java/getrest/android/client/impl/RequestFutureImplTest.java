@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package getrest.android.client.impl;
 
 import getrest.android.client.RequestCallback;
@@ -70,7 +71,7 @@ public class RequestFutureImplTest {
         final ResponseParcelable responseParcelable = mock(ResponseParcelable.class);
         requestFuture.fireFinished(responseParcelable);
 
-        verify(callback).onFinished(responseParcelable);
+        verify(callback).onFinished(any(Request.class));
     }
 
     @Test
@@ -82,7 +83,7 @@ public class RequestFutureImplTest {
 
         verify(callback).onPending(any(Request.class));
         verify(callback, never()).onExecuting(any(Request.class));
-        verify(callback, never()).onFinished(any(ResponseParcelable.class));
+        verify(callback, never()).onFinished(any(Request.class));
     }
 
     @Test
@@ -96,7 +97,7 @@ public class RequestFutureImplTest {
 
         inOrder.verify(callback).onPending(any(Request.class));
         inOrder.verify(callback).onExecuting(any(Request.class));
-        verify(callback, never()).onFinished(any(ResponseParcelable.class));
+        verify(callback, never()).onFinished(any(Request.class));
     }
 
     @Test
@@ -110,7 +111,7 @@ public class RequestFutureImplTest {
 
         inOrder.verify(callback).onPending(any(Request.class));
         inOrder.verify(callback).onExecuting(any(Request.class));
-        inOrder.verify(callback).onFinished(any(ResponseParcelable.class));
+        inOrder.verify(callback).onFinished(any(Request.class));
     }
 
     @Test
@@ -124,7 +125,7 @@ public class RequestFutureImplTest {
 
         verify(callback).onPending(any(Request.class));
         verify(callback).onExecuting(any(Request.class));
-        verify(callback).onFinished(any(ResponseParcelable.class));
+        verify(callback).onFinished(any(Request.class));
 
         verifyNoMoreInteractions(callback);
     }

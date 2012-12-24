@@ -15,7 +15,7 @@
  */
 package getrest.android.core;
 
-import getrest.android.resource.Packer;
+import getrest.android.http.Packer;
 
 public interface PackerResolver {
     Packer getPacker(Class entityType);

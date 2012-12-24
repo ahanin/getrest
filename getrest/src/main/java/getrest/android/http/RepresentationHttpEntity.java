@@ -16,7 +16,6 @@
 
 package getrest.android.http;
 
-import getrest.android.service.Representation;
 import org.apache.http.HttpEntity;
 
 import java.io.IOException;

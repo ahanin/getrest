@@ -15,14 +15,10 @@
  */
 package getrest.android.core;
 
-import getrest.android.config.Resource;
-
-import java.util.Set;
-
 public interface Application {
 
-    ResourceMethodResolver getResourceMethodResolver();
+    boolean isRequestSupported(Request request);
 
-    PackerResolver getPackerResolver();
+    <T extends Request> RequestSupport<T> getRequestSupport(T request);
 
 }

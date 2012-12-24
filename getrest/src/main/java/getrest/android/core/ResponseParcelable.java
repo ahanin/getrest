@@ -19,6 +19,10 @@ package getrest.android.core;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import getrest.android.http.Header;
+import getrest.android.http.Headers;
+import getrest.android.http.HeadersHelper;
+import getrest.android.http.HasHeaders;
 
 /**
  * @author aha

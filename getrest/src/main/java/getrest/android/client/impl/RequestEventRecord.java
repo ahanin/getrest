@@ -16,7 +16,7 @@
 
 package getrest.android.client.impl;
 
-import getrest.android.request.RequestStatus;
+import getrest.android.core.RequestStatus;
 
 class RequestEventRecord {
 

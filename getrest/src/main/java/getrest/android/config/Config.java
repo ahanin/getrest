@@ -16,8 +16,6 @@
 package getrest.android.config;
 
 import getrest.android.core.Application;
-import getrest.android.ext.MessageBodyReader;
-import getrest.android.ext.MessageBodyWriter;
 import getrest.android.util.Sets;
 
 import java.util.Set;
@@ -40,34 +38,4 @@ public interface Config {
 
     }
 
-    class ApplicationBuilder {
-        private Set<MessageBodyWriter> messageBodyWriters = Sets.newHashSet();
-        private Set<MessageBodyReader> messageBodyReaders = Sets.newHashSet();
-        private Set<Resource> resources = Sets.newHashSet();
-
-        public ApplicationBuilder addMessageBodyWriter(
-            final MessageBodyWriter messageBodyWriter) {
-            this.messageBodyWriters.add(messageBodyWriter);
-
-            return this;
-        }
-
-        public ApplicationBuilder addMessageBodyReader(
-            final MessageBodyReader messageBodyReader) {
-            this.messageBodyReaders.add(messageBodyReader);
-
-            return this;
-        }
-
-        public ApplicationBuilder addResource(final Resource resource) {
-            this.resources.add(resource);
-
-            return this;
-        }
-
-        public Application build() {
-            return new GenericApplication(messageBodyWriters, messageBodyReaders,
-                resources);
-        }
-    }
 }

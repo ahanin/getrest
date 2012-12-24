@@ -15,8 +15,8 @@
  */
 package getrest.android.service;
 
-import getrest.android.core.BaseRequest;
-import getrest.android.core.Request;
+import getrest.android.http.BaseRequest;
+import getrest.android.http.Representation;
 
 
 /**
@@ -24,9 +24,10 @@ import getrest.android.core.Request;
  * @since 2012-01-17
  */
 public class ServiceRequest extends BaseRequest {
+
     private Representation entity;
 
-    public ServiceRequest(final Request request) {
+    public ServiceRequest(final ServiceRequest request) {
         super(request);
     }
 

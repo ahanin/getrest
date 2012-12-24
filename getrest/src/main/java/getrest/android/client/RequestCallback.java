@@ -17,16 +17,15 @@
 package getrest.android.client;
 
 import getrest.android.core.Request;
-import getrest.android.core.ResponseParcelable;
 
-public interface RequestCallback {
+public interface RequestCallback<Q extends Request> {
 
-    void onPending(Request request);
+    void onPending(Q request);
 
-    void onExecuting(Request request);
+    void onExecuting(Q request);
 
-    void onError(Request request);
+    void onError(Q request);
 
-    void onFinished(ResponseParcelable request);
+    void onFinished(Q request);
 
 }

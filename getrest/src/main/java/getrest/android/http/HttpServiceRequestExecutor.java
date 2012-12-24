@@ -15,10 +15,6 @@
  */
 package getrest.android.http;
 
-import getrest.android.core.Header;
-import getrest.android.core.Headers;
-import getrest.android.core.Method;
-
 import getrest.android.service.ServiceRequest;
 import getrest.android.service.ServiceRequestExecutor;
 import getrest.android.service.ServiceResponse;

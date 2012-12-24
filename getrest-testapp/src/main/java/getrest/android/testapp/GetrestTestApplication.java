@@ -21,19 +21,20 @@ import getrest.android.Getrest;
 
 import getrest.android.config.Config;
 import getrest.android.config.HasConfig;
-import getrest.android.config.Resource;
-import getrest.android.config.ResourceMethod;
+import getrest.android.http.Resource;
+import getrest.android.http.ResourceMethod;
 
-import getrest.android.core.MediaType;
-import getrest.android.core.Method;
+import getrest.android.http.MediaType;
+import getrest.android.http.Method;
 
+import getrest.android.http.RestfulApplication;
 import getrest.android.util.Sets;
 
 public class GetrestTestApplication extends Application implements HasConfig {
     public Config getGetrestConfig() {
         final Config.ConfigBuilder config = Getrest.newConfigBuilder();
 
-        final Config.ApplicationBuilder twitter = Getrest.newApplicationBuilder();
+        final RestfulApplication.ApplicationBuilder twitter = RestfulApplication.newApplicationBuilder();
 
         twitter.addResource(new Resource("/", Sets.<MediaType>emptySet(),
                 Sets.newHashSet(

@@ -16,7 +16,7 @@
 package getrest.android.client;
 
 import getrest.android.core.Request;
-import getrest.android.request.RequestStatus;
+import getrest.android.core.RequestStatus;
 import getrest.android.core.ResponseParcelable;
 import org.junit.Before;
 import org.junit.Test;

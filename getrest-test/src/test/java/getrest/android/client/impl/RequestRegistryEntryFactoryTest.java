@@ -24,12 +24,10 @@ public class RequestRegistryEntryFactoryTest {
         final Request request = mock(Request.class);
 
         when(request.getRequestId()).thenReturn("12345");
-        when(request.getUri()).thenReturn(Uri.parse("http://disney.com/goofy"));
 
         final RequestRegistry.Entry entry = entryFactory.create(request);
 
         assertThat(entry.getRequestId(), equalTo("12345"));
-        assertThat(entry.getResourceUri(), equalTo(Uri.parse("http://disney.com/goofy")));
     }
 
 }

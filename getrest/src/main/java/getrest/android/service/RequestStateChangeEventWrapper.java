@@ -17,7 +17,7 @@
 package getrest.android.service;
 
 import android.content.Intent;
-import getrest.android.request.RequestStatus;
+import getrest.android.core.RequestStatus;
 
 public class RequestStateChangeEventWrapper {
 

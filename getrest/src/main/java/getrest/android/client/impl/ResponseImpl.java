@@ -149,7 +149,7 @@ class ResponseImpl<T> extends Response<T> {
             }
         } finally {
             try {
-                callback.onFinished(responseParcelable);
+                callback.onFinished(request);
             } finally {
                 isFinishedFired = true;
             }

@@ -13,21 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.service;
 
-import getrest.android.core.ErrorState;
-import getrest.android.executor.RequestHandlerFactory;
-import getrest.android.executor.Handler;
-import getrest.android.core.HandlerException;
 import getrest.android.core.Request;
-import getrest.android.request.RequestContext;
-import getrest.android.request.RequestManager;
-import getrest.android.request.RequestStatus;
-import getrest.android.core.ResponseParcelable;
-import getrest.android.resource.ResourceContext;
-
-import java.io.IOException;
+import getrest.android.core.RequestSupport;
 
 /**
  * @author aha
@@ -36,17 +25,15 @@ import java.io.IOException;
 public class RequestJob implements Runnable {
 
     private Request request;
-
-    private RequestContext requestContext;
-
+    private RequestSupport<Request> requestSupport;
     private RequestEventBus requestEventBus;
 
     public RequestJob(final Request request) {
         this.request = request;
     }
 
-    public void setRequestContext(final RequestContext requestContext) {
-        this.requestContext = requestContext;
+    public void setRequestSupport(final RequestSupport<Request> requestContext) {
+        this.requestSupport = requestContext;
     }
 
     public void setRequestEventBus(final RequestEventBus requestEventBus) {
@@ -54,41 +41,43 @@ public class RequestJob implements Runnable {
     }
 
     public void run() {
-        final String requestId = request.getRequestId();
+        throw new UnsupportedOperationException();
 
-        final ResponseParcelable responseParcelable = new ResponseParcelable();
-        final ResourceContext resourceContext = requestContext.getResourceContext();
-
-        final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
-        final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
-
-        final RequestManager requestManager = requestContext.getRequestManager();
-        requestManager.setRequestState(requestId, RequestStatus.EXECUTING);
-
-        requestEventBus.fireExecuting(requestId);
-
-        try {
-            requestHandler.handle(request, responseParcelable);
-            requestManager.saveResponse(requestId, responseParcelable);
-            requestManager.setRequestState(requestId, RequestStatus.FINISHED);
-            requestEventBus.fireFinished(requestId);
-        } catch (HandlerException e) {
-            final StringBuilder message = new StringBuilder(e.getMessage());
-            final ErrorState errorState;
-            if (e.getCause() instanceof IOException) {
-                errorState = ErrorState.IO;
-            } else {
-                errorState = ErrorState.UNKNOWN;
-            }
-
-            if (e.getCause() != null) {
-                message.append('|').append(e.getCause().getMessage());
-            }
-
-            requestEventBus.fireError(requestId);
-            requestManager.setRequestState(requestId, errorState, message.toString());
-        }
-
+        //        final String requestId = request.getRequestId();
+        //
+        //        final ResponseParcelable responseParcelable = new ResponseParcelable();
+        //
+        //        final ResourceContext resourceContext = requestSupport.getResourceContext();
+        //
+        //        final RequestHandlerFactory requestHandlerFactory = resourceContext.getRequestHandlerFactory();
+        //        final Handler requestHandler = requestHandlerFactory.getRequestHandler(request);
+        //
+        //        final RequestManager requestManager = requestSupport.getRequestManager();
+        //        requestManager.setRequestState(requestId, RequestStatus.EXECUTING);
+        //
+        //        requestEventBus.fireExecuting(requestId);
+        //
+        //        try {
+        //            requestHandler.handle(request, responseParcelable);
+        //            requestManager.saveResponse(requestId, responseParcelable);
+        //            requestManager.setRequestState(requestId, RequestStatus.FINISHED);
+        //            requestEventBus.fireFinished(requestId);
+        //        } catch (HandlerException e) {
+        //            final StringBuilder message = new StringBuilder(e.getMessage());
+        //            final ErrorState errorState;
+        //            if (e.getCause() instanceof IOException) {
+        //                errorState = ErrorState.IO;
+        //            } else {
+        //                errorState = ErrorState.UNKNOWN;
+        //            }
+        //
+        //            if (e.getCause() != null) {
+        //                message.append('|').append(e.getCause().getMessage());
+        //            }
+        //
+        //            requestEventBus.fireError(requestId);
+        //
+        //            requestManager.setRequestState(requestId, errorState, message.toString());
+        //        }
     }
-
 }

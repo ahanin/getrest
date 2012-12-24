@@ -23,7 +23,6 @@ import android.net.Uri;
 import getrest.android.client.RequestRegistry;
 import getrest.android.core.Loggers;
 import getrest.android.util.Logger;
-import getrest.android.util.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -103,7 +102,7 @@ public class RequestRegistryPreferencesImpl implements RequestRegistry, Transact
             if (parts.length == 2) {
                 final String requestId = parts[0];
                 final Uri uri = Uri.parse(Uri.decode(parts[1]));
-                backedMap.put(requestId, new RequestRegistryEntryFactory.EntryImpl(requestId, uri));
+                backedMap.put(requestId, new RequestRegistryEntryFactory.EntryImpl(requestId));
             } else {
                 LOGGER.warn("Invalid request registry entry: {}", entryString);
             }
@@ -117,9 +116,7 @@ public class RequestRegistryPreferencesImpl implements RequestRegistry, Transact
         for (Iterator<Entry> i = requestIds.iterator(); i.hasNext(); ) {
             final Entry entry = i.next();
 
-            sb.append(entry.getRequestId())
-                    .append(":")
-                    .append(Uri.encode(entry.getResourceUri().toString()));
+            sb.append(entry.getRequestId());
 
             if (i.hasNext()) {
                 sb.append(',');

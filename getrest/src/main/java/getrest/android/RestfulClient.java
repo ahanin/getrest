@@ -17,59 +17,20 @@
 package getrest.android;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Handler;
 import getrest.android.client.RequestCallbackFactory;
+import getrest.android.client.RequestExecutor;
 import getrest.android.client.impl.RestfulClientImpl;
-import getrest.android.core.Method;
-import getrest.android.core.Response;
-import getrest.android.util.TypeLiteral;
 
 /**
  * @author aha
  * @since 2012-01-13
  */
-public abstract class RestfulClient {
+public abstract class RestfulClient implements RequestExecutor {
 
-    private String base;
+    private Handler callbackHandler = new Handler();
 
     private RequestCallbackFactory requestCallbackFactory;
-
-    public String getBase() {
-        return base;
-    }
-
-    public void setBase(final String baseUrl) {
-        this.base = baseUrl;
-    }
-
-    protected abstract void init(Context context);
-
-    /**
-     * Detach {@link RestfulClient} and release all retained resources.
-     */
-    public abstract void detach();
-
-    /**
-     * Create request with uri.
-     *
-     * @param uri
-     * @return
-     */
-    public abstract <R> RequestAutomate<R> newRequest(String uri);
-
-    private Uri buildUri(final String path) {
-        return this.base == null ? Uri.parse(path) : Uri.parse(gluePath(base, path));
-    }
-
-    private String gluePath(final String baseUrl, final String path) {
-        final StringBuilder sb = new StringBuilder(baseUrl);
-        if (sb.charAt(sb.length() - 1) != '/' && !path.startsWith("/")) {
-            sb.append('/');
-        }
-        sb.append(path);
-        return sb.toString();
-    }
 
     /**
      * Create new instance of {@link RestfulClient} and attaches it to the given {@link Context}. When client object is
@@ -85,20 +46,22 @@ public abstract class RestfulClient {
         return client;
     }
 
-    public static RestfulClient getInstance(Context context, Object applicationId) {
-        final RestfulClient client = new RestfulClientImpl(applicationId);
-        final String applicationBase = "/"; // TODO retrieve preconfigured application's base uri
-        client.setBase(applicationBase);
-        client.init(context);
-        return client;
-    }
+    protected abstract void init(Context context);
 
-    public static RestfulClient getInstance(Context context, String base, Object applicationId) {
-        final RestfulClient client = new RestfulClientImpl(applicationId);
-        client.setBase(base);
-        client.init(context);
-        return client;
-    }
+    /**
+     * Detach {@link RestfulClient} and release all retained resources.
+     */
+    public abstract void detach();
+
+    /**
+     * Start the client and replays all unfinished requests.
+     */
+    public abstract void replay();
+
+    /**
+     * Start the client.
+     */
+    public abstract void start();
 
     /**
      * Associate {@link RequestCallbackFactory} with the client. This factory will be used to automatically create
@@ -121,41 +84,12 @@ public abstract class RestfulClient {
         return requestCallbackFactory;
     }
 
-    /**
-     * Set {@link Handler} in which request callbacks will be executed. Default behaviour is the callback of thread in
-     * which client has been created.
-     *
-     * @param callbackHandler {@link Handler} instance to be used to execute callbacks
-     */
-    public abstract void setCallbackHandler(Handler callbackHandler);
-
-    /**
-     * Start the client and replays all unfinished requests.
-     */
-    public abstract void replay();
-
-    /**
-     * Start the client.
-     */
-    public abstract void start();
-
-    public abstract Response getResponse(String requestId);
-
-    public interface RequestAutomate<R> {
-
-        RequestAutomate<R> withUri(Uri uri);
-
-        RequestAutomate<R> withMethod(Method method);
-
-        RequestAutomate<R> withHeader(String name, String value);
-
-        <T> RequestAutomate<R> withEntity(T entity);
-
-        <T> RequestAutomate<T> withResponseType(Class<T> responseType);
-
-        <T> RequestAutomate<T> withResponseType(TypeLiteral<T> typeLiteral);
-
-        R execute();
-
+    public void setCallbackHandler(final Handler callbackHandler) {
+        this.callbackHandler = callbackHandler;
     }
+
+    protected Handler getCallbackHandler() {
+        return callbackHandler;
+    }
+
 }

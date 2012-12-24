@@ -19,13 +19,12 @@ package getrest.android.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import getrest.android.config.Config;
-import getrest.android.runtime.GetrestRuntime;
+import getrest.android.core.GetrestRuntime;
 import getrest.android.core.Loggers;
 import getrest.android.core.Request;
-import getrest.android.request.RequestContext;
-import getrest.android.request.RequestManager;
-import getrest.android.request.RequestStatus;
+import getrest.android.core.RequestSupport;
+import getrest.android.core.RequestManager;
+import getrest.android.core.RequestStatus;
 import getrest.android.util.Logger;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -53,10 +52,12 @@ public class RestService extends Service implements Broadcaster {
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         final GetrestRuntime runtime = GetrestRuntime.getInstance(this);
-        final Request request = new RequestWrapper(intent).getRequest();
 
-        LOGGER.debug("Received request: requestId={0}, url={1}, method={2}. Submitting it to queue.",
-                request.getRequestId(), request.getUri(), request.getMethod());
+        final Request request = new RequestWrapper(intent).getRequestParcel().getRequest();
+        final RequestSupport<Request> requestSupport = runtime.getRequestSupport(request);
+
+        LOGGER.debug("Received request: requestId={0}, <{1}>. Submitting it to queue.",
+                request.getRequestId(), request);
 
         try {
             final RequestEventBus eventBus = new RequestEventBus();
@@ -64,12 +65,12 @@ public class RestService extends Service implements Broadcaster {
 
             eventBus.firePending(request.getRequestId());
 
-            final RequestContext requestContext = runtime.getRequestContext(request);
-            final RequestManager requestManager = requestContext.getRequestManager();
-            requestManager.setRequestState(request.getRequestId(), RequestStatus.PENDING);
+            // TODO reuse request manager
+//            final RequestManager requestManager = requestSupport.getRequestManager();
+//            requestManager.setRequestState(request.getRequestId(), RequestStatus.PENDING);
 
             final RequestJob job = new RequestJob(request);
-            job.setRequestContext(requestContext);
+            job.setRequestSupport(requestSupport);
             job.setRequestEventBus(eventBus);
 
             jobExecutorService.submit(job);

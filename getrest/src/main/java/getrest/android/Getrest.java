@@ -23,8 +23,4 @@ public class Getrest {
         return new Config.ConfigBuilder();
     }
 
-    public static Config.ApplicationBuilder newApplicationBuilder() {
-        return new Config.ApplicationBuilder();
-    }
-
 }

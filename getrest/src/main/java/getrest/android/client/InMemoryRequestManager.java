@@ -17,10 +17,9 @@ package getrest.android.client;
 
 import getrest.android.core.*;
 import getrest.android.core.Error;
-import getrest.android.request.RequestManager;
-import getrest.android.request.RequestStatus;
+import getrest.android.core.RequestManager;
+import getrest.android.core.RequestStatus;
 import getrest.android.util.Logger;
-import getrest.android.util.LoggerFactory;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -189,7 +188,7 @@ public class InMemoryRequestManager implements RequestManager {
         error.setErrorState(errorState);
         error.setMessage(message);
 
-        request.setError(error);
+//        request.setError(error);
     }
 
     private class CandidateEntry {

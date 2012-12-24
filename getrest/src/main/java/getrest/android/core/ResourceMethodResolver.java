@@ -15,7 +15,8 @@
  */
 package getrest.android.core;
 
-import getrest.android.config.ResourceMethod;
+import getrest.android.http.ResourceMethod;
+import getrest.android.http.HttpRequest;
 
 /**
  * {@link ResourceMethodResolver} is used to search within the {@link Application} a {@link ResourceMethod} that is best
@@ -26,8 +27,8 @@ public interface ResourceMethodResolver {
      * Find a resource method matching the request. The result must be consistent. That is, same request must result
      * in the same resource method object.
      *
-     * @param request
-     * @return {@link ResourceMethod} matched the request, or {@code null} if request does not match any methods defined
+     *
+     * @param httpRequest@return {@link ResourceMethod} matched the request, or {@code null} if request does not match any methods defined
      */
-    ResourceMethod getResourceMethod(final Request request);
+    ResourceMethod getResourceMethod(final HttpRequest httpRequest);
 }

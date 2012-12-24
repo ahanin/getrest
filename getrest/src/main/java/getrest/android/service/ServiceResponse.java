@@ -16,7 +16,8 @@
 
 package getrest.android.service;
 
-import getrest.android.core.Headers;
+import getrest.android.http.Headers;
+import getrest.android.http.Representation;
 
 /**
  * @author aha

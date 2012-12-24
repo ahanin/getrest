@@ -21,24 +21,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
-import android.os.Handler;
 import getrest.android.RestfulClient;
 import getrest.android.client.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestExecutor;
 import getrest.android.client.RequestRegistry;
-import getrest.android.core.Header;
 import getrest.android.core.Loggers;
-import getrest.android.core.Method;
-import getrest.android.core.Pack;
 import getrest.android.core.Request;
+import getrest.android.core.RequestParcel;
+import getrest.android.core.RequestSupport;
 import getrest.android.core.Response;
 import getrest.android.core.ResponseParcelable;
-import getrest.android.request.RequestContext;
-import getrest.android.request.RequestManager;
-import getrest.android.request.RequestStatus;
-import getrest.android.runtime.GetrestRuntime;
+import getrest.android.core.RequestManager;
+import getrest.android.core.RequestStatus;
+import getrest.android.core.GetrestRuntime;
 import getrest.android.service.RequestEventBus;
 import getrest.android.service.RequestStateChangeEventWrapper;
 import getrest.android.service.RequestWrapper;
@@ -48,13 +44,9 @@ import getrest.android.util.Preconditions;
 import getrest.android.util.TypeLiteral;
 import getrest.android.util.WorkerQueue;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -64,13 +56,9 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
     private GetrestRuntime runtime;
 
-    private final Object applicationId;
-
     private Context androidContext;
 
     private RequestEventBroadcastReceiver requestEventReceiver;
-
-    private Handler callbackHandler = new Handler();
 
     private final Map<String, ResponseImpl> futureMap = new ConcurrentHashMap<String, ResponseImpl>();
 
@@ -83,35 +71,6 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     private boolean isStarted;
 
     public RestfulClientImpl() {
-        this.applicationId = null;
-    }
-
-    public RestfulClientImpl(final Object applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    @Override
-    public void setCallbackHandler(final Handler callbackHandler) {
-        this.callbackHandler = callbackHandler;
-    }
-
-    /**
-     * Return {@link getrest.android.core.Response}. Unless client is started by calling {@link #replay()}, this method will return
-     * futures for currently executing requests, otherwise new synthetic future will be created and will be updated
-     * once the client is started.
-     *
-     * @param requestId request id
-     * @return {@link getrest.android.core.Response} for currently executing requests
-     */
-    @Override
-    public Response getResponse(String requestId) {
-        final Response future;
-        if (isStarted) {
-            future = futureMap.get(requestId);
-        } else {
-            future = obtainStoredRequestFuture(requestId);
-        }
-        return future;
     }
 
     private Response obtainStoredRequestFuture(final String requestId) {
@@ -127,12 +86,16 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         return obtainRequestFuture(request);
     }
 
-    public Object execute(final Request request) {
+    public void execute(final Request request) {
+        throw new UnsupportedOperationException();
+    }
+
+    public <R> R execute(final Request request, final Class<R> responseType) {
 
         LOGGER.trace("Starting service");
 
-        final RequestWrapper wrapper = new RequestWrapper(new Intent(androidContext, RestService.class));
-        wrapper.setRequest(request);
+        final RequestSupport requestSupport = runtime.getRequestSupport(request);
+        final RequestParcel parcel = requestSupport.getRequestParcel();
 
         final RequestManager requestManager = runtime.getRequestManager();
         requestManager.saveRequest(request);
@@ -141,11 +104,16 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         editor.put(request);
         editor.commit();
 
-        final ResponseImpl requestFuture = obtainRequestFuture(request);
+        final RequestWrapper wrapper = new RequestWrapper(new Intent(androidContext, RestService.class));
+        wrapper.setRequestParcel(parcel);
 
         androidContext.startService(wrapper.asIntent());
 
-        return requestFuture;
+        return (R) requestSupport.createResponse(responseType);
+    }
+
+    public <R> R execute(final Request request, final TypeLiteral<R> responseTypeLiteral) {
+        throw new UnsupportedOperationException();
     }
 
     private RequestRegistry getRequestRegistry() {
@@ -192,7 +160,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         final RequestManager requestManager = runtime.getRequestManager();
         final Request request = requestManager.getRequest(entry.getRequestId());
         if (request == null) {
-            LOGGER.warn("Request [{0}, {1}] is not acknowledged by request manager", entry.getRequestId(), entry.getResourceUri());
+            LOGGER.warn("Request [{0}] is not acknowledged by request manager", entry.getRequestId());
             return null;
         } else {
             return obtainRequestFuture(request);
@@ -213,11 +181,6 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     public void detach() {
         androidContext.unregisterReceiver(requestEventReceiver);
         requestEventReceiver = null;
-    }
-
-    @Override
-    public <R> RequestAutomate<R> newRequest(final String uri) {
-        return new RequestAutomateImpl<R>(this, this.runtime).withUri(Uri.parse(uri));
     }
 
     @Override
@@ -268,20 +231,24 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
     }
 
     public void handleRequestEvent(final RequestEventRecord eventRecord) {
+
+        Preconditions.checkState(getCallbackHandler() != null, "Callback handler cannot be null");
+
         synchronized (futureMap) {
             final ResponseImpl future = futureMap.get(eventRecord.getRequestId());
 
             final RequestStatus requestStatus = eventRecord.getRequestStatus();
             if (future == null) {
-                LOGGER.warn("Request id " + eventRecord.getRequestId() + " is not registered");
+                LOGGER.warn("Request event [{0}] cannot be processed, because request [{1}] is not registered",
+                        eventRecord, eventRecord.getRequestId());
             } else if (RequestStatus.PENDING.equals(requestStatus)) {
-                callbackHandler.post(new RequestPendingRunnable(future));
+                getCallbackHandler().post(new RequestPendingRunnable(future));
             } else if (RequestStatus.EXECUTING.equals(requestStatus)) {
-                callbackHandler.post(new RequestExecutingRunnable(future));
+                getCallbackHandler().post(new RequestExecutingRunnable(future));
             } else if (RequestStatus.FINISHED.equals(requestStatus)) {
-                callbackHandler.post(new RequestFinishedRunnable(future, eventRecord, this));
+                getCallbackHandler().post(new RequestFinishedRunnable(future, eventRecord, this));
             } else if (RequestStatus.ERROR.equals(requestStatus)) {
-                callbackHandler.post(new RequestErrorRunnable(future));
+                getCallbackHandler().post(new RequestErrorRunnable(future));
             }
         }
     }
@@ -327,7 +294,7 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
 
         private final ResponseImpl future;
         private final RequestEventRecord eventRecord;
-        private RestfulClientImpl client;
+        private final RestfulClientImpl client;
 
         public RequestFinishedRunnable(final ResponseImpl future, final RequestEventRecord eventRecord,
                                        final RestfulClientImpl client) {
@@ -370,85 +337,6 @@ public class RestfulClientImpl extends RestfulClient implements RequestExecutor,
         }
     }
 
-    private static class RequestAutomateImpl<R> implements RequestAutomate<R> {
-
-        private Uri uri;
-        private Method method;
-        private List<Header> headers = new ArrayList<Header>();
-        private Object entity;
-
-        private final RequestExecutor<R> requestExecutor;
-        private final GetrestRuntime runtime;
-
-        private Type responseType;
-
-        private RequestAutomateImpl(final RequestExecutor<R> requestExecutor, GetrestRuntime runtime) {
-            this.requestExecutor = requestExecutor;
-            this.runtime = runtime;
-        }
-
-        public RequestAutomate<R> withUri(final Uri uri) {
-            this.uri = uri;
-            return this;
-        }
-
-        public RequestAutomate<R> withMethod(final Method method) {
-            this.method = method;
-            return this;
-        }
-
-        public RequestAutomate<R> withHeader(final String name, final String value) {
-            this.headers.add(new Header(name, value));
-            return this;
-        }
-
-        public <T> RequestAutomate<R> withEntity(final T entity) {
-            this.entity = entity;
-            return this;
-        }
-
-        public <T> RequestAutomate<T> withResponseType(final Class<T> responseType) {
-            this.responseType = responseType;
-            return (RequestAutomate<T>) this;
-        }
-
-        public <T> RequestAutomate<T> withResponseType(final TypeLiteral<T> typeLiteral) {
-            this.responseType = typeLiteral.getType();
-            return (RequestAutomate<T>) this;
-        }
-
-        public R execute() {
-            Preconditions.checkState(this.uri != null, "URI is not set");
-            Preconditions.checkState(this.method != null, "Method is not set");
-
-            final Request request = new Request();
-            request.setRequestId(nextRequestId());
-            request.setUri(this.uri);
-            request.setMethod(this.method);
-            request.getHeaders().addAll(headers);
-            request.setNanoTime(System.nanoTime());
-
-            if (this.entity != null) {
-                request.setEntityType(this.entity.getClass());
-            }
-
-            final RequestContext requestContext = runtime.getRequestContext(request);
-            Preconditions.checkState(this.entity == null || requestContext.getEntityPacker() != null,
-                    "Request contains entity, but packer is not defined for the request method.");
-
-            if (this.entity != null) {
-                final Pack pack = requestContext.getEntityPacker().pack(this.entity);
-                request.setEntity(pack);
-            }
-
-            return requestExecutor.execute(request);
-        }
-
-        private String nextRequestId() {
-            return UUID.randomUUID().toString();
-        }
-
-    }
 }
 
 interface RequestEventHandler {

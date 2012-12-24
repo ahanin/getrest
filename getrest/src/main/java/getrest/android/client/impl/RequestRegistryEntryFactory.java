@@ -22,31 +22,24 @@ import getrest.android.core.Request;
 public class RequestRegistryEntryFactory {
 
     public RequestRegistry.Entry create(Request request) {
-        return new EntryImpl(request.getRequestId(), request.getUri());
+        return new EntryImpl(request.getRequestId());
     }
 
     static class EntryImpl implements RequestRegistry.Entry {
         private final String requestId;
-        private final Uri uri;
 
-        public EntryImpl(final String requestId, final Uri uri) {
+        public EntryImpl(final String requestId) {
             this.requestId = requestId;
-            this.uri = uri;
         }
 
         public String getRequestId() {
             return requestId;
         }
 
-        public Uri getResourceUri() {
-            return uri;
-        }
-
         @Override
         public String toString() {
             return "EntryImpl{" +
                     "requestId='" + requestId + '\'' +
-                    ", uri=" + uri +
                     '}';
         }
     }
