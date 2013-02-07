@@ -16,42 +16,50 @@
 package getrest.android.core;
 
 import android.content.Context;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import getrest.android.client.InMemoryRequestManager;
+
 import getrest.android.config.Config;
 import getrest.android.config.HasConfig;
+
 import getrest.android.http.Packer;
+
+import getrest.android.util.Preconditions;
 
 import java.util.HashMap;
 
 public class GetrestRuntime {
 
-    private static final HashMap<Context,GetrestRuntime> cache = new HashMap<Context,GetrestRuntime>(
+    private static final HashMap<Context, GetrestRuntime> cache = new HashMap<Context, GetrestRuntime>(
         1);
-
     private static final DefaultPacker DEFAULT_PACKER = new DefaultPacker();
-
     private RequestManager requestManager = new InMemoryRequestManager();
     private Config config;
 
     public static GetrestRuntime getInstance(final Context context) {
+
         final Context applicationContext = context.getApplicationContext();
 
         if (!cache.containsKey(applicationContext)) {
+
             synchronized (cache) {
+
                 if (!cache.containsKey(applicationContext)) {
+
                     if (!(applicationContext instanceof HasConfig)) {
                         throw new IllegalStateException(
-                                "Unable to find configuration. Does your Android "
-                                        + Application.class.getSimpleName() + " implement "
-                                        + HasConfig.class.getName());
+                            "Unable to find configuration. Does your Android "
+                            + Application.class.getSimpleName() + " implement "
+                            + HasConfig.class.getName());
                     }
 
                     synchronized (applicationContext) {
-                        cache.put(
-                                applicationContext,
-                                new GetrestRuntime(
-                                        ((HasConfig) applicationContext)
-                                                .getGetrestConfig()));
+                        cache.put(applicationContext,
+                                  new GetrestRuntime(
+                            ((HasConfig) applicationContext).getGetrestConfig()));
                     }
                 }
             }
@@ -65,28 +73,73 @@ public class GetrestRuntime {
     }
 
     public Packer getPacker() {
+
         // TODO implement resolving of context-specific packer
         return DEFAULT_PACKER;
     }
 
     public RequestManager getRequestManager() {
+
         return requestManager;
     }
 
     public <T extends Request> RequestSupport<T> getRequestSupport(final T request) {
-        for (Application application : config.getApplications()) {
+
+        for (final Application application : config.getApplications()) {
+
             if (application.isRequestSupported(request)) {
-                return application.getRequestSupport(request);
+
+                return new RequestSupportDecorator<T>(request,
+                                                      application.getRequestSupport(request));
             }
         }
+
         throw new IllegalStateException("Request is not supported: " + request);
     }
 
     private static class DefaultPacker implements Packer {
         public <T> Pack<T> pack(final T object) {
-            throw new UnsupportedOperationException(
-                    "Default packing is not implemented yet");
+            Preconditions.checkArgNotNull(object, "entity");
+            // TODO support non-parcelable entities with different packers
+            Preconditions.checkState(object instanceof Parcelable, "entity must be parcelable");
+
+            return (Pack<T>) new ParcelablePack((Parcelable) object);
+        }
+
+        private static class ParcelablePack implements Pack<Parcelable> {
+
+            private Parcelable entity;
+
+            public ParcelablePack(final Parcelable entity) {
+                this.entity = entity;
+            }
+
+            public Parcelable unpack() {
+
+                return entity;
+            }
+
+            public int describeContents() {
+
+                return 0;
+            }
+
+            public void writeToParcel(final Parcel parcel, final int flags) {
+                parcel.writeParcelable(entity, 0);
+            }
+
+            public static final Creator<ParcelablePack> CREATOR = new Creator<ParcelablePack>() {
+                public ParcelablePack createFromParcel(final Parcel parcel) {
+
+                    return new ParcelablePack(
+                        parcel.readParcelable(GetrestRuntime.class.getClassLoader()));
+                }
+
+                public ParcelablePack[] newArray(final int size) {
+
+                    return new ParcelablePack[size];
+                }
+            };
         }
     }
-
 }

@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.core;
 
-public class RequestStatus {
-
-    public static final RequestStatus PENDING = new RequestStatus((byte) 1, "PENDING");
-    public static final RequestStatus EXECUTING = new RequestStatus((byte) 2, "EXECUTING");
-    public static final RequestStatus FINISHED = new RequestStatus((byte) 3, "FINISHED");
-    public static final RequestStatus ERROR = new RequestStatus((byte) 4, "ERROR");
+public enum RequestStatus {
+    PENDING((byte) 0), 
+    EXECUTING((byte) 1), 
+    ERROR((byte) 2), 
+    FINISHED((byte) 3);
 
     private byte id;
-    private String name;
 
-    private RequestStatus(final byte id, final String name) {
-        this.name = name;
+    private RequestStatus(final byte id) {
         this.id = id;
     }
 
@@ -35,46 +31,13 @@ public class RequestStatus {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public static RequestStatus byId(final byte id) {
-        switch (id) {
-            case 1:
-                return PENDING;
-            case 2:
-                return EXECUTING;
-            case 3:
-                return FINISHED;
-            case 4:
-                return ERROR;
-            default:
-                return null;
+        for (RequestStatus status : values()) {
+            if (status.id == id) {
+                return status;
+            }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "RequestStatus{" +
-                "name='" + name + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        final RequestStatus that = (RequestStatus) o;
-
-        if (id != that.id) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) id;
+        throw new IllegalStateException("Invalid RequestStatus id [" + id + "]");
     }
 }

@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.http;
 
 import android.net.Uri;
+
 import android.os.Parcel;
 import android.os.Parcelable;
-import getrest.android.core.*;
-import getrest.android.core.Error;
 
+import getrest.android.core.Error;
+import getrest.android.core.ErrorState;
+import getrest.android.core.Pack;
+import getrest.android.core.Request;
 
 /**
+ * 
  * @author aha
+ *
  * @since 2012-01-13
  */
 public class HttpRequest extends BaseRequest implements Parcelable, Request {
@@ -33,9 +37,10 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
     private Class entityType;
     private Class returnType;
     private long nanoTime;
-    private getrest.android.core.Error error;
+    private Error error;
 
     public Pack getEntity() {
+
         return entity;
     }
 
@@ -44,6 +49,7 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
     }
 
     public Class getEntityType() {
+
         return entityType;
     }
 
@@ -52,6 +58,7 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
     }
 
     public Class getReturnType() {
+
         return returnType;
     }
 
@@ -60,13 +67,16 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
     }
 
     public long getNanoTime() {
+
         return nanoTime;
     }
 
     public void setNanoTime(final long nanoTime) {
         this.nanoTime = nanoTime;
     }
+
     public Error getError() {
+
         return error;
     }
 
@@ -75,10 +85,12 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
     }
 
     public boolean hasError() {
+
         return error != null;
     }
 
     public int describeContents() {
+
         return 0;
     }
 
@@ -92,11 +104,13 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
         parcel.writeParcelable(entity, 0);
         parcel.writeLong(nanoTime);
         writeErrorToParcel(parcel, error);
+
         final Headers headers = getHeaders();
         HeadersHelper.writeToParcel(parcel, headers);
     }
 
     private static void writeErrorToParcel(final Parcel parcel, final Error error) {
+
         if (error == null) {
             parcel.writeString(null);
             parcel.writeString(null);
@@ -107,34 +121,37 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
     }
 
     public static final Creator<Request> CREATOR = new Creator<Request>() {
-            public Request createFromParcel(final Parcel parcel) {
-                final HttpRequest request = new HttpRequest();
-                request.setRequestId(parcel.readString());
-                request.setEntityType((Class) parcel.readSerializable());
-                request.setReturnType((Class) parcel.readSerializable());
-                request.setUri((Uri) parcel.readParcelable(
-                        Uri.class.getClassLoader()));
-                request.setMethod(Method.byId(parcel.readByte()));
-                request.setMediaType(new MediaType(parcel.readString()));
-                request.entity = parcel.readParcelable(Pack.class.getClassLoader());
-                request.nanoTime = parcel.readLong();
-                request.error = readErrorFromParcel(parcel);
+        public Request createFromParcel(final Parcel parcel) {
 
-                HeadersHelper.readFromParcel(parcel, request.getHeaders());
+            final HttpRequest request = new HttpRequest();
+            request.setRequestId(parcel.readString());
+            request.setEntityType((Class) parcel.readSerializable());
+            request.setReturnType((Class) parcel.readSerializable());
+            request.setUri((Uri) parcel.readParcelable(Uri.class.getClassLoader()));
+            request.setMethod(Method.byId(parcel.readByte()));
+            request.setMediaType(new MediaType(parcel.readString()));
+            request.entity = parcel.readParcelable(Pack.class.getClassLoader());
+            request.nanoTime = parcel.readLong();
+            request.error = readErrorFromParcel(parcel);
 
-                return request;
-            }
+            HeadersHelper.readFromParcel(parcel, request.getHeaders());
 
-            public Request[] newArray(final int i) {
-                return new Request[0];
-            }
-        };
+            return request;
+        }
+
+        public Request[] newArray(final int i) {
+
+            return new Request[0];
+        }
+    };
 
     private static Error readErrorFromParcel(final Parcel parcel) {
+
         final String errorState = parcel.readString();
         final String message = parcel.readString();
 
         if (errorState == null) {
+
             return null;
         }
 
@@ -144,5 +161,4 @@ public class HttpRequest extends BaseRequest implements Parcelable, Request {
 
         return error;
     }
-
 }

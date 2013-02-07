@@ -19,7 +19,7 @@ import getrest.android.client.RequestExecutor;
 
 public interface RequestSupport<Q extends Request> {
 
-    RequestParcel<Q> getRequestParcel();
+    RequestParcel<Q> getRequestParcelable();
 
     RequestExecutor getRequestExecutor();
 

@@ -23,9 +23,9 @@ public class Preconditions {
         }
     }
 
-    public static <E> void checkArgNotNull(final E arg, final String message) {
+    public static <E> void checkArgNotNull(final E arg, final String name) {
         if (arg == null) {
-            throw new IllegalArgumentException(message);
+            throw new IllegalArgumentException(String.format("'%s' cannot be null", name));
         }
     }
 }

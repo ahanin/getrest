@@ -28,7 +28,7 @@ import getrest.android.http.HasHeaders;
  * @author aha
  * @since 2012-01-13
  */
-public class ResponseParcelable implements Parcelable, HasHeaders {
+public class ResponseParcel implements Parcelable, HasHeaders {
 
     private Uri uri;
     private Pack entity;
@@ -62,18 +62,18 @@ public class ResponseParcelable implements Parcelable, HasHeaders {
         parcel.writeInt(status.getResponseCode());
     }
 
-    public static final Creator<ResponseParcelable> CREATOR = new Creator<ResponseParcelable>() {
-        public ResponseParcelable createFromParcel(final Parcel parcel) {
-            final ResponseParcelable responseParcelable = new ResponseParcelable();
-            responseParcelable.uri = parcel.readParcelable(Uri.class.getClassLoader());
-            responseParcelable.entity = parcel.readParcelable(Pack.class.getClassLoader());
-            HeadersHelper.readFromParcel(parcel, responseParcelable.headers);
-            responseParcelable.status = Status.forResponseCode(parcel.readInt());
-            return responseParcelable;
+    public static final Creator<ResponseParcel> CREATOR = new Creator<ResponseParcel>() {
+        public ResponseParcel createFromParcel(final Parcel parcel) {
+            final ResponseParcel responseParcel = new ResponseParcel();
+            responseParcel.uri = parcel.readParcelable(Uri.class.getClassLoader());
+            responseParcel.entity = parcel.readParcelable(Pack.class.getClassLoader());
+            HeadersHelper.readFromParcel(parcel, responseParcel.headers);
+            responseParcel.status = Status.forResponseCode(parcel.readInt());
+            return responseParcel;
         }
 
-        public ResponseParcelable[] newArray(final int size) {
-            return new ResponseParcelable[size];
+        public ResponseParcel[] newArray(final int size) {
+            return new ResponseParcel[size];
         }
     };
 

@@ -16,14 +16,15 @@
 package getrest.android.http;
 
 import android.content.Context;
+
 import getrest.android.core.GetrestRuntime;
 import getrest.android.core.Pack;
+
 import getrest.android.util.Preconditions;
 
 public final class HttpRequestBuilder {
 
     private Context context;
-
     private Method method;
     private Pack entityPack;
     private Object entity;
@@ -32,48 +33,54 @@ public final class HttpRequestBuilder {
         this.context = context;
     }
 
-    private HttpRequestBuilder() {
-    }
+    private HttpRequestBuilder() {}
 
     public static HttpRequestBuilder newHttpRequestBuilder(final Context context) {
+
         return new HttpRequestBuilder(context);
     }
 
     public static HttpRequestBuilder newHttpRequestBuilder() {
+
         return new HttpRequestBuilder();
     }
 
     public HttpRequestBuilder withMethod(final Method method) {
         this.method = method;
+
         return this;
     }
 
     public HttpRequestBuilder withEntity(final Pack entityPack) {
         this.entityPack = entityPack;
+
         return this;
     }
 
     public HttpRequestBuilder withEntity(final Object entity) {
         this.entity = entity;
+
         return this;
     }
 
-
     public HttpRequest build() {
-        Preconditions.checkState(!(this.entityPack != null && this.entity != null),
-                "Entity and entity pack cannot are both set, but cannot be sent both at a time");
+        Preconditions.checkState(!((this.entityPack != null) && (this.entity != null)),
+                                 "Either entity or entity pack can be sent with a request, but both are set");
 
         final HttpRequest request = new HttpRequest();
         request.setMethod(this.method);
+
         if (this.entityPack != null) {
             request.setEntity(this.entityPack);
         } else if (this.entity != null) {
-            Preconditions.checkState(context != null,
-                    "Context must be set to a builder before parcelizing and entity. " +
-                            "Use HttpRequestBuilder.newRequestBuilder(Context) to build a context with Context.");
-
+            Preconditions.checkState(
+                context != null,
+                "Builder must be associated with a Context before an entity can be 'parcelized'."
+                + " Use HttpRequestBuilder.newRequestBuilder(Context) to build a request with Context,"
+                + " or, alternatively, set an already packed entity.");
             request.setEntity(GetrestRuntime.getInstance(context).getPacker().pack(this.entity));
         }
+
         return request;
     }
 }

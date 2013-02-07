@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Alexey Hanin
+ * Copyright 2013 Alexey Hanin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.core;
+package getrest.android.service;
 
-public interface Request<V> {
-    String getRequestId();
+public interface GetrestServiceBinder {
+    GetrestService getGetrestService();
 }

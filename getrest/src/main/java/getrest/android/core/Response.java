@@ -34,7 +34,7 @@ public abstract class Response<T> {
     /**
      * Return response entity. Calling thread will be blocked until the request is finished with any result.
      *
-     * @return {@link getrest.android.core.ResponseParcelable}
+     * @return {@link ResponseParcel}
      */
     public abstract T getEntity();
 }

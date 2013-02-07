@@ -17,7 +17,6 @@
 package getrest.android.service;
 
 import android.content.Intent;
-import getrest.android.core.Request;
 import getrest.android.core.RequestParcel;
 
 /**

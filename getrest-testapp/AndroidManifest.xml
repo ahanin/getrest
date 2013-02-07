@@ -31,7 +31,7 @@
         </activity>
 
         <service
-            android:name="getrest.android.service.RestService"
+            android:name="getrest.android.service.DefaultGetrestService"
             android:exported="false"/>
 
     </application>

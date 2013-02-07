@@ -18,7 +18,7 @@ package getrest.android.client.impl;
 
 import getrest.android.client.RequestCallback;
 import getrest.android.core.Response;
-import getrest.android.core.ResponseParcelable;
+import getrest.android.core.ResponseParcel;
 import getrest.android.exception.GetrestRuntimeException;
 import getrest.android.core.Request;
 
@@ -26,7 +26,7 @@ class ResponseImpl<T> extends Response<T> {
 
     private String requestId;
     private Request request;
-    private ResponseParcelable responseParcelable;
+    private ResponseParcel responseParcel;
 
     private boolean isPendingFired;
     private boolean isExecutingFired;
@@ -61,9 +61,9 @@ class ResponseImpl<T> extends Response<T> {
         this.callback = requestCallback;
     }
 
-    public void finish(ResponseParcelable responseParcelable) {
+    public void finish(ResponseParcel responseParcel) {
         synchronized (this) {
-            this.responseParcelable = responseParcelable;
+            this.responseParcel = responseParcel;
             this.isFinished = true;
             synchronized (lock) {
                 lock.notifyAll();
@@ -72,12 +72,12 @@ class ResponseImpl<T> extends Response<T> {
     }
 
     public T getEntity() {
-        return (T) getResponseParcelable().getEntity().unpack();
+        return (T) getResponseParcel().getEntity().unpack();
     }
 
-    private ResponseParcelable getResponseParcelable() {
+    private ResponseParcel getResponseParcel() {
         waitFinished();
-        return responseParcelable;
+        return responseParcel;
     }
 
     private void waitFinished() {
@@ -134,22 +134,22 @@ class ResponseImpl<T> extends Response<T> {
         }
     }
 
-    public void fireFinished(final ResponseParcelable responseParcelable) {
+    public void fireFinished(final ResponseParcel responseParcel) {
         synchronized (this) {
             if (callback != null && !isFinishedFired) {
-                doFireFinished(responseParcelable);
+                doFireFinished(responseParcel);
             }
         }
     }
 
-    private void doFireFinished(final ResponseParcelable responseParcelable) {
+    private void doFireFinished(final ResponseParcel responseParcel) {
         try {
             if (!isExecutingFired) {
                 doFireExecuting();
             }
         } finally {
             try {
-                callback.onFinished(request);
+                callback.onCompleted(request);
             } finally {
                 isFinishedFired = true;
             }

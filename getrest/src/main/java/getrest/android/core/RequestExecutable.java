@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Alexey Hanin
+ * Copyright 2013 Alexey Hanin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,6 @@
  */
 package getrest.android.core;
 
-public interface Request<V> {
-    String getRequestId();
+public interface RequestExecutable<V> extends Request<V> {
+    V execute();
 }

@@ -16,14 +16,9 @@
 package getrest.android.client;
 
 import getrest.android.core.Request;
+
 import getrest.android.util.TypeLiteral;
 
-public interface RequestExecutor {
-
-    <Q extends Request> void execute(Q request);
-
-    <R> R execute(Request request, Class<R> responseType);
-
-    <R> R execute(Request request, TypeLiteral<R> responseTypeLiteral);
-
+public interface RequestExecutor<R extends Request> {
+    void execute(final R request);
 }

@@ -17,7 +17,7 @@ package getrest.android.client;
 
 import getrest.android.core.Request;
 import getrest.android.core.RequestStatus;
-import getrest.android.core.ResponseParcelable;
+import getrest.android.core.ResponseParcel;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,7 +48,7 @@ public class InMemoryRequestManagerTest {
         final Request request = mock(Request.class);
         when(request.getRequestId()).thenReturn("12345");
 
-        requestManager.saveRequest(request);
+        requestManager.persistRequest(request);
 
         assertThat(requestManager.getRequest("12345"), sameInstance(request));
     }
@@ -63,16 +63,16 @@ public class InMemoryRequestManagerTest {
         final Request request = mock(Request.class);
         when(request.getRequestId()).thenReturn("12345");
 
-        requestManager.saveRequest(request);
+        requestManager.persistRequest(request);
 
         assertThat(requestManager.getResponse("12345"), nullValue());
     }
 
     @Test
     public void testShouldNotSaveResponseBeforeRequestAcknowledged() throws Exception {
-        final ResponseParcelable responseParcelable = mock(ResponseParcelable.class);
+        final ResponseParcel responseParcel = mock(ResponseParcel.class);
         try {
-            requestManager.saveResponse("12345", responseParcelable);
+            requestManager.persistResponse("12345", responseParcel);
             fail("Must raise " + IllegalStateException.class.getName());
         } catch (IllegalStateException ex) {
             // expected behaviour
@@ -83,23 +83,23 @@ public class InMemoryRequestManagerTest {
     public void testShouldSaveResponse() throws Exception {
         final Request request = mock(Request.class);
         when(request.getRequestId()).thenReturn("12345");
-        requestManager.saveRequest(request);
+        requestManager.persistRequest(request);
 
-        final ResponseParcelable responseParcelable = mock(ResponseParcelable.class);
-        requestManager.saveResponse("12345", responseParcelable);
+        final ResponseParcel responseParcel = mock(ResponseParcel.class);
+        requestManager.persistResponse("12345", responseParcel);
 
-        assertThat(requestManager.getResponse("12345"), sameInstance(responseParcelable));
+        assertThat(requestManager.getResponse("12345"), sameInstance(responseParcel));
     }
 
     @Test
     public void testRequestStateShouldBeNullUnlessAcknowledged() throws Exception {
-        assertThat(requestManager.getRequestState("12345"), nullValue());
+        assertThat(requestManager.getRequestStatus("12345"), nullValue());
     }
 
     @Test
     public void testShouldNotSaveStateForUnacknowledgedRequest() throws Exception {
         try {
-            requestManager.setRequestState("12345", RequestStatus.EXECUTING);
+            requestManager.updateRequestStatus("12345", RequestStatus.EXECUTING);
             fail("Must raise " + IllegalStateException.class.getName());
         } catch (IllegalStateException ex) {
             // expected behaviour
@@ -110,11 +110,11 @@ public class InMemoryRequestManagerTest {
     public void testShouldSaveRequestState() throws Exception {
         final Request request = mock(Request.class);
         when(request.getRequestId()).thenReturn("12345");
-        requestManager.saveRequest(request);
+        requestManager.persistRequest(request);
 
-        requestManager.setRequestState("12345", RequestStatus.FINISHED);
+        requestManager.updateRequestStatus("12345", RequestStatus.FINISHED);
 
-        assertThat(requestManager.getRequestState("12345"), equalTo(RequestStatus.FINISHED));
+        assertThat(requestManager.getRequestStatus("12345"), equalTo(RequestStatus.FINISHED));
     }
 
 }

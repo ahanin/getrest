@@ -36,7 +36,7 @@ public class InMemoryRequestManager implements RequestManager {
     private final Map<String, RequestStatus> stateMap = new ConcurrentHashMap<String, RequestStatus>();
 
     private final Map<String, WeakValue<Request>> requestMap = new HashMap<String, WeakValue<Request>>();
-    private final Map<String, WeakValue<ResponseParcelable>> responseMap = new HashMap<String, WeakValue<ResponseParcelable>>();
+    private final Map<String, WeakValue<ResponseParcel>> responseMap = new HashMap<String, WeakValue<ResponseParcel>>();
 
     private final ReferenceQueue<Object> gcQueue = new ReferenceQueue<Object>();
 
@@ -80,10 +80,10 @@ public class InMemoryRequestManager implements RequestManager {
                         final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
                         candidateEntry.setRequest((Request) obj);
                         candidateEntry.setLastAccessedTime(now);
-                    } else if (obj instanceof ResponseParcelable) {
+                    } else if (obj instanceof ResponseParcel) {
                         final String requestId = ref.getRequestId();
                         final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
-                        candidateEntry.setResponseParcelable((ResponseParcelable) obj);
+                        candidateEntry.setResponseParcel((ResponseParcel) obj);
                         candidateEntry.setLastAccessedTime(now);
                     }
                 }
@@ -133,7 +133,7 @@ public class InMemoryRequestManager implements RequestManager {
         new Thread(new CleanupWorker()).start();
     }
 
-    public void saveRequest(final Request request) {
+    public void persistRequest(final Request request) {
         final String requestId = request.getRequestId();
         synchronized (requestMap) {
             if (stateMap.containsKey(requestId)) {
@@ -148,22 +148,22 @@ public class InMemoryRequestManager implements RequestManager {
         return entry != null ? entry.get() : null;
     }
 
-    public void saveResponse(final String requestId, final ResponseParcelable responseParcelable) {
+    public void persistResponse(final String requestId, final ResponseParcel responseParcel) {
         synchronized (requestMap) {
             final Request request = getRequest(requestId);
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
             }
-            responseMap.put(requestId, new WeakValue<ResponseParcelable>(requestId, responseParcelable, gcQueue));
+            responseMap.put(requestId, new WeakValue<ResponseParcel>(requestId, responseParcel, gcQueue));
         }
     }
 
-    public ResponseParcelable getResponse(final String requestId) {
-        final WeakValue<ResponseParcelable> entry = responseMap.get(requestId);
+    public ResponseParcel getResponse(final String requestId) {
+        final WeakValue<ResponseParcel> entry = responseMap.get(requestId);
         return entry == null ? null : entry.get();
     }
 
-    public void setRequestState(final String requestId, final RequestStatus status) {
+    public void updateRequestStatus(final String requestId, final RequestStatus status) {
         synchronized (stateMap) {
             final Request request = getRequest(requestId);
             if (request == null) {
@@ -173,16 +173,17 @@ public class InMemoryRequestManager implements RequestManager {
         }
     }
 
-    public RequestStatus getRequestState(final String requestId) {
+    public RequestStatus getRequestStatus(final String requestId) {
         return stateMap.get(requestId);
     }
 
-    public void setRequestState(final String requestId, final ErrorState errorState, final String message) {
+    public void updateRequestStatus(final String requestId, final ErrorState errorState, final String message) {
         final Request request = getRequest(requestId);
         if (request == null) {
             throw new IllegalStateException("Request is not acknowledged: " + requestId);
         }
-        setRequestState(requestId, RequestStatus.ERROR);
+
+        updateRequestStatus(requestId, RequestStatus.ERROR);
 
         final Error error = new Error();
         error.setErrorState(errorState);
@@ -194,7 +195,7 @@ public class InMemoryRequestManager implements RequestManager {
     private class CandidateEntry {
 
         private Request request;
-        private ResponseParcelable responseParcelable;
+        private ResponseParcel responseParcel;
         private long lastAccessedTime;
 
         public Request getRequest() {
@@ -205,12 +206,12 @@ public class InMemoryRequestManager implements RequestManager {
             this.request = request;
         }
 
-        public ResponseParcelable getResponseParcelable() {
-            return responseParcelable;
+        public ResponseParcel getResponseParcel() {
+            return responseParcel;
         }
 
-        public void setResponseParcelable(final ResponseParcelable responseParcelable) {
-            this.responseParcelable = responseParcelable;
+        public void setResponseParcel(final ResponseParcel responseParcel) {
+            this.responseParcel = responseParcel;
         }
 
         public long getLastAccessedTime() {

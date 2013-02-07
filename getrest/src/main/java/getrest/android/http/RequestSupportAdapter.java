@@ -15,36 +15,32 @@
  */
 package getrest.android.http;
 
-import android.os.Parcelable;
 import getrest.android.client.RequestExecutor;
-import getrest.android.core.ParcelableRequestParcel;
 import getrest.android.core.Request;
 import getrest.android.core.RequestParcel;
 import getrest.android.core.RequestSupport;
-import getrest.android.util.Preconditions;
 
-public class DummyRequestSupport<T extends Request> implements RequestSupport<T> {
+public class RequestSupportAdapter<T extends Request> implements RequestSupport<T> {
 
-    private T request;
+    public RequestSupportAdapter() {}
 
-    public DummyRequestSupport(final T request) {
-        this.request = request;
-    }
+    public RequestParcel<T> getRequestParcelable() {
 
-    public RequestParcel<T> getRequestParcel() {
-        Preconditions.checkState(request instanceof Parcelable, "Request must be Parcelable");
-        return new ParcelableRequestParcel<T>(request);
+        return null;
     }
 
     public RequestExecutor getRequestExecutor() {
-        throw new UnsupportedOperationException();
+
+        return null;
     }
 
     public <E> E getContext(final Class<E> type) {
-        throw new UnsupportedOperationException();
+
+        return null;
     }
 
     public <R> R createResponse(final Class<R> responseType) {
-        throw new UnsupportedOperationException();
+
+        return null;
     }
 }

@@ -15,6 +15,7 @@
  */
 package getrest.android.util;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
@@ -24,11 +25,18 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import java.util.List;
+
 public class TypeLiteralTest {
     @Test
+    public void testShouldCreateInstanceFromClass() throws Exception {
+        assertThat(TypeLiteral.fromClass(String.class).getType(), equalTo((Type) String.class));
+    }
+
+    @Test
     public void testShouldReturnTypeOfParameter() throws Exception {
-        final Type type = new TypeLiteral<List<String>>() {
-                }.getType();
+
+        final Type type = new TypeLiteral<List<String>>() {}
+        .getType();
 
         assertThat(type, instanceOf(ParameterizedType.class));
     }

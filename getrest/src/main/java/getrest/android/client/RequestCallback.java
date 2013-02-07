@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.client;
 
 import getrest.android.core.Request;
 
-public interface RequestCallback<Q extends Request> {
+public interface RequestCallback<R extends Request> {
+    void onPending(final R request);
 
-    void onPending(Q request);
+    void onExecuting(final R request);
 
-    void onExecuting(Q request);
+    void onError(final R request);
 
-    void onError(Q request);
-
-    void onFinished(Q request);
-
+    void onCompleted(final R request);
 }

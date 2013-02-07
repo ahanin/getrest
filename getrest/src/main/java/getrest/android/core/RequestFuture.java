@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.testapp;
+package getrest.android.core;
 
 import getrest.android.client.RequestCallback;
 
-public interface RequestFuture {
+public interface RequestFuture<V> {
+    V get();
 
-    boolean isFinished();
-
-    void setRequestCallback(RequestCallback requestCallback);
-
+    <R extends Request<V>> void setRequestCallback(final RequestCallback<R> requestCallback);
 }

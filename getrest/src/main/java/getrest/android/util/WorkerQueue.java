@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package getrest.android.util;
 
 import java.util.HashSet;
@@ -28,25 +27,19 @@ import java.util.Set;
 public class WorkerQueue<T> {
 
     private final Queue<T> queue;
-
     private final Worker<T> worker;
-
     private final Set<Thread> threads;
-
     private int maxThreads;
-
     private int busyWorkers;
-
     private Runnable workerRunnable;
-
     private boolean isRunning;
     private boolean isStopping;
 
     public interface Worker<T> {
-        void execute(T item);
+        void execute(final T item);
     }
 
-    public WorkerQueue(Queue<T> queue, Worker<T> worker, int maxThreads) {
+    public WorkerQueue(final Queue<T> queue, final Worker<T> worker, final int maxThreads) {
         this.queue = queue;
         this.worker = worker;
         this.maxThreads = maxThreads;
@@ -54,10 +47,12 @@ public class WorkerQueue<T> {
     }
 
     public Queue<T> getQueue() {
+
         return queue;
     }
 
-    public void add(T item) {
+    public void add(final T item) {
+
         synchronized (queue) {
             queue.add(item);
             queue.notifyAll();
@@ -67,8 +62,12 @@ public class WorkerQueue<T> {
     }
 
     private void reviseWorkerThreads() {
+
         synchronized (this) {
-            if (isRunning && queue.size() > threads.size() - busyWorkers && threads.size() < maxThreads) {
+
+            if (isRunning && (queue.size() > (threads.size() - busyWorkers))
+                  && (threads.size() < maxThreads)) {
+
                 final Thread thread = new Thread(getWorkerRunnable());
                 threads.add(thread);
                 thread.start();
@@ -77,19 +76,22 @@ public class WorkerQueue<T> {
     }
 
     private Runnable getWorkerRunnable() {
+
         if (workerRunnable == null) {
+
             synchronized (this) {
                 workerRunnable = new WorkerRunnable();
             }
         }
+
         return workerRunnable;
     }
 
     public void start() {
+
         synchronized (this) {
-            if (isRunning || isStopping) {
-                throw new IllegalStateException("Worker is either already running or is stopping");
-            }
+            Preconditions.checkState(!isRunning && !isStopping,
+                                     "Worker is either already running or is stopping");
 
             isRunning = true;
 
@@ -102,10 +104,13 @@ public class WorkerQueue<T> {
     }
 
     public void stop() {
+
         synchronized (this) {
+
             if (!isRunning || isStopping) {
                 throw new IllegalStateException("Worker is either not running or is stopping");
             }
+
             isStopping = true;
             queue.notifyAll();
         }
@@ -113,24 +118,30 @@ public class WorkerQueue<T> {
 
     private class WorkerRunnable implements Runnable {
         public void run() {
+
             while (isRunning && !isStopping) {
+
                 synchronized (queue) {
+
                     while (queue.isEmpty() && isRunning && !isStopping) {
+
                         try {
                             queue.wait();
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
+
                             // TODO log exception
                         }
                     }
 
                     if (isRunning && !isStopping) {
-
                         beginWork();
 
                         final T item = queue.poll();
+
                         try {
                             worker.execute(item);
-                        } catch (RuntimeException ex) {
+                        } catch (final RuntimeException ex) {
+
                             // TODO log exception
                         }
 
@@ -143,9 +154,11 @@ public class WorkerQueue<T> {
     }
 
     private void endWork() {
+
         synchronized (this) {
             busyWorkers--;
-            if (busyWorkers == 0 && isStopping) {
+
+            if ((busyWorkers == 0) && isStopping) {
                 isRunning = false;
                 isStopping = false;
             }
@@ -153,9 +166,9 @@ public class WorkerQueue<T> {
     }
 
     private void beginWork() {
+
         synchronized (this) {
             busyWorkers++;
         }
     }
-
 }

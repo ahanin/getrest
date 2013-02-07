@@ -17,17 +17,17 @@ package getrest.android.core;
 
 public interface RequestManager {
 
-    void saveRequest(Request request);
+    void persistRequest(Request request);
 
     Request getRequest(String requestId);
 
-    void saveResponse(final String requestId, ResponseParcelable responseParcelable);
+    void persistResponse(final String requestId, ResponseParcel responseParcel);
 
-    ResponseParcelable getResponse(String requestId);
+    ResponseParcel getResponse(String requestId);
 
-    void setRequestState(String requestId, RequestStatus status);
+    void updateRequestStatus(String requestId, RequestStatus status);
 
-    RequestStatus getRequestState(String requestId);
+    void updateRequestStatus(String requestId, ErrorState errorState, String message);
 
-    void setRequestState(String requestId, ErrorState errorState, String message);
+    RequestStatus getRequestStatus(String requestId);
 }

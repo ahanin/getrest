@@ -19,17 +19,40 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 public class TypeLiteral<T> {
+
+    private final Class<T> aClass;
+
+    @SuppressWarnings("unchecked")
+    public TypeLiteral() {
+        this.aClass = (Class<T>) getClass();
+    }
+
+    private TypeLiteral(final Class<T> aClass) {
+        this.aClass = aClass;
+    }
+
     public final Type getType() {
-        final Type genericSuperclass = getClass()
-                                           .getGenericSuperclass();
+
+        if (aClass != this.getClass()) {
+
+            return this.aClass;
+        }
+
+        final Type genericSuperclass = aClass.getGenericSuperclass();
 
         if (!(genericSuperclass instanceof ParameterizedType)) {
-            return Object.class;
+
+            return genericSuperclass;
         }
 
         final ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
 
         return (parameterizedType.getActualTypeArguments().length > 0)
-        ? parameterizedType.getActualTypeArguments()[0] : Object.class;
+               ? parameterizedType.getActualTypeArguments()[0] : Object.class;
+    }
+
+    public static <T> TypeLiteral<T> fromClass(final Class<T> aClass) {
+
+        return new TypeLiteral<T>(aClass);
     }
 }

@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class RestfulApplication implements Application, ResourceMethodResolver, PackerResolver {
+public class RestfulApplication implements Application, ResourceMethodResolver, PackerResolver {
 
     private final Set<MessageBodyWriter> messageBodyWriters = Sets.newHashSet();
     private final Set<MessageBodyReader> messageBodyReaders = Sets.newHashSet();
@@ -78,7 +78,7 @@ class RestfulApplication implements Application, ResourceMethodResolver, PackerR
 
     public Packer getPacker(Class entityType) {
 
-        Preconditions.checkArgNotNull(entityType, "Entity cannot be null");
+        Preconditions.checkArgNotNull(entityType, "entity");
 
         for (Pair<Class, Packer> classToPackerPair : classToPackerPairs) {
             if (classToPackerPair.first.isAssignableFrom(entityType)) {
