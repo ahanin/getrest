@@ -15,11 +15,8 @@
  */
 package getrest.android.core;
 
-import android.os.Parcelable;
-
 import getrest.android.client.RequestExecutor;
 
-import getrest.android.util.Objects;
 import getrest.android.util.Preconditions;
 
 public class RequestSupportDecorator<T extends Request> implements RequestSupport<T> {
@@ -31,20 +28,6 @@ public class RequestSupportDecorator<T extends Request> implements RequestSuppor
     public RequestSupportDecorator(final T request, final RequestSupport<T> delegate) {
         this.delegate = delegate;
         this.request = request;
-    }
-
-    public RequestParcel<T> getRequestParcelable() {
-
-        final RequestParcel<T> parcel = delegate.getRequestParcelable();
-
-        if (parcel == null) {
-            Preconditions.checkState(request instanceof Parcelable, "Request must be Parcelable");
-
-            return new ParcelableRequestParcel<T>(request);
-        } else {
-
-            return parcel;
-        }
     }
 
     public RequestExecutor getRequestExecutor() {

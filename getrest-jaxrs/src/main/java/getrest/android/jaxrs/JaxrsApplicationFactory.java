@@ -15,8 +15,6 @@
  */
 package getrest.android.jaxrs;
 
-import getrest.android.config.Config;
-
 import getrest.android.core.Loggers;
 
 import getrest.android.exception.GetrestConfigurationException;
@@ -32,11 +30,11 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 public class JaxrsApplicationFactory {
-    private static final Logger logger = Loggers.getConfigLogger();
-    private final Class<? extends Application> applicationClass;
 
-    public JaxrsApplicationFactory(
-        final Class<? extends Application> applicationClass) {
+    private static final Logger logger = Loggers.getConfigLogger();
+    private final Class<?extends Application> applicationClass;
+
+    public JaxrsApplicationFactory(final Class<?extends Application> applicationClass) {
         this.applicationClass = applicationClass;
     }
 
@@ -47,13 +45,14 @@ public class JaxrsApplicationFactory {
 
         try {
             application = applicationClass.newInstance();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new GetrestConfigurationException(
-                "Unable to instantiate application class: " +
-                applicationClass.getName(), e);
+                "Unable to instantiate application class: " + applicationClass.getName(),
+                e);
         }
 
-        for (Class<? > aClass : application.getClasses()) {
+        for (final Class<?> aClass : application.getClasses()) {
+
             final Provider provider = aClass.getAnnotation(Provider.class);
 
             if (provider != null) {
@@ -68,30 +67,33 @@ public class JaxrsApplicationFactory {
 
             final Method[] methods = aClass.getMethods();
 
-            for (Method method : methods) {
+            for (final Method method : methods) {
+
                 final Path path = method.getAnnotation(Path.class);
 
                 logger.debug("Resource method found: {0}({1})",
-                    method.getName(),
-                    toParameterTypeString(method.getParameterTypes()));
+                             method.getName(),
+                             toParameterTypeString(method.getParameterTypes()));
             }
         }
     }
 
-    private void configureProvider(final Class<? > providerClass,
-        final Provider provider) {
+    private void configureProvider(final Class<?> providerClass, final Provider provider) {
         logger.debug("Provider found: {0}", providerClass.getName());
 
         if (MessageBodyReader.class.isAssignableFrom(providerClass)) {
+
             // TODO wire-up reader
         }
 
         if (MessageBodyWriter.class.isAssignableFrom(providerClass)) {
+
             // TODO wire-up writer
         }
     }
 
-    private String toParameterTypeString(final Class<? >[] types) {
+    private String toParameterTypeString(final Class<?>[] types) {
+
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < types.length; i++) {

@@ -23,6 +23,7 @@ import getrest.android.http.Header;
 import getrest.android.http.Headers;
 import getrest.android.http.HeadersHelper;
 import getrest.android.http.HasHeaders;
+import getrest.android.http.Pack;
 
 /**
  * @author aha

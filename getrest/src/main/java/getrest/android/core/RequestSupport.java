@@ -17,14 +17,10 @@ package getrest.android.core;
 
 import getrest.android.client.RequestExecutor;
 
-public interface RequestSupport<Q extends Request> {
-
-    RequestParcel<Q> getRequestParcelable();
-
+public interface RequestSupport<R extends Request> {
     RequestExecutor getRequestExecutor();
 
-    <E> E getContext(Class<E> type);
+    <E> E getContext(final Class<E> type);
 
-    <R> R createResponse(final Class<R> responseType);
-
+    <V> V createResponse(final Class<V> responseType);
 }

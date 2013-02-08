@@ -17,21 +17,12 @@ package getrest.android.http;
 
 import android.content.Context;
 
-import getrest.android.core.GetrestRuntime;
-import getrest.android.core.Pack;
-
-import getrest.android.util.Preconditions;
-
 public final class HttpRequestBuilder {
 
-    private Context context;
     private Method method;
-    private Pack entityPack;
     private Object entity;
 
-    private HttpRequestBuilder(final Context context) {
-        this.context = context;
-    }
+    private HttpRequestBuilder(final Context context) {}
 
     private HttpRequestBuilder() {}
 
@@ -51,12 +42,6 @@ public final class HttpRequestBuilder {
         return this;
     }
 
-    public HttpRequestBuilder withEntity(final Pack entityPack) {
-        this.entityPack = entityPack;
-
-        return this;
-    }
-
     public HttpRequestBuilder withEntity(final Object entity) {
         this.entity = entity;
 
@@ -64,21 +49,12 @@ public final class HttpRequestBuilder {
     }
 
     public HttpRequest build() {
-        Preconditions.checkState(!((this.entityPack != null) && (this.entity != null)),
-                                 "Either entity or entity pack can be sent with a request, but both are set");
 
         final HttpRequest request = new HttpRequest();
         request.setMethod(this.method);
 
-        if (this.entityPack != null) {
-            request.setEntity(this.entityPack);
-        } else if (this.entity != null) {
-            Preconditions.checkState(
-                context != null,
-                "Builder must be associated with a Context before an entity can be 'parcelized'."
-                + " Use HttpRequestBuilder.newRequestBuilder(Context) to build a request with Context,"
-                + " or, alternatively, set an already packed entity.");
-            request.setEntity(GetrestRuntime.getInstance(context).getPacker().pack(this.entity));
+        if (this.entity != null) {
+            request.setEntity(this.entity);
         }
 
         return request;

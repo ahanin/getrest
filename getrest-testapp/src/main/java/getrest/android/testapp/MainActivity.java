@@ -57,26 +57,26 @@ public class MainActivity extends Activity {
                             MainActivity.this).withMethod(Method.POST).withEntity(note).build();
 
                         getrestClient.execute(httpRequest).setRequestCallback(
-                            new RequestCallback() {
-                                    public void onPending(final Request request) {
+                            new RequestCallback<HttpRequest>() {
+                                    public void onPending(final HttpRequest request) {
                                         Toast.makeText(MainActivity.this,
                                                        "Pending...",
                                                        Toast.LENGTH_SHORT).show();
                                     }
 
-                                    public void onExecuting(final Request request) {
+                                    public void onExecuting(final HttpRequest request) {
                                         Toast.makeText(MainActivity.this,
                                                        "Executing...",
                                                        Toast.LENGTH_SHORT).show();
                                     }
 
-                                    public void onError(final Request request) {
+                                    public void onError(final HttpRequest request) {
                                         Toast.makeText(MainActivity.this,
                                                        "Error :(",
                                                        Toast.LENGTH_SHORT).show();
                                     }
 
-                                    public void onCompleted(final Request request) {
+                                    public void onCompleted(final HttpRequest request) {
                                         Toast.makeText(MainActivity.this,
                                                        "Completed! :)",
                                                        Toast.LENGTH_SHORT).show();

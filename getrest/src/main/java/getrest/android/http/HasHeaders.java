@@ -15,10 +15,6 @@
  */
 package getrest.android.http;
 
-import getrest.android.http.Headers;
-
 public interface HasHeaders {
-
     Headers getHeaders();
-
 }

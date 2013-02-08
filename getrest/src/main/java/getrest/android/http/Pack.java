@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.core;
 
-import getrest.android.http.Packer;
+package getrest.android.http;
 
-public interface PackerResolver {
-    Packer getPacker(Class entityType);
+import android.os.Parcelable;
+
+/**
+ * {@link Parcelable} interface for sending and receiving objects.
+ *
+ * @author aha
+ * @since 2012-01-17
+ */
+public interface Pack<T> extends Parcelable {
+
+    T unpack();
+
 }
