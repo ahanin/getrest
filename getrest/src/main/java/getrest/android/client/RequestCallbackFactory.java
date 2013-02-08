@@ -22,7 +22,7 @@ import getrest.android.core.Request;
  * Used in {@link getrest.android.GetrestClient} to implicitly create {@link RequestCallback}s and attach them to corresponding
  * {@link getrest.android.core.Response}s.
  */
-public interface RequestCallbackFactory<Q extends Request> {
+public interface RequestCallbackFactory<R extends Request> {
 
     /**
      * Create {@link RequestCallback}
@@ -31,6 +31,6 @@ public interface RequestCallbackFactory<Q extends Request> {
      * @return instance of {@link RequestCallback}, that will be called for {@link Request} events, or {@code null},
      *         in which case no callback will be notified about request events
      */
-    RequestCallback<Q> createCallback(Q request);
+    RequestCallback<R> createCallback(R request);
 
 }

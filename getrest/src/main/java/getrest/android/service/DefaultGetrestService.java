@@ -58,6 +58,13 @@ public class DefaultGetrestService extends Service implements Broadcaster, Getre
         return new RequestFutureImpl<R, V>(requestFutureSupport);
     }
 
+    public <R extends Request<V>, V> RequestFuture<V> obtainRequestFuture(final R request,
+                                                                          final CallerContext callerContextAdapter) {
+
+        // TODO implement "reconnection" to an already being executed request, probably cache
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
     private final LocalBinder localBinder = new LocalBinder(this);
 
     private static class LocalBinder extends Binder implements GetrestServiceBinder {

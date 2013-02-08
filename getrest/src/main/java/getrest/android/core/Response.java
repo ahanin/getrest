@@ -17,24 +17,25 @@ package getrest.android.core;
 
 import getrest.android.client.RequestCallback;
 
-
 public abstract class Response<T> {
-
     public abstract String getRequestId();
 
     /**
-     * Set {@link getrest.android.client.RequestCallback} that will receive {@link Request} event notifications.
+     * Set {@link getrest.android.client.RequestCallback} that will receive {@link Request}
+     * event notifications.
      *
-     * @param requestCallback instance of {@link getrest.android.client.RequestCallback} to receive notifications
+     * @param requestCallback instance of {@link getrest.android.client.RequestCallback} to receive
+     *        notifications
      */
-    public abstract void setRequestCallback(RequestCallback requestCallback);
+    public abstract void setRequestCallback(final RequestCallback requestCallback);
 
     public abstract boolean isFinished();
 
     /**
-     * Return response entity. Calling thread will be blocked until the request is finished with any result.
+     * Return response entity. Calling thread will be blocked until the request is finished
+     * with any result.
      *
-     * @return {@link ResponseParcel}
+     * @return request response
      */
     public abstract T getEntity();
 }

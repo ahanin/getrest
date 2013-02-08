@@ -15,10 +15,15 @@
  */
 package getrest.android.service;
 
+import getrest.android.client.impl.GetrestClientImpl;
+
 import getrest.android.core.Request;
 import getrest.android.core.RequestFuture;
 
 public interface GetrestService {
     <R extends Request<V>, V> RequestFuture<V> execute(final R request,
                                                        final CallerContext callerContext);
+
+    <R extends Request<V>, V> RequestFuture<V> obtainRequestFuture(final R request,
+                                                                   final CallerContext callerContextAdapter);
 }

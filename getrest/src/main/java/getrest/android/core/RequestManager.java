@@ -21,9 +21,9 @@ public interface RequestManager {
 
     Request getRequest(String requestId);
 
-    void persistResponse(final String requestId, ResponseParcel responseParcel);
+    void persistResponse(final String requestId, Object response);
 
-    ResponseParcel getResponse(String requestId);
+    Object getResponse(String requestId);
 
     void updateRequestStatus(String requestId, RequestStatus status);
 

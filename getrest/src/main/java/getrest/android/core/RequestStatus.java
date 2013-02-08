@@ -16,28 +16,8 @@
 package getrest.android.core;
 
 public enum RequestStatus {
-    PENDING((byte) 0), 
-    EXECUTING((byte) 1), 
-    ERROR((byte) 2), 
-    FINISHED((byte) 3);
-
-    private byte id;
-
-    private RequestStatus(final byte id) {
-        this.id = id;
-    }
-
-    public byte getId() {
-        return id;
-    }
-
-    public static RequestStatus byId(final byte id) {
-        for (RequestStatus status : values()) {
-            if (status.id == id) {
-                return status;
-            }
-        }
-
-        throw new IllegalStateException("Invalid RequestStatus id [" + id + "]");
-    }
+    PENDING,
+    EXECUTING,
+    ERROR,
+    FINISHED;
 }

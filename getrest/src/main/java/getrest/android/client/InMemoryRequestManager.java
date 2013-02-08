@@ -15,14 +15,18 @@
  */
 package getrest.android.client;
 
-import getrest.android.core.*;
 import getrest.android.core.Error;
+import getrest.android.core.ErrorState;
+import getrest.android.core.Loggers;
+import getrest.android.core.Request;
 import getrest.android.core.RequestManager;
 import getrest.android.core.RequestStatus;
+
 import getrest.android.util.Logger;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,34 +36,31 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryRequestManager implements RequestManager {
 
     private static final Logger LOGGER = Loggers.getRequestManagerLogger();
-
     private final Map<String, RequestStatus> stateMap = new ConcurrentHashMap<String, RequestStatus>();
-
     private final Map<String, WeakValue<Request>> requestMap = new HashMap<String, WeakValue<Request>>();
-    private final Map<String, WeakValue<ResponseParcel>> responseMap = new HashMap<String, WeakValue<ResponseParcel>>();
-
+    private final Map<String, WeakValue<Object>> responseMap = new HashMap<String, WeakValue<Object>>();
     private final ReferenceQueue<Object> gcQueue = new ReferenceQueue<Object>();
-
     private final Map<String, CandidateEntry> undeadQueue = new HashMap<String, CandidateEntry>();
-
     private static final long MAX_UNDEAD_AGE = 30000L;
 
     private static class WeakValue<T> extends SoftReference<T> {
 
         private String requestId;
 
-        public WeakValue(String requestId, T referent, ReferenceQueue<? super T> q) {
+        public WeakValue(final String requestId, final T referent, final ReferenceQueue<?super T> q) {
             super(referent, q);
             this.requestId = requestId;
         }
 
         public String getRequestId() {
+
             return requestId;
         }
     }
 
     private class CleanupWorker implements Runnable {
         public void run() {
+
             while (true) {
                 processQueue();
                 processUndeadQueue();
@@ -69,36 +70,51 @@ public class InMemoryRequestManager implements RequestManager {
     }
 
     private void processQueue() {
+
         try {
+
             WeakValue<Object> ref;
+
             while ((ref = (WeakValue<Object>) gcQueue.remove()) != null) {
+
                 final long now = System.currentTimeMillis();
+
                 synchronized (undeadQueue) {
+
                     final Object obj = ref.get();
+
                     if (obj instanceof Request) {
+
                         final String requestId = ref.getRequestId();
                         final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
                         candidateEntry.setRequest((Request) obj);
                         candidateEntry.setLastAccessedTime(now);
-                    } else if (obj instanceof ResponseParcel) {
+                    } else {
+
                         final String requestId = ref.getRequestId();
                         final CandidateEntry candidateEntry = requireCandidateEntry(requestId);
-                        candidateEntry.setResponseParcel((ResponseParcel) obj);
+                        candidateEntry.setResponse(obj);
                         candidateEntry.setLastAccessedTime(now);
                     }
                 }
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             LOGGER.error("Interrupted exception", e);
         }
     }
 
     private void processUndeadQueue() {
+
         final long maxUndeadAge = System.currentTimeMillis() - MAX_UNDEAD_AGE;
+
         synchronized (undeadQueue) {
+
             final Set<String> enqueuedIds = new HashSet<String>();
-            for (Map.Entry<String, CandidateEntry> entry : undeadQueue.entrySet()) {
+
+            for (final Map.Entry<String, CandidateEntry> entry : undeadQueue.entrySet()) {
+
                 final CandidateEntry candidateEntry = entry.getValue();
+
                 if (candidateEntry.getLastAccessedTime() < maxUndeadAge) {
                     enqueuedIds.add(entry.getKey());
                 }
@@ -106,9 +122,11 @@ public class InMemoryRequestManager implements RequestManager {
 
             if (!enqueuedIds.isEmpty()) {
                 undeadQueue.entrySet().removeAll(enqueuedIds);
+
                 synchronized (requestMap) {
                     requestMap.keySet().removeAll(enqueuedIds);
                 }
+
                 synchronized (responseMap) {
                     responseMap.keySet().removeAll(enqueuedIds);
                 }
@@ -117,8 +135,11 @@ public class InMemoryRequestManager implements RequestManager {
     }
 
     private CandidateEntry requireCandidateEntry(final String requestId) {
+
         final CandidateEntry candidateEntry;
+
         synchronized (undeadQueue) {
+
             if (!undeadQueue.containsKey(requestId)) {
                 candidateEntry = new CandidateEntry();
                 undeadQueue.put(requestId, candidateEntry);
@@ -126,6 +147,7 @@ public class InMemoryRequestManager implements RequestManager {
                 candidateEntry = undeadQueue.get(requestId);
             }
         }
+
         return candidateEntry;
     }
 
@@ -134,51 +156,72 @@ public class InMemoryRequestManager implements RequestManager {
     }
 
     public void persistRequest(final Request request) {
+
         final String requestId = request.getRequestId();
+
         synchronized (requestMap) {
+
             if (stateMap.containsKey(requestId)) {
-                throw new IllegalStateException("Request with id '" + requestId + "' is already registered");
+                throw new IllegalStateException(
+                    "Request with id '" + requestId + "' is already registered");
             }
+
             requestMap.put(requestId, new WeakValue<Request>(requestId, request, gcQueue));
         }
     }
 
     public Request getRequest(final String requestId) {
+
         final WeakValue<Request> entry = requestMap.get(requestId);
-        return entry != null ? entry.get() : null;
+
+        return (entry != null) ? entry.get() : null;
     }
 
-    public void persistResponse(final String requestId, final ResponseParcel responseParcel) {
+    public void persistResponse(final String requestId, final Object response) {
+
         synchronized (requestMap) {
+
             final Request request = getRequest(requestId);
+
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
             }
-            responseMap.put(requestId, new WeakValue<ResponseParcel>(requestId, responseParcel, gcQueue));
+
+            responseMap.put(requestId, new WeakValue<Object>(requestId, response, gcQueue));
         }
     }
 
-    public ResponseParcel getResponse(final String requestId) {
-        final WeakValue<ResponseParcel> entry = responseMap.get(requestId);
-        return entry == null ? null : entry.get();
+    public Object getResponse(final String requestId) {
+
+        final WeakValue<Object> entry = responseMap.get(requestId);
+
+        return (entry == null) ? null : entry.get();
     }
 
     public void updateRequestStatus(final String requestId, final RequestStatus status) {
+
         synchronized (stateMap) {
+
             final Request request = getRequest(requestId);
+
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
             }
+
             stateMap.put(requestId, status);
         }
     }
 
     public RequestStatus getRequestStatus(final String requestId) {
+
         return stateMap.get(requestId);
     }
 
-    public void updateRequestStatus(final String requestId, final ErrorState errorState, final String message) {
+    public void updateRequestStatus(final String requestId, final ErrorState errorState,
+                                    final String message) {
+
         final Request request = getRequest(requestId);
+
         if (request == null) {
             throw new IllegalStateException("Request is not acknowledged: " + requestId);
         }
@@ -188,17 +231,16 @@ public class InMemoryRequestManager implements RequestManager {
         final Error error = new Error();
         error.setErrorState(errorState);
         error.setMessage(message);
-
-//        request.setError(error);
     }
 
     private class CandidateEntry {
 
         private Request request;
-        private ResponseParcel responseParcel;
+        private Object response;
         private long lastAccessedTime;
 
         public Request getRequest() {
+
             return request;
         }
 
@@ -206,15 +248,17 @@ public class InMemoryRequestManager implements RequestManager {
             this.request = request;
         }
 
-        public ResponseParcel getResponseParcel() {
-            return responseParcel;
+        public Object getResponse() {
+
+            return response;
         }
 
-        public void setResponseParcel(final ResponseParcel responseParcel) {
-            this.responseParcel = responseParcel;
+        public void setResponse(final Object response) {
+            this.response = response;
         }
 
         public long getLastAccessedTime() {
+
             return lastAccessedTime;
         }
 
@@ -222,5 +266,4 @@ public class InMemoryRequestManager implements RequestManager {
             this.lastAccessedTime = lastAccessedTime;
         }
     }
-
 }
