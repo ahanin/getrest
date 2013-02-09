@@ -17,6 +17,8 @@ package getrest.android.core;
 
 import android.content.Context;
 
+import getrest.android.Getrest;
+
 import getrest.android.client.InMemoryRequestManager;
 
 import getrest.android.config.Config;
@@ -41,18 +43,16 @@ public class GetrestRuntime {
 
                 if (!cache.containsKey(applicationContext)) {
 
-                    if (!(applicationContext instanceof HasConfig)) {
-                        throw new IllegalStateException(
-                            "Unable to find configuration. Does your Android "
-                            + Application.class.getSimpleName() + " implement "
-                            + HasConfig.class.getName());
+                    final Config config;
+
+                    if (applicationContext instanceof HasConfig) {
+                        config = ((HasConfig) applicationContext).getGetrestConfig();
+                    } else {
+                        config = Getrest.newConfigBuilder().build();
                     }
 
-                    synchronized (applicationContext) {
-                        cache.put(applicationContext,
-                                  new GetrestRuntime(
-                            ((HasConfig) applicationContext).getGetrestConfig()));
-                    }
+                    cache.put(applicationContext, new GetrestRuntime(config));
+
                 }
             }
         }
@@ -68,5 +68,4 @@ public class GetrestRuntime {
 
         return requestManager;
     }
-
 }

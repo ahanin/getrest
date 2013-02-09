@@ -15,20 +15,4 @@
  */
 package getrest.android.config;
 
-import getrest.android.core.Application;
-import getrest.android.util.Sets;
-
-import java.util.Set;
-
-class GenericConfig implements Config {
-    private final Set<Application> applications;
-
-    GenericConfig(final Set<Application> applications) {
-        this.applications = Sets.immutableSet(applications);
-    }
-
-    public Set<Application> getApplications() {
-        return applications;
-    }
-
-}
+class GenericConfig implements Config {}

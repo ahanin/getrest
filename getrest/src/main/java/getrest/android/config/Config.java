@@ -15,27 +15,11 @@
  */
 package getrest.android.config;
 
-import getrest.android.core.Application;
-import getrest.android.util.Sets;
-
-import java.util.Set;
-
 public interface Config {
-
-    Set<Application> getApplications();
-
     public static class ConfigBuilder {
-
-        private Set<Application> applications = Sets.newHashSet();
-
-        public void addApplication(final Application application) {
-            this.applications.add(application);
-        }
-
         public Config build() {
-            return new GenericConfig(applications);
+
+            return new GenericConfig();
         }
-
     }
-
 }
