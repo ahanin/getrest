@@ -36,7 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @since 2012-01-13
  */
-public class DefaultGetrestService extends Service implements Broadcaster, GetrestService {
+public class DefaultGetrestService extends Service implements GetrestService {
 
     private WorkerQueue<RequestTuple> requestWorkerQueue = new WorkerQueue<RequestTuple>(
         new LinkedBlockingQueue<RequestTuple>(),
@@ -99,10 +99,5 @@ public class DefaultGetrestService extends Service implements Broadcaster, Getre
     public IBinder onBind(final Intent intent) {
 
         return localBinder;
-    }
-
-    @Override
-    public void sendBroadcast(final Intent intent) {
-        super.sendBroadcast(intent);
     }
 }

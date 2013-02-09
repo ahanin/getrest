@@ -28,7 +28,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
+
+import org.mockito.InOrder;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
@@ -89,7 +95,7 @@ public class RequestFutureImplTest {
 
         requestFuture.setRequestCallback(requestCallback);
 
-        verify(requestCallback).onPending(request);
+        verify(requestCallback, times(1)).onPending(request);
     }
 
     @Test
@@ -99,7 +105,7 @@ public class RequestFutureImplTest {
 
         requestFuture.setRequestCallback(requestCallback);
 
-        verify(requestCallback).onExecuting(request);
+        verify(requestCallback, times(1)).onExecuting(request);
     }
 
     @Test
@@ -110,7 +116,7 @@ public class RequestFutureImplTest {
 
         requestFuture.setRequestCallback(requestCallback);
 
-        verify(requestCallback).onCompleted(request);
+        verify(requestCallback, times(1)).onCompleted(request);
     }
 
     @Test
@@ -121,9 +127,35 @@ public class RequestFutureImplTest {
 
         requestFuture.setRequestCallback(requestCallback);
 
-        verify(requestCallback).onError(request);
+        verify(requestCallback, times(1)).onError(request);
     }
 
+    @Test
+    public void testShouldReplayToTheHighestEvent() throws Exception {
+        requestFutureSupport.fireOnExecuting();
+        requestFutureSupport.fireOnPending();
 
+        final InOrder inOrder = inOrder(requestCallback);
 
+        requestFuture.setRequestCallback(requestCallback);
+
+        inOrder.verify(requestCallback).onPending(request);
+        inOrder.verify(requestCallback).onExecuting(request);
+
+    }
+
+    @Test
+    public void testShouldConsistentlyAdvanceNotificationProgress() throws Exception {
+
+        final InOrder inOrder = inOrder(requestCallback);
+
+        requestFutureSupport.fireOnPending();
+
+        requestFutureSupport.setRequestCallback(requestCallback);
+
+        requestFutureSupport.fireOnExecuting();
+
+        inOrder.verify(requestCallback, times(1)).onPending(request);
+        inOrder.verify(requestCallback, times(1)).onExecuting(request);
+    }
 }

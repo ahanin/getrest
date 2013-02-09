@@ -15,10 +15,6 @@
  */
 package getrest.android.http;
 
-import getrest.android.service.ServiceRequest;
-import getrest.android.service.ServiceRequestExecutor;
-import getrest.android.service.ServiceResponse;
-
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;

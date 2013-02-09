@@ -18,122 +18,166 @@ package getrest.android.service;
 import getrest.android.client.RequestCallback;
 
 import getrest.android.core.Request;
+import getrest.android.core.RequestStatus;
 
+import getrest.android.util.Objects;
 import getrest.android.util.Preconditions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RequestFutureSupport<R extends Request<V>, V> {
+
+    private static final int NOTIFICATION_STATE_PENDING = 1;
+    private static final int NOTIFICATION_STATE_EXECUTING = 2;
+    private static final int NOTIFICATION_STATE_FINISHED = 3;
+    private static final Map<RequestStatus, Integer> requestStatusOrdinalMap = new HashMap<RequestStatus, Integer>();
+
+    static {
+        requestStatusOrdinalMap.put(RequestStatus.PENDING, NOTIFICATION_STATE_PENDING);
+        requestStatusOrdinalMap.put(RequestStatus.EXECUTING, NOTIFICATION_STATE_EXECUTING);
+        requestStatusOrdinalMap.put(RequestStatus.FINISHED, NOTIFICATION_STATE_FINISHED);
+        requestStatusOrdinalMap.put(RequestStatus.ERROR, NOTIFICATION_STATE_FINISHED);
+    }
 
     private RequestTuple<R> requestTuple;
     private RequestCallback<R> requestCallback;
     private boolean hasGottenResult;
     private boolean isFinished;
-    private byte notificationState = 0;
-    private byte pendingNotificationState = 0;
     private V result;
     private Throwable exception;
-
-    private static final byte NOTIFICATION_STATE_PENDING = 1;
-    private static final byte NOTIFICATION_STATE_EXECUTING = 2;
-    private static final byte NOTIFICATION_STATE_FINISHED = 3;
-
     private final Object syncLock = new Object();
+    private RequestStatus pendingRequestStatus;
+    private RequestStatus currentNotifiedRequestStatus;
 
-    public void fireOnPending() {
-        runNotificationCycle(NOTIFICATION_STATE_PENDING);
+    private void runNotificationCycle(final RequestStatus requestStatus) {
+        runNotificationCycle(requestStatus, this.result, this.exception);
     }
 
-    private void runNotificationCycle(final byte targetNotificationState) {
-        runNotificationCycle(targetNotificationState, this.result, this.exception);
-    }
-
-    private void runNotificationCycle(final byte targetNotificationState, final V result,
+    private void runNotificationCycle(final RequestStatus requestStatus, final V result,
                                       final Throwable exception) {
 
         synchronized (syncLock) {
-            Preconditions.checkState(this.notificationState < targetNotificationState,
-                                     "Inconsistent notification chain state");
 
-            if (NOTIFICATION_STATE_PENDING <= targetNotificationState) {
+            final int targetOrdinal = getRequestStatusOrdinal(requestStatus);
+            final int currentNotifiedStatusOrdinal = getRequestStatusOrdinal(
+                this.currentNotifiedRequestStatus);
+            final int pendingNotifiedStatusOrdinal = getRequestStatusOrdinal(this.pendingRequestStatus);
 
-                if (requestCallback != null) {
-                    notificationState = NOTIFICATION_STATE_PENDING;
+            if (targetOrdinal < Math.max(currentNotifiedStatusOrdinal, pendingNotifiedStatusOrdinal)) {
 
-                    requestTuple.getCallerContext().getHandler().post(new Runnable() {
-                            public void run() {
-                                requestCallback.onPending(requestTuple.getRequest());
-                            }
-                        });
-                } else {
-                    pendingNotificationState = NOTIFICATION_STATE_PENDING;
-                }
+                // don't bother recording the progress of the state more than once
+                return;
             }
 
-            if (NOTIFICATION_STATE_EXECUTING <= targetNotificationState) {
+            // all notifications must be stored and replayed once the callback is set
+            if (requestCallback == null && targetOrdinal > pendingNotifiedStatusOrdinal) {
 
-                if (requestCallback != null) {
-                    notificationState = NOTIFICATION_STATE_EXECUTING;
-                    requestTuple.getCallerContext().getHandler().post(new Runnable() {
-                            public void run() {
-                                requestCallback.onExecuting(requestTuple.getRequest());
-                            }
-                        });
-                } else {
-                    pendingNotificationState = NOTIFICATION_STATE_EXECUTING;
+                if (requestStatus == RequestStatus.ERROR || requestStatus == RequestStatus.FINISHED) {
+                    this.result = result;
+                    this.exception = exception;
                 }
-            }
 
-            if (NOTIFICATION_STATE_FINISHED <= targetNotificationState) {
-                this.result = result;
-                this.exception = exception;
+                this.pendingRequestStatus = requestStatus;
+            } else if (requestCallback != null && targetOrdinal > currentNotifiedStatusOrdinal) {
 
-                if (requestCallback != null) {
-                    Preconditions.checkState(!((this.result != null) && (this.exception != null)),
-                                             "result and exception cannot present at the same time");
+                for (int i = Math.max(currentNotifiedStatusOrdinal + 1, NOTIFICATION_STATE_PENDING);
+                       i <= targetOrdinal; i++) {
 
-                    this.notificationState = NOTIFICATION_STATE_FINISHED;
+                    switch (i) {
 
-                    if (this.result != null) {
-                        requestTuple.getCallerContext().getHandler().post(new Runnable() {
-                                public void run() {
-                                    requestCallback.onCompleted(requestTuple.getRequest());
-                                }
-                            });
-                    } else if (this.exception != null) {
-                        requestTuple.getCallerContext().getHandler().post(new Runnable() {
-                                public void run() {
-                                    requestCallback.onError(requestTuple.getRequest());
-                                }
-                            });
+                        case NOTIFICATION_STATE_PENDING:
+                            requestTuple.getCallerContext().getHandler().post(new Runnable() {
+                                    public void run() {
+                                        requestCallback.onPending(requestTuple.getRequest());
+                                    }
+                                });
+
+
+                            break;
+
+                        case NOTIFICATION_STATE_EXECUTING:
+                            requestTuple.getCallerContext().getHandler().post(new Runnable() {
+                                    public void run() {
+                                        requestCallback.onExecuting(requestTuple.getRequest());
+                                    }
+                                });
+
+
+                            break;
+
+                        case NOTIFICATION_STATE_FINISHED:
+                            this.result = result;
+                            this.exception = exception;
+
+                            Preconditions.checkState(!(this.result != null
+                                                     && this.exception != null),
+                                                     "result and exception cannot present at the same time");
+
+                            if (requestStatus == RequestStatus.FINISHED) {
+                                requestTuple.getCallerContext().getHandler().post(new Runnable() {
+                                        public void run() {
+                                            requestCallback.onCompleted(requestTuple.getRequest());
+                                        }
+                                    });
+                            } else if (requestStatus == RequestStatus.ERROR) {
+                                requestTuple.getCallerContext().getHandler().post(new Runnable() {
+                                        public void run() {
+                                            requestCallback.onError(requestTuple.getRequest());
+                                        }
+                                    });
+                            }
+
+                            break;
                     }
-                } else {
-                    pendingNotificationState = NOTIFICATION_STATE_FINISHED;
                 }
+
+                this.currentNotifiedRequestStatus = requestStatus;
             }
 
             syncLock.notifyAll();
         }
     }
 
+    private int getRequestStatusOrdinal(final RequestStatus requestStatus) {
+
+        return requestStatus == null ? -1
+               : Objects.firstNotNull(requestStatusOrdinalMap.get(requestStatus), -1);
+    }
+
+    public void fireOnPending() {
+        runNotificationCycle(RequestStatus.PENDING);
+    }
+
     public void fireOnExecuting() {
-        runNotificationCycle(NOTIFICATION_STATE_EXECUTING);
+        runNotificationCycle(RequestStatus.EXECUTING);
     }
 
     public void fireOnError(final Throwable ex) {
-        runNotificationCycle(NOTIFICATION_STATE_FINISHED, null, ex);
+        runNotificationCycle(RequestStatus.ERROR, null, ex);
     }
 
     public void fireOnCompleted(final V result) {
         saveResult(result);
 
-        runNotificationCycle(NOTIFICATION_STATE_FINISHED, result, null);
+        runNotificationCycle(RequestStatus.FINISHED, result, null);
     }
 
     public void setRequestCallback(final RequestCallback<R> requestCallback) {
-        this.requestCallback = requestCallback;
 
-        if (notificationState < pendingNotificationState) {
-            runNotificationCycle(pendingNotificationState);
+        synchronized (syncLock) {
+            this.requestCallback = requestCallback;
+
+            if (mustReplayNotifications()) {
+                runNotificationCycle(pendingRequestStatus);
+            }
         }
+    }
+
+    private boolean mustReplayNotifications() {
+
+        return getRequestStatusOrdinal(pendingRequestStatus) > getRequestStatusOrdinal(
+            currentNotifiedRequestStatus);
     }
 
     private void saveResult(final V result) {

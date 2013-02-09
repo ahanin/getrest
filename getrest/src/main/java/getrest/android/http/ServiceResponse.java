@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package getrest.android.service;
+package getrest.android.http;
 
 import getrest.android.http.Headers;
 import getrest.android.http.Representation;

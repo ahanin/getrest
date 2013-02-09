@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package getrest.android.service;
+package getrest.android.http;
 
-import android.content.Intent;
+import java.io.IOException;
 
-public interface Broadcaster {
-    void sendBroadcast(Intent intent);
+/**
+ * @author aha
+ * @since 2012-01-17
+ */
+public interface ServiceRequestExecutor {
+    void execute(final ServiceRequest request, final ServiceResponse response) throws IOException;
 }

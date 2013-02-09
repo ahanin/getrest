@@ -37,7 +37,9 @@ class RequestProcessor implements WorkerQueue.Worker<RequestTuple> {
         Object result = null;
 
         try {
-            requestTuple.getRequestFutureSupport().fireOnPending();
+            Loggers.getServiceLogger().trace("executing request: {0}", requestTuple.getRequest());
+
+            requestTuple.getRequestFutureSupport().fireOnExecuting();
 
             if (requestTuple instanceof RequestExecutable) {
 

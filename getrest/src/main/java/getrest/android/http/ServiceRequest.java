@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.service;
-
-import getrest.android.http.BaseRequest;
-import getrest.android.http.Representation;
+package getrest.android.http;
 
 
 /**

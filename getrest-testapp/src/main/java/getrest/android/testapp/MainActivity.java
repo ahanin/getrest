@@ -18,6 +18,7 @@ import getrest.android.GetrestClient;
 
 import getrest.android.client.RequestCallback;
 
+import getrest.android.core.Loggers;
 import getrest.android.core.Request;
 import getrest.android.core.RequestFuture;
 
