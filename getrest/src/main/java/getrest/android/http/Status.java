@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package getrest.android.core;
+package getrest.android.http;
 
 import java.util.HashMap;
 import java.util.Map;

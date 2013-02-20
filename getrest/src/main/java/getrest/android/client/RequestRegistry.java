@@ -16,8 +16,6 @@
 
 package getrest.android.client;
 
-import getrest.android.core.Request;
-
 import java.util.Set;
 
 public interface RequestRegistry {
@@ -33,9 +31,9 @@ public interface RequestRegistry {
         /**
          * Stores information about pending request.
          *
-         * @param request pending request
+         * @param requestId pending request
          */
-        void put(Request request);
+        void put(String requestId);
 
         /**
          * Removes request from registry.

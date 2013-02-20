@@ -41,8 +41,8 @@ public class RequestRegistryEditorImpl implements RequestRegistry.Editor {
         this.entryFactory = entryFactory;
     }
 
-    public void put(final Request request) {
-        newEntries.put(request.getRequestId(), entryFactory.create(request));
+    public void put(final String requestId) {
+        newEntries.put(requestId, entryFactory.create(requestId));
     }
 
     public void remove(final String requestId) {

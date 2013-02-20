@@ -21,8 +21,8 @@ import getrest.android.core.Request;
 
 public class RequestRegistryEntryFactory {
 
-    public RequestRegistry.Entry create(Request request) {
-        return new EntryImpl(request.getRequestId());
+    public RequestRegistry.Entry create(final String requestId) {
+        return new EntryImpl(requestId);
     }
 
     static class EntryImpl implements RequestRegistry.Entry {

@@ -38,34 +38,32 @@ public class InMemoryRequestManagerTest {
 
     @Test
     public void testGetRequestShouldReturnNull() throws Exception {
-        assertThat(requestManager.getRequest("12345"), nullValue());
+        assertThat(requestManager.loadRequest("12345"), nullValue());
     }
 
     @Test
     public void testShouldSaveRequest() throws Exception {
 
         final Request request = mock(Request.class);
-        when(request.getRequestId()).thenReturn("12345");
 
-        requestManager.persistRequest(request);
+        requestManager.persistRequest("12345", request);
 
-        assertThat(requestManager.getRequest("12345"), sameInstance(request));
+        assertThat(requestManager.loadRequest("12345"), sameInstance(request));
     }
 
     @Test
     public void testGetResponseShouldReturnNull() throws Exception {
-        assertThat(requestManager.getResponse("12345"), nullValue());
+        assertThat(requestManager.loadResponse("12345"), nullValue());
     }
 
     @Test
     public void testGetResponseShouldReturnNullBeforeSaved() throws Exception {
 
         final Request request = mock(Request.class);
-        when(request.getRequestId()).thenReturn("12345");
 
-        requestManager.persistRequest(request);
+        requestManager.persistRequest("12345", request);
 
-        assertThat(requestManager.getResponse("12345"), nullValue());
+        assertThat(requestManager.loadResponse("12345"), nullValue());
     }
 
     @Test
@@ -86,13 +84,12 @@ public class InMemoryRequestManagerTest {
     public void testShouldSaveResponse() throws Exception {
 
         final Request request = mock(Request.class);
-        when(request.getRequestId()).thenReturn("12345");
-        requestManager.persistRequest(request);
+        requestManager.persistRequest("12345", request);
 
         final Object response = new Object();
         requestManager.persistResponse("12345", response);
 
-        assertThat(requestManager.getResponse("12345"), sameInstance(response));
+        assertThat(requestManager.loadResponse("12345"), sameInstance(response));
     }
 
     @Test
@@ -116,8 +113,7 @@ public class InMemoryRequestManagerTest {
     public void testShouldSaveRequestState() throws Exception {
 
         final Request request = mock(Request.class);
-        when(request.getRequestId()).thenReturn("12345");
-        requestManager.persistRequest(request);
+        requestManager.persistRequest("12345", request);
 
         requestManager.updateRequestStatus("12345", RequestStatus.FINISHED);
 

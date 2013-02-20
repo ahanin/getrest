@@ -155,9 +155,7 @@ public class InMemoryRequestManager implements RequestManager {
         new Thread(new CleanupWorker()).start();
     }
 
-    public void persistRequest(final Request request) {
-
-        final String requestId = request.getRequestId();
+    public void persistRequest(final String requestId, final Request request) {
 
         synchronized (requestMap) {
 
@@ -170,7 +168,7 @@ public class InMemoryRequestManager implements RequestManager {
         }
     }
 
-    public Request getRequest(final String requestId) {
+    public Request loadRequest(final String requestId) {
 
         final WeakValue<Request> entry = requestMap.get(requestId);
 
@@ -181,7 +179,7 @@ public class InMemoryRequestManager implements RequestManager {
 
         synchronized (requestMap) {
 
-            final Request request = getRequest(requestId);
+            final Request request = loadRequest(requestId);
 
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
@@ -191,7 +189,7 @@ public class InMemoryRequestManager implements RequestManager {
         }
     }
 
-    public Object getResponse(final String requestId) {
+    public Object loadResponse(final String requestId) {
 
         final WeakValue<Object> entry = responseMap.get(requestId);
 
@@ -202,7 +200,7 @@ public class InMemoryRequestManager implements RequestManager {
 
         synchronized (stateMap) {
 
-            final Request request = getRequest(requestId);
+            final Request request = loadRequest(requestId);
 
             if (request == null) {
                 throw new IllegalStateException("Request must be acknowledged prior to response");
@@ -220,7 +218,7 @@ public class InMemoryRequestManager implements RequestManager {
     public void updateRequestStatus(final String requestId, final ErrorState errorState,
                                     final String message) {
 
-        final Request request = getRequest(requestId);
+        final Request request = loadRequest(requestId);
 
         if (request == null) {
             throw new IllegalStateException("Request is not acknowledged: " + requestId);

@@ -19,12 +19,15 @@ import getrest.android.core.Request;
 
 public class RequestTuple<R extends Request> {
 
-    private R request;
-    private RequestFutureSupport requestFutureSupport;
-    private CallerContext callerContext;
+    private final String requestId;
+    private final R request;
+    private final RequestFutureSupport requestFutureSupport;
+    private final CallerContext callerContext;
 
-    public RequestTuple(final R request, final RequestFutureSupport requestFutureSupport,
+    public RequestTuple(final String requestId, final R request,
+                        final RequestFutureSupport requestFutureSupport,
                         final CallerContext callerContext) {
+        this.requestId = requestId;
         this.request = request;
         this.requestFutureSupport = requestFutureSupport;
         this.callerContext = callerContext;
@@ -33,6 +36,11 @@ public class RequestTuple<R extends Request> {
     public RequestFutureSupport getRequestFutureSupport() {
 
         return requestFutureSupport;
+    }
+
+    public String getRequestId() {
+
+        return requestId;
     }
 
     public R getRequest() {

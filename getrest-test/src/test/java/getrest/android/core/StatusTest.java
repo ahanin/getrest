@@ -15,6 +15,7 @@
  */
 package getrest.android.core;
 
+import getrest.android.http.Status;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.sameInstance;

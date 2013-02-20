@@ -17,18 +17,18 @@ package getrest.android.service;
 
 import getrest.android.core.Loggers;
 import getrest.android.core.RequestExecutable;
+import getrest.android.core.RequestManager;
+import getrest.android.core.RequestStatus;
 
+import getrest.android.util.Provider;
 import getrest.android.util.WorkerQueue;
 
 class RequestProcessor implements WorkerQueue.Worker<RequestTuple> {
 
-    private static RequestProcessor instance = new RequestProcessor();
+    private final Provider<RequestManager> requestManagerProvider;
 
-    private RequestProcessor() {}
-
-    public static RequestProcessor getInstance() {
-
-        return instance;
+    public RequestProcessor(final Provider<RequestManager> requestManagerProvider) {
+        this.requestManagerProvider = requestManagerProvider;
     }
 
     public void execute(final RequestTuple requestTuple) {
@@ -36,7 +36,12 @@ class RequestProcessor implements WorkerQueue.Worker<RequestTuple> {
         Exception error = null;
         Object result = null;
 
+        final String requestId = requestTuple.getRequestId();
+        final RequestManager requestManager = requestManagerProvider.get();
+
         try {
+            requestManager.updateRequestStatus(requestId, RequestStatus.EXECUTING);
+
             Loggers.getServiceLogger().trace("executing request: {0}", requestTuple.getRequest());
 
             requestTuple.getRequestFutureSupport().fireOnExecuting();
@@ -51,13 +56,26 @@ class RequestProcessor implements WorkerQueue.Worker<RequestTuple> {
             }
         } catch (final Exception ex) {
             error = ex;
-            Loggers.getServiceLogger().error("Exception during execution of a request", ex);
+            requestTuple.getCallerContext().getHandler().post(new ExceptionLogger(ex));
         }
 
         if (error != null) {
             requestTuple.getRequestFutureSupport().fireOnError(error);
         } else {
             requestTuple.getRequestFutureSupport().fireOnCompleted(result);
+        }
+    }
+
+    private static class ExceptionLogger implements Runnable {
+
+        private final Exception ex;
+
+        public ExceptionLogger(final Exception ex) {
+            this.ex = ex;
+        }
+
+        public void run() {
+            Loggers.getServiceLogger().error("Exception during execution of a request", ex);
         }
     }
 }

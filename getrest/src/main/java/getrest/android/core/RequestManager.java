@@ -16,18 +16,18 @@
 package getrest.android.core;
 
 public interface RequestManager {
+    void persistRequest(final String requestId, final Request request);
 
-    void persistRequest(Request request);
+    Request loadRequest(final String requestId);
 
-    Request getRequest(String requestId);
+    void persistResponse(final String requestId, final Object response);
 
-    void persistResponse(final String requestId, Object response);
+    Object loadResponse(final String requestId);
 
-    Object getResponse(String requestId);
+    void updateRequestStatus(final String requestId, final RequestStatus status);
 
-    void updateRequestStatus(String requestId, RequestStatus status);
+    void updateRequestStatus(final String requestId, final ErrorState errorState,
+                             final String message);
 
-    void updateRequestStatus(String requestId, ErrorState errorState, String message);
-
-    RequestStatus getRequestStatus(String requestId);
+    RequestStatus getRequestStatus(final String requestId);
 }

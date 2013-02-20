@@ -16,36 +16,25 @@
 package getrest.android.http;
 
 import android.net.Uri;
-import getrest.android.core.Request;
 
 public class BaseRequest implements HasHeaders {
 
-    private String requestId;
     private Uri uri;
     private Method method;
     private MediaType mediaType;
     private Headers headers = new Headers();
 
-    public BaseRequest() {
-    }
+    public BaseRequest() {}
 
     public BaseRequest(final BaseRequest request) {
-        this.requestId = request.getRequestId();
         this.uri = request.getUri();
         this.method = request.getMethod();
         this.mediaType = request.getMediaType();
         this.headers = new Headers(request.getHeaders());
     }
 
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(final String requestId) {
-        this.requestId = requestId;
-    }
-
     public Uri getUri() {
+
         return uri;
     }
 
@@ -54,6 +43,7 @@ public class BaseRequest implements HasHeaders {
     }
 
     public Method getMethod() {
+
         return method;
     }
 
@@ -62,6 +52,7 @@ public class BaseRequest implements HasHeaders {
     }
 
     public MediaType getMediaType() {
+
         return mediaType;
     }
 
@@ -70,10 +61,11 @@ public class BaseRequest implements HasHeaders {
     }
 
     public Headers getHeaders() {
+
         return headers;
     }
 
-    public void addHeader(Header header) {
+    public void addHeader(final Header header) {
         this.headers.add(header);
     }
 }

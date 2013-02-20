@@ -45,7 +45,6 @@ import getrest.android.service.GetrestServiceBinder;
 import getrest.android.util.Preconditions;
 import getrest.android.util.TypeLiteral;
 
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class GetrestClientImpl extends GetrestClient {
@@ -69,7 +68,7 @@ public class GetrestClientImpl extends GetrestClient {
         }
 
         final RequestManager requestManager = runtime.getRequestManager();
-        final Request request = requestManager.getRequest(requestId);
+        final Request request = requestManager.loadRequest(requestId);
 
         return obtainRequestFuture(request);
     }
@@ -95,11 +94,6 @@ public class GetrestClientImpl extends GetrestClient {
 
     @Override
     public <V> V execute(final Request request, final TypeLiteral<V> responseTypeLiteral) {
-        Loggers.getClientLogger().trace("Calling {0}: requestId={1}, request={2}",
-                                        DefaultGetrestService.class.getSimpleName(),
-                                        request.getRequestId(),
-                                        request);
-
         return (V) serviceConnection.getService().execute(request, callerContextAdapter);
     }
 
@@ -152,7 +146,7 @@ public class GetrestClientImpl extends GetrestClient {
     private RequestFuture obtainRequestFuture(final RequestRegistry.Entry entry) {
 
         final RequestManager requestManager = runtime.getRequestManager();
-        final Request request = requestManager.getRequest(entry.getRequestId());
+        final Request request = requestManager.loadRequest(entry.getRequestId());
 
         if (request == null) {
             Loggers.getClientLogger().warn("Request [{0}] is not acknowledged by request manager",

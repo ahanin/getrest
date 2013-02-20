@@ -22,11 +22,13 @@ import getrest.android.service.RequestFutureSupport;
 import getrest.android.service.RequestTuple;
 
 public class GetrestSupport {
-    public static <R extends Request<V>, V> RequestFutureSupport<R, V> createRequestFutureSupport(final R request,
+    public static <R extends Request<V>, V> RequestFutureSupport<R, V> createRequestFutureSupport(final String requestId,
+                                                                                                  final R request,
                                                                                                   final CallerContext callerContext) {
 
         final RequestFutureSupport<R, V> requestFutureSupport = new RequestFutureSupport<R, V>();
-        final RequestTuple<R> requestTuple = new RequestTuple<R>(request,
+        final RequestTuple<R> requestTuple = new RequestTuple<R>(requestId,
+                                                                 request,
                                                                  requestFutureSupport,
                                                                  callerContext);
         requestFutureSupport.setRequestTuple(requestTuple);

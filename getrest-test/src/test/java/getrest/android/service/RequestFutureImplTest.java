@@ -32,11 +32,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.UUID;
 @RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("unchecked")
 public class RequestFutureImplTest {
@@ -52,7 +52,9 @@ public class RequestFutureImplTest {
         final CallerContext callerContext = mock(CallerContext.class);
         final Handler mockHandler = new Handler();
         when(callerContext.getHandler()).thenReturn(mockHandler);
-        requestFutureSupport = createRequestFutureSupport(request, callerContext);
+        requestFutureSupport = createRequestFutureSupport(UUID.randomUUID().toString(),
+                                                          request,
+                                                          callerContext);
         requestFuture = new RequestFutureImpl(requestFutureSupport);
     }
 

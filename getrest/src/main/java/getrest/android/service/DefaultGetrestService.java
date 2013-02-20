@@ -22,12 +22,17 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import getrest.android.core.GetrestRuntime;
+import getrest.android.core.Loggers;
 import getrest.android.core.Request;
 import getrest.android.core.RequestFuture;
+import getrest.android.core.RequestManager;
 
 import getrest.android.util.GetrestSupport;
+import getrest.android.util.Provider;
 import getrest.android.util.WorkerQueue;
 
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -38,18 +43,34 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class DefaultGetrestService extends Service implements GetrestService {
 
-    private WorkerQueue<RequestTuple> requestWorkerQueue = new WorkerQueue<RequestTuple>(
+    private final WorkerQueue<RequestTuple> requestWorkerQueue = new WorkerQueue<RequestTuple>(
         new LinkedBlockingQueue<RequestTuple>(),
-        RequestProcessor.getInstance(),
+        new RequestProcessor(new RequestManagerProvider()),
         10);
     private boolean isStarted;
 
     public <R extends Request<V>, V> RequestFuture<V> execute(final R request,
                                                               final CallerContext callerContext) {
 
+        final String requestId = UUID.randomUUID().toString();
+
+        return execute(request, callerContext, requestId);
+    }
+
+    private <R extends Request<V>, V> RequestFuture<V> execute(final R request,
+                                                               final CallerContext callerContext,
+                                                               final String requestId) {
+        Loggers.getClientLogger().trace("Executing request {1}",
+                                        DefaultGetrestService.class.getSimpleName(),
+                                        requestId);
+
         final RequestFutureSupport<R, V> requestFutureSupport = GetrestSupport
-                                                   .createRequestFutureSupport(request,
-                                                                               callerContext);
+                                                                    .createRequestFutureSupport(
+            requestId,
+            request,
+            callerContext);
+
+        getRequestManager().persistRequest(requestId, request);
 
         requestWorkerQueue.add(requestFutureSupport.getRequestTuple());
 
@@ -99,5 +120,17 @@ public class DefaultGetrestService extends Service implements GetrestService {
     public IBinder onBind(final Intent intent) {
 
         return localBinder;
+    }
+
+    private class RequestManagerProvider implements Provider<RequestManager> {
+        public RequestManager get() {
+
+            return getRequestManager();
+        }
+    }
+
+    private RequestManager getRequestManager() {
+
+        return GetrestRuntime.getInstance(getApplicationContext()).getRequestManager();
     }
 }

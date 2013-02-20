@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Alexey Hanin
+ * Copyright 2013 Alexey Hanin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.core;
+package getrest.android.storage;
 
-public interface Request<V> {}
+import android.net.Uri;
+
+/**
+ * Provides persisting and loading of data of various types.
+ */
+public interface Storage {
+    <T> boolean supports(final Uri uri, final Class<? extends T> dataType);
+
+    <T> void persist(final Uri uri, final T data);
+
+    boolean contains(final Uri uri);
+
+    <T> T load(final Uri uri);
+}

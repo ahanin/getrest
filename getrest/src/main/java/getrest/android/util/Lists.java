@@ -16,20 +16,17 @@
 package getrest.android.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Lists {
-    public static <T> LinkedList<T> newLinkedList() {
-        return new LinkedList<T>();
-    }
 
     public static <T> List<T> newArrayList() {
         return new ArrayList<T>();
     }
 
-    public static <T> List<T> immutableList(final List<T> list) {
-        return Collections.unmodifiableList(list);
+    public static <T> List<T> newArrayList(final T... elements) {
+        return new ArrayList<T>(Arrays.asList(elements));
     }
+
 }
