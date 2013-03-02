@@ -16,7 +16,6 @@
 package getrest.android.service;
 
 import getrest.android.core.Loggers;
-import getrest.android.core.RequestExecutable;
 import getrest.android.core.RequestManager;
 import getrest.android.core.RequestStatus;
 
@@ -39,30 +38,26 @@ class RequestProcessor implements WorkerQueue.Worker<RequestTuple> {
         final String requestId = requestTuple.getRequestId();
         final RequestManager requestManager = requestManagerProvider.get();
 
+        final RequestFutureSupport requestFutureSupport = requestManager.getRequestFutureSupport(
+            requestTuple);
+
         try {
             requestManager.updateRequestStatus(requestId, RequestStatus.EXECUTING);
 
             Loggers.getServiceLogger().trace("executing request: {0}", requestTuple.getRequest());
 
-            requestTuple.getRequestFutureSupport().fireOnExecuting();
+            requestFutureSupport.fireOnExecuting();
 
-            if (requestTuple instanceof RequestExecutable) {
-
-                final RequestExecutable executable = (RequestExecutable) requestTuple;
-                result = executable.execute();
-
-            } else {
-                throw new UnsupportedOperationException("non-executable request are not supported");
-            }
+            result = requestTuple.getRequest().execute();
         } catch (final Exception ex) {
             error = ex;
             requestTuple.getCallerContext().getHandler().post(new ExceptionLogger(ex));
         }
 
         if (error != null) {
-            requestTuple.getRequestFutureSupport().fireOnError(error);
+            requestFutureSupport.fireOnError(error);
         } else {
-            requestTuple.getRequestFutureSupport().fireOnCompleted(result);
+            requestFutureSupport.fireOnCompleted(result);
         }
     }
 

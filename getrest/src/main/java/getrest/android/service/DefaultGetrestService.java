@@ -28,7 +28,6 @@ import getrest.android.core.Request;
 import getrest.android.core.RequestFuture;
 import getrest.android.core.RequestManager;
 
-import getrest.android.util.GetrestSupport;
 import getrest.android.util.Provider;
 import getrest.android.util.WorkerQueue;
 
@@ -64,15 +63,13 @@ public class DefaultGetrestService extends Service implements GetrestService {
                                         DefaultGetrestService.class.getSimpleName(),
                                         requestId);
 
-        final RequestFutureSupport<R, V> requestFutureSupport = GetrestSupport
-                                                                    .createRequestFutureSupport(
-            requestId,
-            request,
-            callerContext);
+        final RequestTuple<R> requestTuple = new RequestTuple<R>(requestId, request, callerContext);
 
+        final RequestFutureSupport requestFutureSupport = getRequestManager()
+                                                          .getRequestFutureSupport(requestTuple);
         getRequestManager().persistRequest(requestId, request);
 
-        requestWorkerQueue.add(requestFutureSupport.getRequestTuple());
+        requestWorkerQueue.add(requestTuple);
 
         requestFutureSupport.fireOnPending();
 

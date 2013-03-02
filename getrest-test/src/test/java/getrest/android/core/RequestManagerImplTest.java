@@ -19,7 +19,8 @@ import android.net.Uri;
 
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 
-import getrest.android.storage.Storage;
+import getrest.android.persistence.Storage;
+import getrest.android.persistence.util.RequestStorageSupport;
 
 import getrest.android.util.Lists;
 import getrest.android.util.Provider;
@@ -30,9 +31,7 @@ import org.junit.Test;
 
 import org.junit.runner.RunWith;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,7 +55,6 @@ public class RequestManagerImplTest {
         final Provider<List<Storage>> storageListProvider = mock(Provider.class);
         when(storageListProvider.get()).thenAnswer(new Answer<List<Storage>>() {
                 public List<Storage> answer(final InvocationOnMock invocation) throws Throwable {
-
                     return storageList;
                 }
             });
@@ -71,9 +69,7 @@ public class RequestManagerImplTest {
 
         requestManager.persistRequest("1234567890", request);
 
-        verify(storage).persist(
-            new Uri.Builder().scheme("getrest").authority("request").appendPath("1234567890").build(),
-            request);
+        verify(storage).persist(RequestStorageSupport.getRequestUri("1234567890"), request);
     }
 
     @Test

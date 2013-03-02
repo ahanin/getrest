@@ -15,6 +15,9 @@
  */
 package getrest.android.core;
 
+import getrest.android.service.RequestFutureSupport;
+import getrest.android.service.RequestTuple;
+
 public interface RequestManager {
     void persistRequest(final String requestId, final Request request);
 
@@ -30,4 +33,6 @@ public interface RequestManager {
                              final String message);
 
     RequestStatus getRequestStatus(final String requestId);
+
+    <R extends Request<V>, V> RequestFutureSupport<R, V> getRequestFutureSupport(final RequestTuple<R> requestTuple);
 }

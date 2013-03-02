@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Alexey Hanin
+ * Copyright 2013 Alexey Hanin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,22 @@
  */
 package getrest.android.core;
 
-public interface Request<V> {
-    RequestMetadata getMetadata();
+import getrest.android.util.Lists;
 
-    V execute();
+import java.lang.annotation.Annotation;
+
+import java.util.List;
+
+public class RequestMetadata {
+
+    private List<? extends Annotation> annotations = Lists.emptyList();
+
+    public RequestMetadata(final List<?extends Annotation> annotations) {
+        this.annotations = Lists.immutableList(annotations);
+    }
+
+    public List<? extends Annotation> getAnnotations() {
+
+        return annotations;
+    }
 }

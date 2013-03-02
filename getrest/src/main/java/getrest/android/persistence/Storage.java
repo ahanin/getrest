@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.storage;
+package getrest.android.persistence;
 
 import android.net.Uri;
 
 /**
- * Provides persisting and loading of data of various types.
+ * Provides persisting and loading of objects of various types.
  */
 public interface Storage {
     <T> boolean supports(final Uri uri, final Class<? extends T> dataType);

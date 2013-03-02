@@ -21,21 +21,12 @@ public class RequestTuple<R extends Request> {
 
     private final String requestId;
     private final R request;
-    private final RequestFutureSupport requestFutureSupport;
     private final CallerContext callerContext;
 
-    public RequestTuple(final String requestId, final R request,
-                        final RequestFutureSupport requestFutureSupport,
-                        final CallerContext callerContext) {
+    public RequestTuple(final String requestId, final R request, final CallerContext callerContext) {
         this.requestId = requestId;
         this.request = request;
-        this.requestFutureSupport = requestFutureSupport;
         this.callerContext = callerContext;
-    }
-
-    public RequestFutureSupport getRequestFutureSupport() {
-
-        return requestFutureSupport;
     }
 
     public String getRequestId() {

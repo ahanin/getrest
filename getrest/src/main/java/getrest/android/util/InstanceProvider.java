@@ -13,8 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.core;
+package getrest.android.util;
 
-public interface RequestExecutable<V> extends Request<V> {
-    V execute();
+public class InstanceProvider<V> implements Provider<V> {
+
+    private final V object;
+
+    public InstanceProvider(final V object) {
+        this.object = object;
+    }
+
+    public V get() {
+        return object;
+    }
 }

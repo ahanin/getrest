@@ -15,6 +15,7 @@
  */
 package getrest.android.http;
 
+import getrest.android.core.AbstractRequest;
 import getrest.android.core.Error;
 import getrest.android.core.Request;
 
@@ -24,16 +25,24 @@ import getrest.android.core.Request;
  *
  * @since 2012-01-13
  */
-public class HttpRequest extends BaseRequest implements Request {
+public class HttpRequest extends AbstractRequest implements Request {
 
+    private Method method;
     private Object entity;
     private Class entityType;
     private Class returnType;
     private long nanoTime;
     private Error error;
 
-    public Object getEntity() {
+    public Method getMethod() {
+        return method;
+    }
 
+    public void setMethod(final Method method) {
+        this.method = method;
+    }
+
+    public Object getEntity() {
         return entity;
     }
 
@@ -42,7 +51,6 @@ public class HttpRequest extends BaseRequest implements Request {
     }
 
     public Class getEntityType() {
-
         return entityType;
     }
 
@@ -51,7 +59,6 @@ public class HttpRequest extends BaseRequest implements Request {
     }
 
     public Class getReturnType() {
-
         return returnType;
     }
 
@@ -60,7 +67,6 @@ public class HttpRequest extends BaseRequest implements Request {
     }
 
     public long getNanoTime() {
-
         return nanoTime;
     }
 
@@ -69,7 +75,6 @@ public class HttpRequest extends BaseRequest implements Request {
     }
 
     public Error getError() {
-
         return error;
     }
 
@@ -78,7 +83,10 @@ public class HttpRequest extends BaseRequest implements Request {
     }
 
     public boolean hasError() {
-
         return error != null;
+    }
+
+    public Object execute() {
+        throw new UnsupportedOperationException();
     }
 }

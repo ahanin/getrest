@@ -19,30 +19,31 @@ import android.content.Context;
 
 import getrest.android.Getrest;
 
-import getrest.android.client.InMemoryRequestManager;
-
 import getrest.android.config.Config;
 import getrest.android.config.HasConfig;
 
+import getrest.android.persistence.Storage;
+
+import getrest.android.persistence.impl.InMemoryRequestStorage;
+import getrest.android.util.InstanceProvider;
+import getrest.android.util.Lists;
+
 import java.util.HashMap;
+import java.util.List;
 
 public class GetrestRuntime {
-
     private static final HashMap<Context, GetrestRuntime> cache = new HashMap<Context, GetrestRuntime>(
         1);
-    private RequestManager requestManager = new InMemoryRequestManager();
+    private RequestManager requestManager = new RequestManagerImpl(
+        new InstanceProvider<List<Storage>>(Lists.<Storage>immutableList(new InMemoryRequestStorage())));
     private Config config;
 
     public static GetrestRuntime getInstance(final Context context) {
-
         final Context applicationContext = context.getApplicationContext();
 
         if (!cache.containsKey(applicationContext)) {
-
             synchronized (cache) {
-
                 if (!cache.containsKey(applicationContext)) {
-
                     final Config config;
 
                     if (applicationContext instanceof HasConfig) {
@@ -52,7 +53,6 @@ public class GetrestRuntime {
                     }
 
                     cache.put(applicationContext, new GetrestRuntime(config));
-
                 }
             }
         }
@@ -65,7 +65,6 @@ public class GetrestRuntime {
     }
 
     public RequestManager getRequestManager() {
-
         return requestManager;
     }
 }

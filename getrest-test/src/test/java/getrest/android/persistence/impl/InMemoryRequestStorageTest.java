@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.client;
+package getrest.android.persistence.impl;
 
 import getrest.android.core.Request;
 import getrest.android.core.RequestStatus;
@@ -23,22 +23,15 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-public class InMemoryRequestManagerTest {
+public class InMemoryRequestStorageTest {
 
-    private InMemoryRequestManager requestManager;
-
-    @Before
-    public void setUp() throws Exception {
-        requestManager = new InMemoryRequestManager();
-    }
+    private InMemoryRequestStorage inMemoryRequestStorage = new InMemoryRequestStorage();
 
     @Test
     public void testGetRequestShouldReturnNull() throws Exception {
-        assertThat(requestManager.loadRequest("12345"), nullValue());
+        assertThat(inMemoryRequestStorage.loadRequest("12345"), nullValue());
     }
 
     @Test
@@ -46,14 +39,14 @@ public class InMemoryRequestManagerTest {
 
         final Request request = mock(Request.class);
 
-        requestManager.persistRequest("12345", request);
+        inMemoryRequestStorage.persistRequest("12345", request);
 
-        assertThat(requestManager.loadRequest("12345"), sameInstance(request));
+        assertThat(inMemoryRequestStorage.loadRequest("12345"), sameInstance(request));
     }
 
     @Test
     public void testGetResponseShouldReturnNull() throws Exception {
-        assertThat(requestManager.loadResponse("12345"), nullValue());
+        assertThat(inMemoryRequestStorage.loadResponse("12345"), nullValue());
     }
 
     @Test
@@ -61,9 +54,9 @@ public class InMemoryRequestManagerTest {
 
         final Request request = mock(Request.class);
 
-        requestManager.persistRequest("12345", request);
+        inMemoryRequestStorage.persistRequest("12345", request);
 
-        assertThat(requestManager.loadResponse("12345"), nullValue());
+        assertThat(inMemoryRequestStorage.loadResponse("12345"), nullValue());
     }
 
     @Test
@@ -72,7 +65,7 @@ public class InMemoryRequestManagerTest {
         final Object response = new Object();
 
         try {
-            requestManager.persistResponse("12345", response);
+            inMemoryRequestStorage.persistResponse("12345", response);
             fail("Must raise " + IllegalStateException.class.getName());
         } catch (final IllegalStateException ex) {
 
@@ -84,24 +77,23 @@ public class InMemoryRequestManagerTest {
     public void testShouldSaveResponse() throws Exception {
 
         final Request request = mock(Request.class);
-        requestManager.persistRequest("12345", request);
+        inMemoryRequestStorage.persistRequest("12345", request);
 
         final Object response = new Object();
-        requestManager.persistResponse("12345", response);
+        inMemoryRequestStorage.persistResponse("12345", response);
 
-        assertThat(requestManager.loadResponse("12345"), sameInstance(response));
+        assertThat(inMemoryRequestStorage.loadResponse("12345"), sameInstance(response));
     }
 
     @Test
     public void testRequestStateShouldBeNullUnlessAcknowledged() throws Exception {
-        assertThat(requestManager.getRequestStatus("12345"), nullValue());
+        assertThat(inMemoryRequestStorage.loadRequestStatus("12345"), nullValue());
     }
 
     @Test
     public void testShouldNotSaveStateForUnacknowledgedRequest() throws Exception {
-
         try {
-            requestManager.updateRequestStatus("12345", RequestStatus.EXECUTING);
+            inMemoryRequestStorage.persistRequestStatus("12345", RequestStatus.EXECUTING);
             fail("Must raise " + IllegalStateException.class.getName());
         } catch (final IllegalStateException ex) {
 
@@ -113,10 +105,11 @@ public class InMemoryRequestManagerTest {
     public void testShouldSaveRequestState() throws Exception {
 
         final Request request = mock(Request.class);
-        requestManager.persistRequest("12345", request);
+        inMemoryRequestStorage.persistRequest("12345", request);
 
-        requestManager.updateRequestStatus("12345", RequestStatus.FINISHED);
+        inMemoryRequestStorage.persistRequestStatus("12345", RequestStatus.FINISHED);
 
-        assertThat(requestManager.getRequestStatus("12345"), equalTo(RequestStatus.FINISHED));
+        assertThat(inMemoryRequestStorage.loadRequestStatus("12345"),
+                   equalTo(RequestStatus.FINISHED));
     }
 }

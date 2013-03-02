@@ -22,7 +22,6 @@ import com.xtremelabs.robolectric.RobolectricTestRunner;
 import getrest.android.client.RequestCallback;
 
 import getrest.android.core.Request;
-import static getrest.android.util.GetrestSupport.createRequestFutureSupport;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,11 +34,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.UUID;
 @RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("unchecked")
-public class RequestFutureImplTest {
+public class RequestFutureSupportTest {
 
     private Request request = mock(Request.class);
     private RequestCallback requestCallback = mock(RequestCallback.class);
@@ -51,10 +48,11 @@ public class RequestFutureImplTest {
 
         final CallerContext callerContext = mock(CallerContext.class);
         final Handler mockHandler = new Handler();
+
         when(callerContext.getHandler()).thenReturn(mockHandler);
-        requestFutureSupport = createRequestFutureSupport(UUID.randomUUID().toString(),
-                                                          request,
-                                                          callerContext);
+
+        requestFutureSupport = new RequestFutureSupport();
+        requestFutureSupport.setRequestTuple(new RequestTuple("12345", request, callerContext));
         requestFuture = new RequestFutureImpl(requestFutureSupport);
     }
 
@@ -62,6 +60,7 @@ public class RequestFutureImplTest {
     public void testShouldInvokeOnPending() throws Exception {
         requestFuture.setRequestCallback(requestCallback);
         requestFutureSupport.fireOnPending();
+
         verify(requestCallback).onPending(request);
     }
 

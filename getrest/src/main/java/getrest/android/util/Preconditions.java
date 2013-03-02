@@ -15,11 +15,19 @@
  */
 package getrest.android.util;
 
-public class Preconditions {
+import java.text.MessageFormat;
 
+public class Preconditions {
     public static void checkState(final boolean state, final String message) {
         if (!state) {
             throw new IllegalStateException(message);
+        }
+    }
+
+    public static void checkState(final boolean state, final String message,
+                                  final Object... messageArguments) {
+        if (!state) {
+            throw new IllegalStateException(MessageFormat.format(message, messageArguments));
         }
     }
 
