@@ -19,6 +19,7 @@ import android.net.Uri;
 
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 
+import getrest.android.core.impl.RequestManagerImpl;
 import getrest.android.persistence.Storage;
 import getrest.android.persistence.util.RequestStorageSupport;
 

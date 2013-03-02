@@ -71,15 +71,16 @@ public class RequestFutureSupport<R extends Request<V>, V> {
             }
 
             // all notifications must be stored and replayed once the callback is set
-            if (requestCallback == null && targetOrdinal > pendingNotifiedStatusOrdinal) {
+            if ((requestCallback == null) && (targetOrdinal > pendingNotifiedStatusOrdinal)) {
 
-                if (requestStatus == RequestStatus.ERROR || requestStatus == RequestStatus.FINISHED) {
+                if ((requestStatus == RequestStatus.ERROR)
+                      || (requestStatus == RequestStatus.FINISHED)) {
                     this.result = result;
                     this.exception = exception;
                 }
 
                 this.pendingRequestStatus = requestStatus;
-            } else if (requestCallback != null && targetOrdinal > currentNotifiedStatusOrdinal) {
+            } else if ((requestCallback != null) && (targetOrdinal > currentNotifiedStatusOrdinal)) {
 
                 for (int i = Math.max(currentNotifiedStatusOrdinal + 1, NOTIFICATION_STATE_PENDING);
                        i <= targetOrdinal; i++) {
@@ -110,9 +111,9 @@ public class RequestFutureSupport<R extends Request<V>, V> {
                             this.result = result;
                             this.exception = exception;
 
-                            Preconditions.checkState(!(this.result != null
-                                                     && this.exception != null),
-                                                     "result and exception cannot present at the same time");
+                            Preconditions.checkState(
+                                !((this.result != null) && (this.exception != null)),
+                                "result and exception cannot present at the same time");
 
                             if (requestStatus == RequestStatus.FINISHED) {
                                 requestTuple.getCallerContext().getHandler().post(new Runnable() {
@@ -141,7 +142,7 @@ public class RequestFutureSupport<R extends Request<V>, V> {
 
     private int getRequestStatusOrdinal(final RequestStatus requestStatus) {
 
-        return requestStatus == null ? -1
+        return (requestStatus == null) ? (-1)
                : Objects.firstNotNull(requestStatusOrdinalMap.get(requestStatus), -1);
     }
 
@@ -157,10 +158,10 @@ public class RequestFutureSupport<R extends Request<V>, V> {
         runNotificationCycle(RequestStatus.ERROR, null, ex);
     }
 
-    public void fireOnCompleted(final V result) {
-        saveResult(result);
+    public void fireOnCompleted(final V response) {
+        saveResult(response);
 
-        runNotificationCycle(RequestStatus.FINISHED, result, null);
+        runNotificationCycle(RequestStatus.FINISHED, response, null);
     }
 
     public void setRequestCallback(final RequestCallback<R> requestCallback) {

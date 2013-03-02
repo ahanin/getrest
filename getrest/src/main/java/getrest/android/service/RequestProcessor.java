@@ -19,58 +19,58 @@ import getrest.android.core.Loggers;
 import getrest.android.core.RequestManager;
 import getrest.android.core.RequestStatus;
 
+import getrest.android.event.RequestCompletedEvent;
+import getrest.android.event.RequestErrorEvent;
+import getrest.android.event.RequestExecutingEvent;
+import getrest.android.event.RequestPendingEvent;
+
+import getrest.android.util.InstanceProvider;
 import getrest.android.util.Provider;
 import getrest.android.util.WorkerQueue;
 
 class RequestProcessor implements WorkerQueue.Worker<RequestTuple> {
 
+    private final Provider<GetrestService> getrestServiceProvider;
     private final Provider<RequestManager> requestManagerProvider;
 
-    public RequestProcessor(final Provider<RequestManager> requestManagerProvider) {
+    public RequestProcessor(final Provider<GetrestService> getrestServiceProvider,
+                            final Provider<RequestManager> requestManagerProvider) {
+        this.getrestServiceProvider = getrestServiceProvider;
         this.requestManagerProvider = requestManagerProvider;
     }
 
     public void execute(final RequestTuple requestTuple) {
 
-        Exception error = null;
-        Object result = null;
+        Exception exception = null;
+        Object response = null;
 
         final String requestId = requestTuple.getRequestId();
         final RequestManager requestManager = requestManagerProvider.get();
-
-        final RequestFutureSupport requestFutureSupport = requestManager.getRequestFutureSupport(
-            requestTuple);
 
         try {
             requestManager.updateRequestStatus(requestId, RequestStatus.EXECUTING);
 
             Loggers.getServiceLogger().trace("executing request: {0}", requestTuple.getRequest());
 
-            requestFutureSupport.fireOnExecuting();
+            getrestServiceProvider.get().publishEvent(new RequestExecutingEvent(requestTuple));
 
-            result = requestTuple.getRequest().execute();
+            response = requestTuple.getRequest().execute();
         } catch (final Exception ex) {
-            error = ex;
-            requestTuple.getCallerContext().getHandler().post(new ExceptionLogger(ex));
+            exception = ex;
         }
 
-        if (error != null) {
-            requestFutureSupport.fireOnError(error);
+        if (exception != null) {
+
+            final RequestErrorEvent requestErrorEvent = new RequestErrorEvent(requestTuple);
+            requestErrorEvent.setException(exception);
+
+            getrestServiceProvider.get().publishEvent(requestErrorEvent);
         } else {
-            requestFutureSupport.fireOnCompleted(result);
-        }
-    }
 
-    private static class ExceptionLogger implements Runnable {
+            final RequestCompletedEvent requestCompletedEvent = new RequestCompletedEvent(requestTuple);
+            requestCompletedEvent.setResponse(response);
 
-        private final Exception ex;
-
-        public ExceptionLogger(final Exception ex) {
-            this.ex = ex;
-        }
-
-        public void run() {
-            Loggers.getServiceLogger().error("Exception during execution of a request", ex);
+            getrestServiceProvider.get().publishEvent(requestCompletedEvent);
         }
     }
 }

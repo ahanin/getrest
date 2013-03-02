@@ -22,6 +22,7 @@ import getrest.android.Getrest;
 import getrest.android.config.Config;
 import getrest.android.config.HasConfig;
 
+import getrest.android.core.impl.RequestManagerImpl;
 import getrest.android.persistence.Storage;
 
 import getrest.android.persistence.impl.InMemoryRequestStorage;

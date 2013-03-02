@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.core;
+package getrest.android.core.impl;
 
 import android.net.Uri;
 
+import getrest.android.core.ErrorState;
+import getrest.android.core.Request;
+import getrest.android.core.RequestManager;
+import getrest.android.core.RequestStatus;
 import getrest.android.persistence.Storage;
 import getrest.android.persistence.util.RequestStorageSupport;
 

@@ -13,21 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.service;
-
-import getrest.android.client.impl.GetrestClientImpl;
+package getrest.android.service.eventbus.impl;
 
 import getrest.android.core.Request;
-import getrest.android.core.RequestFuture;
-import getrest.android.event.Event;
+
 import getrest.android.event.RequestPendingEvent;
 
-public interface GetrestService {
-    <R extends Request<V>, V> RequestFuture<V> execute(final R request,
-                                                       final CallerContext callerContext);
+import getrest.android.service.RequestFutureSupport;
 
-    <R extends Request<V>, V> RequestFuture<V> obtainRequestFuture(final R request,
-                                                                   final CallerContext callerContextAdapter);
+import getrest.android.util.Provider;
 
-    void publishEvent(Event event);
+import java.util.Map;
+import java.util.Set;
+
+public class RequestPendingEventHandler extends AbstractRequestEventHandler<RequestPendingEvent> {
+    public RequestPendingEventHandler(final Provider<Map<Request, Set<RequestFutureSupport>>> requestFutureSupportMapProvider) {
+        super(requestFutureSupportMapProvider);
+    }
+
+    @Override
+    protected void handleEvent(final RequestPendingEvent event,
+                               final RequestFutureSupport requestFutureSupport) {
+        requestFutureSupport.fireOnPending();
+    }
 }

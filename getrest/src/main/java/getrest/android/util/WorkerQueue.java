@@ -15,6 +15,8 @@
  */
 package getrest.android.util;
 
+import getrest.android.core.Loggers;
+
 import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
@@ -59,6 +61,9 @@ public class WorkerQueue<T> {
 
             reviseWorkerThreads();
         }
+
+        Loggers.getServiceLogger()
+        .debug("Item enqueued: item={0}, queueSize={1}", item, queue.size());
     }
 
     private void reviseWorkerThreads() {
@@ -118,6 +123,9 @@ public class WorkerQueue<T> {
 
     private class WorkerRunnable implements Runnable {
         public void run() {
+            Loggers.getServiceLogger().debug("Starting worker: [{0}] workerQueue={1}",
+                                             Thread.currentThread().getName(),
+                                             WorkerQueue.this);
 
             while (isRunning && !isStopping) {
 
@@ -127,9 +135,11 @@ public class WorkerQueue<T> {
 
                         try {
                             queue.wait();
-                        } catch (final InterruptedException e) {
-
-                            // TODO log exception
+                        } catch (final InterruptedException ex) {
+                            Loggers.getServiceLogger().error("[{0}] Interrupted exception: {1}",
+                                                             ex,
+                                                             Thread.currentThread().getName(),
+                                                             ex.getMessage());
                         }
                     }
 
@@ -141,15 +151,25 @@ public class WorkerQueue<T> {
                         try {
                             worker.execute(item);
                         } catch (final RuntimeException ex) {
-
-                            // TODO log exception
+                            Loggers.getServiceLogger().error("[{0}] Unexpected exception: {1}",
+                                                             ex,
+                                                             Thread.currentThread().getName(),
+                                                             ex.getMessage());
                         }
+
+                        Loggers.getServiceLogger().debug("[{0}] Item processed: queueSize={1}",
+                                                         Thread.currentThread().getName(),
+                                                         queue.size());
 
                         endWork();
 
                     }
                 }
             }
+
+            Loggers.getServiceLogger().debug("[0] Worker stopped: workerQueue={1}",
+                                             Thread.currentThread().getName(),
+                                             WorkerQueue.this);
         }
     }
 
