@@ -27,7 +27,7 @@ import android.os.IBinder;
 
 import getrest.android.GetrestClient;
 
-import getrest.android.client.RequestCallback;
+import getrest.android.core.RequestCallback;
 import getrest.android.client.RequestCallbackFactory;
 import getrest.android.client.RequestRegistry;
 
@@ -75,7 +75,6 @@ public class GetrestClientImpl extends GetrestClient {
 
     @Override
     public <V> V executeWithResult(final Request<V> request) {
-
         return execute(request).get();
     }
 
@@ -88,7 +87,6 @@ public class GetrestClientImpl extends GetrestClient {
 
     @Override
     public <R> R execute(final Request request, final Class<R> responseType) {
-
         return execute(request, TypeLiteral.fromClass(responseType));
     }
 
@@ -98,18 +96,15 @@ public class GetrestClientImpl extends GetrestClient {
     }
 
     private RequestRegistry getRequestRegistry() {
-
         if (requestRegistry.get() == null) {
-
             synchronized (requestRegistry) {
-
                 if (requestRegistry.get() == null) {
-
                     if (!(androidContext instanceof Activity)) {
                         throw new IllegalStateException("Context must be an Activity");
                     }
 
-                    requestRegistry.set(new RequestRegistryPreferencesImpl((Activity) androidContext));
+                    requestRegistry.set(
+                        new RequestRegistryPreferencesImpl((Activity) androidContext));
                 }
             }
         }
@@ -119,14 +114,15 @@ public class GetrestClientImpl extends GetrestClient {
 
     private <R extends Request<V>, V> RequestFuture<V> obtainRequestFuture(final R request) {
 
-        final RequestFuture requestFuture = serviceConnection.getService().obtainRequestFuture(request,
-                                                                                               callerContextAdapter);
+        final RequestFuture<V> requestFuture = serviceConnection.getService().obtainRequestFuture(
+            request,
+            callerContextAdapter);
 
         final RequestCallbackFactory callbackFactory = getRequestCallbackFactory();
 
         if (callbackFactory != null) {
 
-            final RequestCallback callback = callbackFactory.createCallback(request);
+            final RequestCallback<R, V> callback = callbackFactory.createCallback(request);
 
             if (callback != null) {
                 requestFuture.setRequestCallback(callback);
@@ -154,7 +150,6 @@ public class GetrestClientImpl extends GetrestClient {
 
             return null;
         } else {
-
             return obtainRequestFuture(request);
         }
     }
@@ -179,19 +174,6 @@ public class GetrestClientImpl extends GetrestClient {
         androidContext.unbindService(serviceConnection);
     }
 
-    @Override
-    public void replay() {
-
-        // TODO Rewrite replaying of requests
-        //        final Set<RequestRegistry.Entry> entries = getRequestRegistry().getEntries();
-        //
-        //        throw new UnsupportedOperationException("");
-        //
-        //        for (final RequestRegistry.Entry entry : entries) {
-        //            obtainRequestFuture(entry);
-        //        }
-    }
-
     private static class GetrestServiceConnection implements ServiceConnection {
 
         private GetrestServiceBinder serviceBinder;
@@ -200,7 +182,6 @@ public class GetrestClientImpl extends GetrestClient {
         public GetrestServiceConnection() {}
 
         public void onServiceConnected(final ComponentName componentName, final IBinder iBinder) {
-
             synchronized (waitLock) {
                 serviceBinder = (GetrestServiceBinder) iBinder;
 
@@ -212,7 +193,6 @@ public class GetrestClientImpl extends GetrestClient {
         }
 
         public void onServiceDisconnected(final ComponentName componentName) {
-
             synchronized (waitLock) {
                 serviceBinder = null;
 
@@ -224,13 +204,9 @@ public class GetrestClientImpl extends GetrestClient {
         }
 
         public GetrestService getService() {
-
             while (serviceBinder == null) {
-
                 synchronized (waitLock) {
-
                     while (serviceBinder == null) {
-
                         try {
                             waitLock.wait();
                         } catch (final InterruptedException ex) {
@@ -247,7 +223,6 @@ public class GetrestClientImpl extends GetrestClient {
 
     private class CallerContextAdapter implements CallerContext {
         public Handler getHandler() {
-
             return getCallbackHandler();
         }
     }

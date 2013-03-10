@@ -21,10 +21,10 @@
               android:layout_height="fill_parent">
 
     <Button
-        android:id="@+id/Main_CreatePostRequestButton"
+        android:id="@+id/Main_GetSimOperatorButton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="POST"
+        android:text="Get SIM operator"
         />
 
 </LinearLayout>

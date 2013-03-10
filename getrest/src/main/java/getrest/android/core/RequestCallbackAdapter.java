@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Alexey Hanin
+ * Copyright 2013 Alexey Hanin
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.client;
+package getrest.android.core;
 
-import getrest.android.core.Request;
+public class RequestCallbackAdapter<R extends Request<V>, V> implements RequestCallback<R, V> {
+    public void onPending(final R request) {}
 
-import getrest.android.util.TypeLiteral;
+    public void onExecuting(final R request) {}
 
-public interface RequestExecutor<R extends Request> {
-    void execute(final R request);
+    public void onError(final R request) {}
+
+    public void onCompleted(final R request, final V response) {}
 }

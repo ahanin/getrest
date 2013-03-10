@@ -17,10 +17,10 @@ package getrest.android.core.impl;
 
 import android.net.Uri;
 
-import getrest.android.core.ErrorState;
 import getrest.android.core.Request;
 import getrest.android.core.RequestManager;
 import getrest.android.core.RequestStatus;
+
 import getrest.android.persistence.Storage;
 import getrest.android.persistence.util.RequestStorageSupport;
 
@@ -45,16 +45,16 @@ public class RequestManagerImpl implements RequestManager {
     }
 
     public void persistRequest(final String requestId, final Request request) {
-
-        final Uri requestUri = RequestStorageSupport.getRequestUri(requestId);
-        final Storage storage = requireValidStorage(request, requestUri);
-
-        storage.persist(requestUri, request);
+        persistObject(RequestStorageSupport.getRequestUri(requestId), request);
     }
 
     private Storage requireValidStorage(final Object object, final Uri requestUri) {
+        return requireValidStorage(requestUri, object.getClass());
+    }
+
+    private Storage requireValidStorage(final Uri requestUri, final Class<?> dataType) {
         for (final Storage storage : storageListProvider.get()) {
-            if (storage.supports(requestUri, object.getClass())) {
+            if (storage.supports(requestUri, dataType)) {
                 return storage;
             }
         }
@@ -62,51 +62,48 @@ public class RequestManagerImpl implements RequestManager {
         throw new IllegalStateException(
             MessageFormat.format("Unable to find corresponding storage for: uri={0}, dataType={1}",
                                  requestUri,
-                                 object.getClass()));
+                                 dataType));
     }
 
     public Request loadRequest(final String requestId) {
 
         final Uri requestUri = RequestStorageSupport.getRequestUri(requestId);
-
-        for (final Storage storage : storageListProvider.get()) {
-            if (storage.contains(requestUri)) {
-                return storage.load(requestUri);
-            }
-        }
-
-        return null;
+        return loadObject(requestUri);
     }
 
     public void persistResponse(final String requestId, final Object response) {
-
-        final Uri uri = RequestStorageSupport.getResponseUri(requestId);
-        final Storage storage = requireValidStorage(response, uri);
-
-        storage.persist(uri, response);
+        persistObject(RequestStorageSupport.getResponseUri(requestId), response);
     }
 
     public Object loadResponse(final String requestId) {
+        return loadObject(RequestStorageSupport.getResponseUri(requestId));
+    }
 
-        // TODO finish implementation
-        throw new UnsupportedOperationException("not yet implemented");
+    private <T> T loadObject(final Uri responseUri) {
+        for (final Storage storage : storageListProvider.get()) {
+            if (storage.contains(responseUri)) {
+                return storage.load(responseUri);
+            }
+        }
+
+        throw new IllegalStateException(
+            "Object was not found in any of the repositories: " + responseUri);
     }
 
     public void updateRequestStatus(final String requestId, final RequestStatus status) {
-
-        // TODO finish implementation
-        throw new UnsupportedOperationException("not yet implemented");
+        persistObject(RequestStorageSupport.getRequestStatusUri(requestId), status);
     }
 
-    public void updateRequestStatus(final String requestId, final ErrorState errorState,
-                                    final String message) {
+    private <T> void persistObject(final Uri uri, final T object) {
 
-        // TODO finish implementation
-        throw new UnsupportedOperationException("not yet implemented");
+        final Storage storage = requireValidStorage(object, uri);
+        storage.persist(uri, object);
     }
 
     public RequestStatus getRequestStatus(final String requestId) {
-        return null;
+
+        final Uri uri = RequestStorageSupport.getRequestStatusUri(requestId);
+        return requireValidStorage(RequestStatus.class, uri).load(uri);
     }
 
     public <R extends Request<V>, V> RequestFutureSupport<R, V> getRequestFutureSupport(final RequestTuple<R> requestTuple) {

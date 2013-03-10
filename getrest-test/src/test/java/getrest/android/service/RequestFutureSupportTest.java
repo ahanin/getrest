@@ -19,7 +19,7 @@ import android.os.Handler;
 
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 
-import getrest.android.client.RequestCallback;
+import getrest.android.core.RequestCallback;
 
 import getrest.android.core.Request;
 
@@ -74,11 +74,13 @@ public class RequestFutureSupportTest {
 
     @Test
     public void testShouldInvokeOnFinished() throws Exception {
+
+        final Object response = new Object();
         requestFuture.setRequestCallback(requestCallback);
         requestFutureSupport.fireOnPending();
         requestFutureSupport.fireOnExecuting();
-        requestFutureSupport.fireOnCompleted(new Object());
-        verify(requestCallback).onCompleted(request);
+        requestFutureSupport.fireOnCompleted(response);
+        verify(requestCallback).onCompleted(request, response);
     }
 
     @Test
@@ -111,13 +113,16 @@ public class RequestFutureSupportTest {
 
     @Test
     public void testShouldReplayOnCompleted() throws Exception {
+
+        final Object response = new Object();
+
         requestFutureSupport.fireOnPending();
         requestFutureSupport.fireOnExecuting();
-        requestFutureSupport.fireOnCompleted(new Object());
+        requestFutureSupport.fireOnCompleted(response);
 
         requestFuture.setRequestCallback(requestCallback);
 
-        verify(requestCallback, times(1)).onCompleted(request);
+        verify(requestCallback, times(1)).onCompleted(request, response);
     }
 
     @Test

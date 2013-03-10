@@ -15,7 +15,7 @@
  */
 package getrest.android.service;
 
-import getrest.android.client.RequestCallback;
+import getrest.android.core.RequestCallback;
 
 import getrest.android.core.Request;
 import getrest.android.core.RequestFuture;

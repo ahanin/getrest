@@ -15,10 +15,8 @@
  */
 package getrest.android.core;
 
-import getrest.android.client.RequestCallback;
-
 public interface RequestFuture<V> {
     V get();
 
-    <R extends Request<V>> void setRequestCallback(final RequestCallback<R> requestCallback);
+    <R extends Request<V>> void setRequestCallback(final RequestCallback<R, V> requestCallback);
 }

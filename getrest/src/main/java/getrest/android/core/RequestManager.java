@@ -29,9 +29,6 @@ public interface RequestManager {
 
     void updateRequestStatus(final String requestId, final RequestStatus status);
 
-    void updateRequestStatus(final String requestId, final ErrorState errorState,
-                             final String message);
-
     RequestStatus getRequestStatus(final String requestId);
 
     <R extends Request<V>, V> RequestFutureSupport<R, V> getRequestFutureSupport(final RequestTuple<R> requestTuple);

@@ -15,8 +15,6 @@
  */
 package getrest.android;
 
-import android.R;
-
 import android.content.Context;
 
 import android.os.Handler;
@@ -67,11 +65,6 @@ public abstract class GetrestClient {
     public abstract void detach();
 
     /**
-     * Start the client and replays all unfinished requests.
-     */
-    public abstract void replay();
-
-    /**
      * Associate {@link RequestCallbackFactory} with the client. This factory will be used
      * to automatically create request callbacks.
      *
@@ -90,7 +83,6 @@ public abstract class GetrestClient {
      * @see #setRequestCallbackFactory(getrest.android.client.RequestCallbackFactory)
      */
     protected RequestCallbackFactory getRequestCallbackFactory() {
-
         return requestCallbackFactory;
     }
 
@@ -99,13 +91,12 @@ public abstract class GetrestClient {
     }
 
     protected Handler getCallbackHandler() {
-
         return callbackHandler;
     }
 
     public abstract <V> V executeWithResult(final Request<V> request);
 
-    public abstract <R extends Request<? extends V>, V> RequestFuture<V> execute(final Request<V> request);
+    public abstract <R extends Request<?extends V>, V> RequestFuture<V> execute(final Request<V> request);
 
     public abstract <R> R execute(final Request request, final Class<R> responseType);
 

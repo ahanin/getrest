@@ -13,8 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package getrest.android.config;
+package getrest.android.core;
 
-interface MutableConfig {
-    Config asConfig();
+public interface RequestCallback<R extends Request<V>, V> {
+    void onPending(final R request);
+
+    void onExecuting(final R request);
+
+    void onError(final R request);
+
+    void onCompleted(final R request, final V response);
 }

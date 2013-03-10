@@ -15,7 +15,7 @@
  */
 package getrest.android.service;
 
-import getrest.android.client.RequestCallback;
+import getrest.android.core.RequestCallback;
 
 import getrest.android.core.Request;
 import getrest.android.core.RequestStatus;
@@ -41,7 +41,7 @@ public class RequestFutureSupport<R extends Request<V>, V> {
     }
 
     private RequestTuple<R> requestTuple;
-    private RequestCallback<R> requestCallback;
+    private RequestCallback<R, V> requestCallback;
     private boolean hasGottenResult;
     private boolean isFinished;
     private V result;
@@ -56,7 +56,6 @@ public class RequestFutureSupport<R extends Request<V>, V> {
 
     private void runNotificationCycle(final RequestStatus requestStatus, final V result,
                                       final Throwable exception) {
-
         synchronized (syncLock) {
 
             final int targetOrdinal = getRequestStatusOrdinal(requestStatus);
@@ -72,7 +71,6 @@ public class RequestFutureSupport<R extends Request<V>, V> {
 
             // all notifications must be stored and replayed once the callback is set
             if ((requestCallback == null) && (targetOrdinal > pendingNotifiedStatusOrdinal)) {
-
                 if ((requestStatus == RequestStatus.ERROR)
                       || (requestStatus == RequestStatus.FINISHED)) {
                     this.result = result;
@@ -81,10 +79,8 @@ public class RequestFutureSupport<R extends Request<V>, V> {
 
                 this.pendingRequestStatus = requestStatus;
             } else if ((requestCallback != null) && (targetOrdinal > currentNotifiedStatusOrdinal)) {
-
                 for (int i = Math.max(currentNotifiedStatusOrdinal + 1, NOTIFICATION_STATE_PENDING);
                        i <= targetOrdinal; i++) {
-
                     switch (i) {
 
                         case NOTIFICATION_STATE_PENDING:
@@ -118,7 +114,8 @@ public class RequestFutureSupport<R extends Request<V>, V> {
                             if (requestStatus == RequestStatus.FINISHED) {
                                 requestTuple.getCallerContext().getHandler().post(new Runnable() {
                                         public void run() {
-                                            requestCallback.onCompleted(requestTuple.getRequest());
+                                            requestCallback.onCompleted(requestTuple.getRequest(),
+                                                                        RequestFutureSupport.this.result);
                                         }
                                     });
                             } else if (requestStatus == RequestStatus.ERROR) {
@@ -141,7 +138,6 @@ public class RequestFutureSupport<R extends Request<V>, V> {
     }
 
     private int getRequestStatusOrdinal(final RequestStatus requestStatus) {
-
         return (requestStatus == null) ? (-1)
                : Objects.firstNotNull(requestStatusOrdinalMap.get(requestStatus), -1);
     }
@@ -164,8 +160,7 @@ public class RequestFutureSupport<R extends Request<V>, V> {
         runNotificationCycle(RequestStatus.FINISHED, response, null);
     }
 
-    public void setRequestCallback(final RequestCallback<R> requestCallback) {
-
+    public void setRequestCallback(final RequestCallback<R, V> requestCallback) {
         synchronized (syncLock) {
             this.requestCallback = requestCallback;
 
@@ -176,13 +171,11 @@ public class RequestFutureSupport<R extends Request<V>, V> {
     }
 
     private boolean mustReplayNotifications() {
-
         return getRequestStatusOrdinal(pendingRequestStatus) > getRequestStatusOrdinal(
             currentNotifiedRequestStatus);
     }
 
     private void saveResult(final V result) {
-
         synchronized (syncLock) {
             Preconditions.checkState(!hasGottenResult && !isFinished,
                                      "result has already been set or the request has ended prematurely");
@@ -197,13 +190,9 @@ public class RequestFutureSupport<R extends Request<V>, V> {
     }
 
     public V getResult() {
-
         if (!hasGottenResult && !isFinished) {
-
             synchronized (syncLock) {
-
                 while (!hasGottenResult && !isFinished) {
-
                     try {
                         syncLock.wait();
                     } catch (final InterruptedException ex) {
@@ -222,7 +211,6 @@ public class RequestFutureSupport<R extends Request<V>, V> {
     }
 
     public RequestTuple getRequestTuple() {
-
         return requestTuple;
     }
 }
