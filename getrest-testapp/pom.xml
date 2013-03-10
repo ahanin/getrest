@@ -55,7 +55,7 @@
         </dependency>
         <dependency>
             <groupId>getrest</groupId>
-            <artifactId>getrest</artifactId>
+            <artifactId>getrest-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>

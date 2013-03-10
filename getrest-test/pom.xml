@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>getrest</groupId>
-            <artifactId>getrest</artifactId>
+            <artifactId>getrest-core</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
